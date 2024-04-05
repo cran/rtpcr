@@ -1,4 +1,4 @@
-#' @title Bar plot of the relative gene expression from a three-factor experiment
+#' @title Bar plot of the relative gene expression (RE) from a three-factor experiment
 #' @description Bar plot of the relative expression (RE) of a gene along with the confidence interval and significance
 #' @details The \code{threeFACTORplot} function generates the bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
 #' @author Ghader Mirzaghaderi
@@ -171,9 +171,11 @@ threeFACTORplot <- function(x,
   
   
   if(errorbar == "std") {
-    print(pp1)
+    out <- list(plot = pp1)
+    
   } else if(errorbar == "ci") {
-    print(pp2)
+    out <- list(plot = pp2)
   }
+  
+  return(out)
 }
-

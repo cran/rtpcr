@@ -1,6 +1,11 @@
-#' @title Analysis of Variance of qPCR data
-#' @description Analysis of Variance of qPCR data
-#' @details The qpcrANOVA performs ANOVA (analysis of variance) of qPCR data. It is suitable when there is a factor with more than two levels or when the are more that a condition factor in the experiment or when there is a blocking factor.
+#' @title Analysis of Variance of RE values based on CRD 
+#' @description Analysis of Variance relative efficiency (RE) values based on a completely randomized design (CRD). Even there are more than a factor in the experiment, it is still possible to apply CRD analysis on the factor-level combinations as treatments. Analysis of variance based on factorial design or analysis of covariance can be performed using \code{qpcrANCOVA} function.  
+#' @details The \code{qpcrANOVA} function performs ANOVA (analysis of variance) based on a completely randomized design (CRD). 
+#' It is suitable when relative expression (RE) analysis between different treatment combinations 
+#' (in a Uni- or multi-factorial experiment) is desired. If there are more than a factor in the experiment, 
+#' it is still possible to apply CRD analysis on the factor-level combinations as treatments. 
+#' For this, a column of treatment combinations is made first as a grouping factor Fold change analysis based 
+#' on factorial design or analysis of covariance for the can be performed using \link{qpcrANCOVA}.
 #' @author Ghader Mirzaghaderi
 #' @export qpcrANOVA
 #' @import dplyr
@@ -57,7 +62,8 @@
 qpcrANOVA <- function(x,
                       numberOfrefGenes,
                       block = NULL,
-                      p.adj = c("none","holm","hommel", "hochberg", "bonferroni", "BH", "BY", "fdr")){
+                      p.adj = c("none","holm","hommel", 
+                                "hochberg", "bonferroni", "BH", "BY", "fdr")){
 
 
 
@@ -69,7 +75,6 @@ qpcrANOVA <- function(x,
     if(numberOfrefGenes == 1) {
 
       factors <- colnames(x)[1:(ncol(x)-5)]
-      CRDfactors <- paste(factors, collapse = "*")
       colnames(x)[ncol(x)-4] <- "rep"
       colnames(x)[ncol(x)-3] <- "Etarget"
       colnames(x)[ncol(x)-2] <- "Cttarget"
@@ -81,7 +86,6 @@ qpcrANOVA <- function(x,
     } else if(numberOfrefGenes == 2) {
 
       factors <- colnames(x)[1:(ncol(x)-7)]
-      CRDfactors <- paste(factors, collapse = "*")
       colnames(x)[ncol(x)-6] <- "rep"
       colnames(x)[ncol(x)-5] <- "Etarget"
       colnames(x)[ncol(x)-4] <- "Cttarget"
@@ -98,7 +102,6 @@ qpcrANOVA <- function(x,
     if(numberOfrefGenes == 1) {
 
       factors <- colnames(x)[1:(ncol(x)-6)]
-      CRDfactors <- paste(factors, collapse = "*")
       colnames(x)[ncol(x)-5] <- "block"
       colnames(x)[ncol(x)-4] <- "rep"
       colnames(x)[ncol(x)-3] <- "Etarget"
@@ -109,9 +112,7 @@ qpcrANOVA <- function(x,
       x <- data.frame(x, wDCt = (log10(x$Etarget)*x$Cttarget)-(log10(x$Eref)*x$Ctref))
 
     } else if(numberOfrefGenes == 2) {
-
       factors <- colnames(x)[1:(ncol(x)-8)]
-      CRDfactors <- paste(factors, collapse = "*")
       colnames(x)[ncol(x)-7] <- "block"
       colnames(x)[ncol(x)-6] <- "rep"
       colnames(x)[ncol(x)-5] <- "Etarget"
@@ -132,25 +133,13 @@ qpcrANOVA <- function(x,
 
   # Check if there is block
   if (is.null(block)) {
-
-    # If ANOVA based on factorial design was desired:
-    lm0 <- stats::lm(stats::as.formula(paste("wDCt ~", CRDfactors)), x)
-    factorialANOVA <- stats::anova(lm0)
-
-
     # Concatenate the columns using paste0
     x$T <- do.call(paste, c(x[1:(ncol(x)-6)], sep = ":"))
     x
     lm <- stats::lm(wDCt ~ T, x)
     anovaCRD <- stats::anova(lm)
 
-
   } else {
-    # If ANOVA based on factorial design was desired with blocking factor:
-    lm0 <- stats::lm(stats::as.formula(paste("wDCt ~",  "block +", CRDfactors)), x)
-    factorialANOVA <- stats::anova(lm0)
-
-
     # Concatenate the columns using paste0
     x$T <- do.call(paste, c(x[1:(ncol(x)-7)], sep = ":"))
     x
@@ -195,14 +184,14 @@ qpcrANOVA <- function(x,
   }
 
 
-  # Preparing final result table including letter grouping of the means
+  # Preparing final result table including letter grouping of the means for T
   g <- LSD.test(lm, "T", group = T, console = F, alpha = 0.05, p.adj = p.adj)$groups
   g <- g[rev(rownames(g)),] #order the result the way you want
   g$groups <- invOrder(as.character(g$groups))
   mean <- LSD.test(lm, "T", group = T, console = F, alpha = 0.05, p.adj = p.adj)$means
 
 
-  # Comparing mean pairs that also returns CI
+  # Comparing mean pairs that also returns CI for T
   # Preparing final result table including letter grouping of the means
   meanPP <- LSD.test(lm, "T", group = F, console = F, alpha = 0.05, p.adj = p.adj)
   meanPairs <- meanPP$comparison
@@ -250,16 +239,18 @@ qpcrANOVA <- function(x,
   } else if(length(factors) == 3) {
     Results <- Results
   }
-
-
+  
+  
+  
   xx <- x[, -(ncol(x))] # Removing the last column of T
-
-
+  
+  
   outlist <- list(Final_data = xx,
                   lmCRD = lm,
-                  ANOVA_factorial = factorialANOVA,
                   ANOVA_CRD = anovaCRD,
                   Result = Results,
                   Post_hoc_Test = Post_hoc_Testing)
+  
+  
   return(outlist)
 }
