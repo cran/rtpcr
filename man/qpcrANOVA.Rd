@@ -2,7 +2,7 @@
 % Please edit documentation in R/qpcrANOVA.r
 \name{qpcrANOVA}
 \alias{qpcrANOVA}
-\title{Analysis of Variance of RE values based on CRD}
+\title{ANOVA of RE values based on CRD}
 \usage{
 qpcrANOVA(
   x,
@@ -16,7 +16,7 @@ qpcrANOVA(
 
 \item{numberOfrefGenes}{number of reference genes (1 or 2). Up to two reference genes can be handled.}
 
-\item{block}{column name of the blocking factor (for correct column arrangement see example data.)}
+\item{block}{column name of the blocking factor (for correct column arrangement see example data.). When a qPCR experiment is done in multiple qPCR plates, variation resulting from the plates may interfere with the actual amount of gene expression. One solution is to conduct each plate as a complete randomized block so that at least one replicate of each treatment and control is present on a plate. Block effect is usually considered as random and its interaction with any main effect is not considered.}
 
 \item{p.adj}{Method for adjusting p values (see p.adjust)}
 }
@@ -32,10 +32,10 @@ A list with 5 elements:
 }
 }
 \description{
-Analysis of Variance relative efficiency (RE) values based on a completely randomized design (CRD). Even there are more than a factor in the experiment, it is still possible to apply CRD analysis on the factor-level combinations as treatments. Analysis of variance based on factorial design or analysis of covariance can be performed using \code{qpcrANCOVA} function.
+Analysis of Variance of relative efficiency (RE) values based on a completely randomized design (CRD). Even there are more than a factor in the experiment, it is still possible to apply CRD analysis on the factor-level combinations as treatments. Analysis of variance based on factorial design or analysis of covariance can be performed using \code{qpcrANCOVA} function.
 }
 \details{
-The \code{qpcrANOVA} function performs ANOVA (analysis of variance) based on a completely randomized design (CRD). 
+The \code{qpcrANOVA} function performs analysis of variance (ANOVA) of relative efficiency (RE) values based on a completely randomized design (CRD). 
 It is suitable when relative expression (RE) analysis between different treatment combinations 
 (in a Uni- or multi-factorial experiment) is desired. If there are more than a factor in the experiment, 
 it is still possible to apply CRD analysis on the factor-level combinations as treatments. 

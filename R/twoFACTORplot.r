@@ -24,7 +24,10 @@
 #' @param ylab  the title of the y axis.
 #' @param legend.position a two digit vector specifying the legend position.
 #' @param fontsize size of all fonts  of the plot.
+#' @param fontsizePvalue font size of the pvalue labels
 #' @param show.letters a logical variable. If TRUE, mean grouping letters are added to the bars. 
+#' @param axis.text.x.angle angle of x axis text
+#' @param axis.text.x.hjust horizontal justification of x axis text
 #' @return Bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
 #' @examples
 #' 
@@ -81,7 +84,10 @@ twoFACTORplot <- function(x,
                           ylab = "Relative Expression",
                           xlab = "Gene",
                           legend.position = c(0.09, 0.8),
-                          fontsize = 12){
+                          fontsize = 12,
+                          fontsizePvalue = 7,
+                          axis.text.x.angle = 0,
+                          axis.text.x.hjust = 0.5){
   b <- x$Result
   a <- x$Final_data
   RE <- b$RE
@@ -98,7 +104,7 @@ twoFACTORplot <- function(x,
     ylab(ylab) +
     xlab(xlab) +
     theme_bw() +
-    theme(axis.text.x = element_text(size = fontsize, color = "black", angle = 0, hjust = 0.5),
+    theme(axis.text.x = element_text(size = fontsize, color = "black", angle = axis.text.x.angle, hjust = axis.text.x.hjust),
           axis.text.y = element_text(size = fontsize, color = "black", angle = 0, hjust = 0.5),
           axis.title  = element_text(size = fontsize),
           legend.text = element_text(size = fontsize)) +
@@ -123,7 +129,7 @@ twoFACTORplot <- function(x,
   if (show.letters) {
     qq1 <-qq1 + 
       geom_text(data = b, aes(label = letters, x = {{ x.axis.factor }}, y = RE + std + letter.position.adjust), 
-                vjust = -0.5, size = 4, position = position_dodge(width = 0.5))
+                vjust = -0.5, size = fontsizePvalue, position = position_dodge(width = 0.5))
   }
   
   
@@ -137,7 +143,7 @@ twoFACTORplot <- function(x,
     ylab(ylab) +
     xlab(xlab) +
     theme_bw() +
-    theme(axis.text.x = element_text(size = fontsize, color = "black", angle = 0, hjust = 0.5),
+    theme(axis.text.x = element_text(size = fontsize, color = "black", angle = axis.text.x.angle, hjust = axis.text.x.hjust),
           axis.text.y = element_text(size = fontsize, color = "black", angle = 0, hjust = 0.5),
           axis.title  = element_text(size = fontsize),
           legend.text = element_text(size = fontsize)) +
@@ -161,7 +167,7 @@ twoFACTORplot <- function(x,
   if (show.letters) {
     qq2 <- qq2 + 
       geom_text(data = b, aes(label = letters, x = {{ x.axis.factor }}, y = RE + LCL + letter.position.adjust), 
-                vjust = -0.5, size = 4, position = position_dodge(width = 0.5))
+                vjust = -0.5, size = fontsizePvalue, position = position_dodge(width = 0.5))
   }
   
   

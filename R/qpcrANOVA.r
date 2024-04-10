@@ -1,6 +1,6 @@
-#' @title Analysis of Variance of RE values based on CRD 
-#' @description Analysis of Variance relative efficiency (RE) values based on a completely randomized design (CRD). Even there are more than a factor in the experiment, it is still possible to apply CRD analysis on the factor-level combinations as treatments. Analysis of variance based on factorial design or analysis of covariance can be performed using \code{qpcrANCOVA} function.  
-#' @details The \code{qpcrANOVA} function performs ANOVA (analysis of variance) based on a completely randomized design (CRD). 
+#' @title ANOVA of RE values based on CRD 
+#' @description Analysis of Variance of relative efficiency (RE) values based on a completely randomized design (CRD). Even there are more than a factor in the experiment, it is still possible to apply CRD analysis on the factor-level combinations as treatments. Analysis of variance based on factorial design or analysis of covariance can be performed using \code{qpcrANCOVA} function.  
+#' @details The \code{qpcrANOVA} function performs analysis of variance (ANOVA) of relative efficiency (RE) values based on a completely randomized design (CRD). 
 #' It is suitable when relative expression (RE) analysis between different treatment combinations 
 #' (in a Uni- or multi-factorial experiment) is desired. If there are more than a factor in the experiment, 
 #' it is still possible to apply CRD analysis on the factor-level combinations as treatments. 
@@ -16,7 +16,7 @@
 #' @import agricolae
 #' @param x A data frame consisting of condition columns, target gene efficiency (E), target Gene Ct, reference gene efficiency and reference gene Ct values, respectively. Each Ct in the data frame is the mean of technical replicates. Complete amplification efficiencies of 2 was assumed in the example data for all wells but the calculated efficienies can be used instead.
 #' @param numberOfrefGenes number of reference genes (1 or 2). Up to two reference genes can be handled.
-#' @param block column name of the blocking factor (for correct column arrangement see example data.)
+#' @param block column name of the blocking factor (for correct column arrangement see example data.). When a qPCR experiment is done in multiple qPCR plates, variation resulting from the plates may interfere with the actual amount of gene expression. One solution is to conduct each plate as a complete randomized block so that at least one replicate of each treatment and control is present on a plate. Block effect is usually considered as random and its interaction with any main effect is not considered.
 #' @param p.adj Method for adjusting p values (see p.adjust)
 #' @return A list with 5 elements:
 #' \describe{
@@ -64,73 +64,11 @@ qpcrANOVA <- function(x,
                       block = NULL,
                       p.adj = c("none","holm","hommel", 
                                 "hochberg", "bonferroni", "BH", "BY", "fdr")){
-
-
-
-
-  # Check if there is block
-  if (is.null(block)) {
-
-
-    if(numberOfrefGenes == 1) {
-
-      factors <- colnames(x)[1:(ncol(x)-5)]
-      colnames(x)[ncol(x)-4] <- "rep"
-      colnames(x)[ncol(x)-3] <- "Etarget"
-      colnames(x)[ncol(x)-2] <- "Cttarget"
-      colnames(x)[ncol(x)-1] <- "Eref"
-      colnames(x)[ncol(x)] <- "Ctref"
-
-      x <- data.frame(x, wDCt = (log10(x$Etarget)*x$Cttarget)-(log10(x$Eref)*x$Ctref))
-
-    } else if(numberOfrefGenes == 2) {
-
-      factors <- colnames(x)[1:(ncol(x)-7)]
-      colnames(x)[ncol(x)-6] <- "rep"
-      colnames(x)[ncol(x)-5] <- "Etarget"
-      colnames(x)[ncol(x)-4] <- "Cttarget"
-      colnames(x)[ncol(x)-3] <- "Eref"
-      colnames(x)[ncol(x)-2] <- "Ctref"
-      colnames(x)[ncol(x)-1] <- "Eref2"
-      colnames(x)[ncol(x)] <- "Ctref2"
-
-      x <- data.frame(x[1:(ncol(x)-2)], wDCt = (log10(x$Etarget)*x$Cttarget)-
-                        ((log10(x$Eref)*x$Ctref) + (log10(x$Eref2)*x$Ctref2))/2)
-    }
-
-  } else {    # if there is Block
-    if(numberOfrefGenes == 1) {
-
-      factors <- colnames(x)[1:(ncol(x)-6)]
-      colnames(x)[ncol(x)-5] <- "block"
-      colnames(x)[ncol(x)-4] <- "rep"
-      colnames(x)[ncol(x)-3] <- "Etarget"
-      colnames(x)[ncol(x)-2] <- "Cttarget"
-      colnames(x)[ncol(x)-1] <- "Eref"
-      colnames(x)[ncol(x)] <- "Ctref"
-
-      x <- data.frame(x, wDCt = (log10(x$Etarget)*x$Cttarget)-(log10(x$Eref)*x$Ctref))
-
-    } else if(numberOfrefGenes == 2) {
-      factors <- colnames(x)[1:(ncol(x)-8)]
-      colnames(x)[ncol(x)-7] <- "block"
-      colnames(x)[ncol(x)-6] <- "rep"
-      colnames(x)[ncol(x)-5] <- "Etarget"
-      colnames(x)[ncol(x)-4] <- "Cttarget"
-      colnames(x)[ncol(x)-3] <- "Eref"
-      colnames(x)[ncol(x)-2] <- "Ctref"
-      colnames(x)[ncol(x)-1] <- "Eref2"
-      colnames(x)[ncol(x)] <- "Ctref2"
-
-      x <- data.frame(x[1:(ncol(x)-2)], wDCt = (log10(x$Etarget)*x$Cttarget)-
-                        ((log10(x$Eref)*x$Ctref) + (log10(x$Eref2)*x$Ctref2))/2)
-    }
-  }
-
-
-
-
-
+  
+  
+  resultx <- .addwDCt(x)
+  x<- resultx$x
+  factors <- resultx$factors
   # Check if there is block
   if (is.null(block)) {
     # Concatenate the columns using paste0
@@ -138,7 +76,7 @@ qpcrANOVA <- function(x,
     x
     lm <- stats::lm(wDCt ~ T, x)
     anovaCRD <- stats::anova(lm)
-
+    
   } else {
     # Concatenate the columns using paste0
     x$T <- do.call(paste, c(x[1:(ncol(x)-7)], sep = ":"))
@@ -146,51 +84,16 @@ qpcrANOVA <- function(x,
     lm <- stats::lm(wDCt ~ block + T, x)
     anovaCRD <- stats::anova(lm)
   }
-
-
-
-  # Reverse ordering of the grouping letters
-  invOrder <- function(invg){
-    collapsed <- paste(invg,sep="", collapse = "")
-    u <- unique(strsplit(collapsed, "")[[1]])
-    if(length(u) < 2){
-      return( invg)
-    }
-    u <- u[order(u)]
-    m <- matrix(nrow = NROW(invg), ncol=length(u))
-    m[] <-F
-    for(i in 1:length( invg)){
-      s <- strsplit( invg[i],"")[[1]]
-      index <- match(s, u)
-      m[i, index] <- T
-    }
-    for(i in 1:(length(u) - 1)){
-      firstColT <- match(T, m[, i])[1]
-      firstT <- match(T, rowSums(m[, i:length(u)] > 0))[1]
-      if(firstT < firstColT){
-        colT <- match(T, m[firstT, i:length(u)])[1]
-        colT <- colT + i - 1
-        tmp <- m[, colT]
-        m[, colT] <- m[,i]
-        m[, i] <- tmp
-      }
-    }
-    res <- vector(mode = "character", length = length("trt"))
-    for(i in 1:length(invg)){
-      l <- u[m[i, ]]
-      res[i] <- paste(l, sep = "",collapse = "")
-    }
-    return(res)
-  }
-
-
+  
+  
+  
   # Preparing final result table including letter grouping of the means for T
   g <- LSD.test(lm, "T", group = T, console = F, alpha = 0.05, p.adj = p.adj)$groups
   g <- g[rev(rownames(g)),] #order the result the way you want
-  g$groups <- invOrder(as.character(g$groups))
+  g$groups <- .invOrder(as.character(g$groups))
   mean <- LSD.test(lm, "T", group = T, console = F, alpha = 0.05, p.adj = p.adj)$means
-
-
+  
+  
   # Comparing mean pairs that also returns CI for T
   # Preparing final result table including letter grouping of the means
   meanPP <- LSD.test(lm, "T", group = F, console = F, alpha = 0.05, p.adj = p.adj)
@@ -207,35 +110,35 @@ qpcrANOVA <- function(x,
                                  signif. = signif,
                                  LCL = round(10^(-ucl), 4),
                                  UCL = round(10^(-lcl), 4))
-
-
+  
+  
   RowNames <- rownames(mean)
   mean$RowNames <- RowNames
   mean <- separate(mean, RowNames, into = factors, sep = ":", remove = T)
   mean <- mean[order(rownames(mean)),]
   g <- g[order(rownames(g)),]
-
+  
   bwDCt <- 10^(-x$wDCt)
   sdRow <- summarise(
     group_by(data.frame(T = x$T, bwDCt = bwDCt), T),
     sd = sd(bwDCt, na.rm = TRUE))
   sd <- sdRow[order(sdRow$T),]
-
+  
   Results <- data.frame(mean[,(ncol(mean)-2):ncol(mean)],
                         RE = round(10^(-mean$wDCt), 4),
                         LCL = round(10^(-mean$LCL), 4),
                         UCL = round(10^(-mean$UCL), 4),
                         letters = g$groups,
                         std = round(sd$sd, 4))
-
-
+  
+  
   # removing additional columns!
   if(length(factors) == 1) {
     Results <- Results[, -(1:2)]
-
+    
   } else if(length(factors) == 2) {
     Results <- Results[, -1]
-
+    
   } else if(length(factors) == 3) {
     Results <- Results
   }

@@ -41,7 +41,8 @@ qpcrTTEST(data_ttest,
 
 # Producing the plot
 t1 <- qpcrTTESTplot(data_ttest,
-              numberOfrefGenes = 1)
+              numberOfrefGenes = 1,
+              fontsizePvalue = 4)
 
 # Producing the plot: specifying gene order
 t2 <- qpcrTTESTplot(data_ttest,
@@ -54,7 +55,8 @@ t2 <- qpcrTTESTplot(data_ttest,
               y.axis.adjust = 0,
               y.axis.by = 2,
               ylab = "Average Fold Change (FC)",
-              xlab = "Gene")
+              xlab = "Gene",
+              fontsizePvalue = 4)
 
 multiplot(t1, t2, cols = 2)
 grid.text("A", x = 0.02, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
@@ -64,12 +66,13 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 # See sample data
 data_2factor
 
+order <- unique(data_2factor$Drought)
 qpcrANCOVA(data_2factor, 
            numberOfrefGenes = 1, 
-           analysisType = "ancova", 
-           main.factor = 2, 
-           y.axis.adjust = 0.3,
-           levels = c(3, 2, 1))
+           analysisType = "ancova",
+           mainFactor.column = 2,
+           mainFactor.level.order = order,
+           fontsizePvalue = 4)
 
 ## ----eval= T------------------------------------------------------------------
 # See a sample dataset
@@ -101,13 +104,16 @@ f1 <- oneFACTORplot(out2,
               letter.position.adjust = 0.1,
               ylab = "Relative Expression (RE)",
               xlab = "Factor Levels",
-              fontsize = 12)
+              fontsize = 12,
+              fontsizePvalue = 4)
 
-f2 <- qpcrANCOVA(data_1factor, 
-           numberOfrefGenes = 1,
-           analysisType = "ancova", 
-           main.factor = 1,
-           levels = c(1, 2, 3))
+order <- unique(data_2factor$Drought)
+f2 <- qpcrANCOVA(data_2factor, 
+           numberOfrefGenes = 1, 
+           analysisType = "ancova",
+           mainFactor.column = 2,
+           mainFactor.level.order = order,
+           fontsizePvalue = 4)
 
 multiplot(f1, f2, cols = 2)
 grid.text("A", x = 0.02, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
@@ -129,7 +135,8 @@ q1 <- twoFACTORplot(res,
    ylab = "Relative Expression",
    xlab = "Drought Levels",
    legend.position = c(0.15, 0.8),
-   show.letters = TRUE)
+   show.letters = TRUE,
+   fontsizePvalue = 4)
 
 # Plotting the same data with 'Drought' as grouping factor
 q2 <- twoFACTORplot(res,
@@ -140,7 +147,8 @@ q2 <- twoFACTORplot(res,
    legend.position = c(0.15, 0.8),
    show.letters = FALSE,
    show.errorbars = F,
-   show.points = T)
+   show.points = T,
+   fontsizePvalue = 4)
 
 multiplot(q1, q2, cols = 2)
 grid.text("A", x = 0.02, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
@@ -160,7 +168,8 @@ res$Type <- factor(res$Type, levels = c("S","R"))
 p1 <- threeFACTORplot(res,
     arrangement = c(3, 1, 2),
     legend.position = c(0.2, 0.85),
-    xlab = "condition")
+    xlab = "condition",
+    fontsizePvalue = 4)
 
 
 # When using ci as error, increase y.axis.adjust to see the plot correctly!
@@ -177,7 +186,8 @@ p2 <- threeFACTORplot(res,
    legend.title = "Genotype",
    fontsize = 12,
    legend.position = c(0.2, 0.8),
-   show.letters = TRUE)
+   show.letters = TRUE,
+   fontsizePvalue = 4)
 
 multiplot(p1, p2, cols = 2)
 grid.text("A", x = 0.02, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))

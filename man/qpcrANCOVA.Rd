@@ -2,25 +2,27 @@
 % Please edit documentation in R/qpcrANCOVA.r
 \name{qpcrANCOVA}
 \alias{qpcrANCOVA}
-\title{ANCOVA and ANOVA on a factorial design plus bar plot of FC}
+\title{Fold change (FC) analysis using ANCOVA}
 \usage{
 qpcrANCOVA(
   x,
   numberOfrefGenes,
-  block = NULL,
   analysisType = "ancova",
-  main.factor,
-  levels,
-  level.names = "none",
+  mainFactor.column,
+  mainFactor.level.order,
+  block = NULL,
   width = 0.5,
-  fill = "skyblue",
+  fill = "#BFEFFF",
   y.axis.adjust = 1,
   y.axis.by = 1,
   letter.position.adjust = 0.1,
-  ylab = "Average Fold Change",
+  ylab = "Fold Change",
   xlab = "Pairs",
   fontsize = 12,
-  p.adj = c("none", "holm", "hommel", "hochberg", "bonferroni", "BH", "BY", "fdr")
+  fontsizePvalue = 7,
+  axis.text.x.angle = 0,
+  axis.text.x.hjust = 0.5,
+  p.adj = "none"
 )
 }
 \arguments{
@@ -28,19 +30,17 @@ qpcrANCOVA(
 
 \item{numberOfrefGenes}{number of reference genes. Up to two reference genes can be handled.}
 
-\item{block}{column name of the blocking factor (for correct column arrangement see example data.)}
-
 \item{analysisType}{should be one of "ancova" or "anova".}
 
-\item{main.factor}{main factor (not covariate) for which the levels FC is compared.}
+\item{mainFactor.column}{main factor for which the levels FC is compared. The remaining factors are considered as covariates.}
 
-\item{levels}{a numeric vector corresponding to the main factor levels. First number indicates Control level to which the other levels are compared.}
+\item{mainFactor.level.order}{a vector of main factor level names. The first level in the vector is used as reference.}
 
-\item{level.names}{a vector determining level names in the x axis on the plot.}
+\item{block}{column name of the block if there is a blocking factor (for correct column arrangement see example data.). When a qPCR experiment is done in multiple qPCR plates, variation resulting from the plates may interfere with the actual amount of gene expression. One solution is to conduct each plate as a complete randomized block so that at least one replicate of each treatment and control is present on a plate. Block effect is usually considered as random and its interaction with any main effect is not considered.}
 
 \item{width}{a positive number determining bar width.}
 
-\item{fill}{specify the fill color for the columns of the bar plot.}
+\item{fill}{specify the fill color for the columns in the bar plot. If a vector of two colors is specified, the reference level is differentialy colored.}
 
 \item{y.axis.adjust}{a negative or positive value for reducing or increasing the length of the y axis.}
 
@@ -52,58 +52,95 @@ qpcrANCOVA(
 
 \item{xlab}{the title of the x axis}
 
-\item{fontsize}{all fonts size of the plot}
+\item{fontsize}{font size of the plot}
 
-\item{p.adj}{method for adjusting p values (see \code{p.adjust})}
+\item{fontsizePvalue}{font size of the pvalue labels}
+
+\item{axis.text.x.angle}{angle of x axis text}
+
+\item{axis.text.x.hjust}{horizontal justification of x axis text}
+
+\item{p.adj}{Method for adjusting p values}
 }
 \value{
 A list with 2 elements:
 \describe{
   \item{Final_data}{}
-  \item{lmf}{lm of factorial analysis-tyle}
-  \item{lmc}{lm of ANCOVA analysis-type}
+  \item{lm_ANOVA}{lm of factorial analysis-tyle}
+  \item{lm_ANCOVA}{lm of ANCOVA analysis-type}
   \item{ANOVA_table}{ANOVA table}
   \item{ANCOVA_table}{ANCOVA table}
-  \item{Table}{Table of FC values and significance and the 95 percent CI as error bars.}
-  \item{plot}{Bar plot of the average fold change for the main factor levels.}
+  \item{FC Table}{Table of FC values, significance and confidence limits for the main factor levels.}
+  \item{Bar plot of FC values}{Bar plot of the fold change values for the main factor levels.}
 }
 }
 \description{
-ANCOVA (analysis of covariance) and ANOVA (analysis of variance) can be performed using \code{qpcrANCOVA} function, if more than a factor exist. This works even if there is one factor in the experiment. Bar plot of fold changes (FCs) along with the 95\% confidence interval is also returned by the \code{qpcrANCOVA} function. There is also a function called \code{oneFACTORplot} which returns FC values and related plot for a one-factor-experiment with more than two levels.
+ANCOVA (analysis of covariance) and ANOVA (analysis of variance) can be performed using 
+\code{qpcrANCOVA} function, for uni- or multi-factorial experiment data. This function performs FC analysis even
+if there is only one factor (without covariate variable), although, for the data with 
+only one factor, the analysis turns into ANOVA. The bar plot of the fold changes (FC) 
+values along with the confidence interval is also returned by the \code{qpcrANCOVA} function.
 }
 \details{
-The \code{qpcrANCOVA} function applies both ANCOVA and ANOVA analysis to the data. ANCOVA is a method based on both ANOVA and linear regression. It is basically suitable when the levels of a factor are also affected by an uncontrolled quantitative covariate. 
-For example, suppose that wDCt of a target gene in a plant is affected by temperature. The gene may also be affected by drought. since we already know that temperature affects the target gene, we are interesting now if the gene expression is also altered by the drought levels. We can design an experiment to understand the gene behavior at both temperature and drought levels at the same time. The drought is another factor (the covariate) that may affect the expression of our gene under the levels of the first factor i.e. temperature. The data of such an experiment can be analyzed by ANCOVA or even ANOVA based on a factorial experiment using \code{qpcrANCOVA} function, if more than a factor exist. Bar plot of fold changes (FCs) along with the 95\% confidence interval is also returned by the \code{qpcrANCOVA} function. There is also a function called \code{oneFACTORplot} which returns FC values and related plot for a one-factor-experiment with more than two levels
+The \code{qpcrANCOVA} function applies both ANCOVA and ANOVA analysis to the data of a uni- or 
+multi-factorial experiment, although for the data with 
+only one factor, the analysis turns to ANOVA. ANCOVA is basically appropriate when the 
+levels of a factor are 
+also affected by uncontrolled quantitative covariate(s). 
+For example, suppose that wDCt of a target gene in a plant is affected by temperature. The gene may 
+also be affected by drought. Since we already know that temperature affects the target gene, we are 
+interested to now if the gene expression is also altered by the drought levels. We can design an 
+experiment to understand the gene behavior at both temperature and drought levels at the same time. 
+The drought is another factor (the covariate) that may affect the expression of our gene under the 
+levels of the first factor i.e. temperature. The data of such an experiment can be analyzed by ANCOVA 
+or even ANOVA based on a factorial experiment using \code{qpcrANCOVA}. This function performs FC 
+analysis even there is only one factor (without covariate or factor  variable). Bar plot of fold changes 
+(FC) values along with the pair-wise errors (square roots of pooled variances of each pair of samples) are also returned by the 
+\code{qpcrANCOVA} function. There is also a function called \code{oneFACTORplot} which returns RE values 
+and related plot for a one-factor-experiment with more than two levels.
+Along with the ANCOVA, the \code{qpcrANCOVA} also performs a full model factorial analysis of variance. 
+If there is covariate variable(s), before ANCOVA analysis, it is better to run ANOVA based on a 
+factorial design to see if the main factor and covariate(s) interaction is significant or not. 
+If the pvalue of the interaction effect is smaller than 0.05, then the interaction between the main factor and covariate 
+is significant, suggesting that ANCOVA is not appropriate in this case.
 }
 \examples{
 
-# See sample data
-data_2factor
+# Data from Lee et al., 2020 
 
-
-qpcrANCOVA(data_2factor, 
+df <- meanTech(Lee_etal2020qPCR, groups = 1:3)
+order2 <- unique(df$DS)
+qpcrANCOVA(df, 
            numberOfrefGenes = 1, 
            analysisType = "ancova", 
-           main.factor = 1,
-           levels = c(1, 2))
-           
+           mainFactor.column = 2,
+           mainFactor.level.order = c("D7", "D12", "D15","D18"),
+           fill = c("skyblue", "#BFEFFF"),
+           y.axis.adjust = 0.05)
 
-qpcrANCOVA(data_2factorBlock, 
-           numberOfrefGenes = 1,
-           block = "block",  
-           analysisType = "ancova", 
-           main.factor = 2,
-           levels = c(3, 2, 1))
-           
-           
- qpcrANCOVA(data_1factor, 
-           numberOfrefGenes = 1,
-           analysisType = "ancova", 
-           main.factor = 1,
-           levels = 3:1)
-           
-           
 
+df <- meanTech(Lee_etal2020qPCR, groups = 1:3) 
+df2 <- df[df$factor1 == "DSWHi",][-1]
+qpcrANCOVA(df2, 
+          mainFactor.column = 1,
+          mainFactor.level.order = c("D7", "D12", "D15","D18"),
+          numberOfrefGenes = 1,
+          analysisType = "ancova",
+          fontsizePvalue = 5,
+          y.axis.adjust = 0.1)
+
+
+}
+\references{
+Livak, Kenneth J, and Thomas D Schmittgen. 2001. Analysis of
+Relative Gene Expression Data Using Real-Time Quantitative PCR and the
+Double Delta CT Method. Methods 25 (4). doi:10.1006/meth.2001.1262.
+
+Ganger, MT, Dietz GD, and Ewing SJ. 2017. A common base method for analysis of qPCR data
+and the application of simple blocking in qPCR experiments. BMC bioinformatics 18, 1-11.
+
+Yuan, Joshua S, Ann Reed, Feng Chen, and Neal Stewart. 2006.
+Statistical Analysis of Real-Time PCR Data. BMC Bioinformatics 7 (85). doi:10.1186/1471-2105-7-85.
 }
 \author{
 Ghader Mirzaghaderi
