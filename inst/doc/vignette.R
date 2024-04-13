@@ -55,7 +55,7 @@ t2 <- qpcrTTESTplot(data_ttest,
               y.axis.adjust = 0,
               y.axis.by = 2,
               ylab = "Average Fold Change (FC)",
-              xlab = "Gene",
+              xlab = "none",
               fontsizePvalue = 4)
 
 multiplot(t1, t2, cols = 2)
@@ -72,11 +72,12 @@ qpcrANCOVA(data_2factor,
            analysisType = "ancova",
            mainFactor.column = 2,
            mainFactor.level.order = order,
-           fontsizePvalue = 4)
+           fontsizePvalue = 4,
+           x.axis.labels.rename = "none")
 
 ## ----eval= T------------------------------------------------------------------
 # See a sample dataset
-data_3factor_a
+data_3factor
 
 ## ----eval= T, fig.height = 3, fig.width = 5-----------------------------------
 # If the data include technical replicates, means of technical replicates
@@ -102,18 +103,31 @@ f1 <- oneFACTORplot(out2,
               errorbar = "ci",
               show.letters = TRUE,
               letter.position.adjust = 0.1,
-              ylab = "Relative Expression (RE)",
+              ylab = "Relative Expression",
               xlab = "Factor Levels",
               fontsize = 12,
               fontsizePvalue = 4)
 
+
+addline_format <- function(x,...){
+    gsub('\\s','\n',x)
+}
 order <- unique(data_2factor$Drought)
-f2 <- qpcrANCOVA(data_2factor, 
-           numberOfrefGenes = 1, 
-           analysisType = "ancova",
-           mainFactor.column = 2,
-           mainFactor.level.order = order,
-           fontsizePvalue = 4)
+f2 <- qpcrANCOVA(data_1factor,
+                 numberOfrefGenes = 1,
+                 mainFactor.column = 1,
+                 mainFactor.level.order = c("L1","L2","L3"),
+                 width = 0.5,
+                 fill = c("skyblue","#79CDCD"),
+                 y.axis.by = 1,
+                 letter.position.adjust = 0,
+                 y.axis.adjust = 1,
+                 ylab = "Fold Change",
+                 fontsize = 12,
+                 x.axis.labels.rename = addline_format(c("Control", 
+                                                       "Treatment_1 vs Control", 
+                                                       "Treatment_2 vs Control")))
+
 
 multiplot(f1, f2, cols = 2)
 grid.text("A", x = 0.02, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
@@ -156,7 +170,7 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
 ## ----fig.height = 5, fig.width = 11, fig.align = 'center', fig.cap = "A and B) Relative expression (RE) of a target gene under two or three factors produced by ‘twoFACTORplot’ and ‘threeFACTORplot’ functions, respectively. Error bars represent standard deviations (can be set to confidence interval). Means (columns) lacking letters in common have significant differences at alpha = 0.05 as resulted from an ‘LSD.test’."----
 # Before plotting, the result needs to be extracted as below:
-res <- qpcrANOVA(data_3factor_b, numberOfrefGenes = 1)$Result
+res <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)
 res
 
 # releveling a factor levels first
@@ -195,8 +209,8 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
 ## ----eval=F, include = T------------------------------------------------------
 #  
-#  b <- qpcrANOVA(data_3factor_a, numberOfrefGenes = 1)$Result
-#  a <- qpcrANOVA(data_3factor_a, numberOfrefGenes = 1)$Final_data
+#  b <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Result
+#  a <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Final_data
 #  
 #  ggplot(b, aes(x = Genotype, y = RE, fill = factor(Drought))) +
 #    geom_bar(stat = "identity", position = "dodge") +
