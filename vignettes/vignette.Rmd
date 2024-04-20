@@ -7,11 +7,11 @@ output:
     keep_md: yes
     output: rmarkdown::html_vignette
     df_print: default
-  word_document:
-    toc: No
   pdf_document: 
     toc: yes
     latex_engine: lualatex
+  word_document:
+    toc: No
 vignette: |
   %\VignetteIndexEntry{Sending Messages With Gmailr}
   %\usepackage[utf8]{inputenc}
@@ -32,7 +32,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 
 Real-time polymerase chain reaction (real-time PCR), is widely used in biological research. Various analysis methods are employed on the real-time PCR data to measure the mRNA levels under different experimental conditions. 
-‘rtpcr’ package was developed for amplification efficiency calculation and statistical analysis of real-time PCR data in R. By accounting for up to two reference genes and amplification efficiency values, a general calculation methodology described by <a href="https://doi.org/10.1186/s12859-017-1949-5">Ganger et al. (2017)</a>, matching both <a href="https://doi.org/10.1006/meth.2001.1262">Livak and Schmittgen (2001)</a> and <a href="https://doi.org/10.1093/nar/30.9.e36">Pfaffl et al. (2002) </a> methods  was used. Based on the experimental conditions, the functions of the ‘rtpcr’ package use a t-test (for experiments with a two-level factor) or analysis of variance (for cases where more than two levels or factors or a blocking factor exist) to calculate the fold change (FC) or relative expression (RE). The functions further provide standard deviations and confidence limits for means, apply statistical mean comparisons and present letter mean grouping. To facilitate function application, different data sets were used as examples and the outputs were explained. An outstanding feature of ‘rtpcr’ package is providing publication-ready bar plots with various controlling arguments for experiments with up to three different factors.
+‘rtpcr’ package was developed for amplification efficiency calculation and statistical analysis of real-time PCR data in R. By accounting for up to two reference genes and amplification efficiency values, a general calculation methodology described by <a href="https://doi.org/10.1186/s12859-017-1949-5">Ganger et al. (2017)</a>
+and <a href="https://doi.org/10.1016/j.tibtech.2018.12.002">Taylor et al. 2019</a>, matching both <a href="https://doi.org/10.1006/meth.2001.1262">Livak and Schmittgen (2001)</a> and <a href="https://doi.org/10.1093/nar/30.9.e36">Pfaffl et al. (2002) </a> methods  was used. Based on the experimental conditions, the functions of the ‘rtpcr’ package use a t-test (for experiments with a two-level factor) or analysis of variance (for cases where more than two levels or factors or a blocking factor exist) to calculate the fold change (FC) or relative expression (RE). The functions further provide standard deviations and confidence limits for means, apply statistical mean comparisons and present letter mean grouping. To facilitate function application, different data sets were used as examples and the outputs were explained. An outstanding feature of ‘rtpcr’ package is providing publication-ready bar plots with various controlling arguments for experiments with up to three different factors.
 
 # Calculation methods
 The basic method for expression estimation of a gene between conditions relies on the calculation of fold differences by means of the PCR amplification efficiency (E) and the threshold cycle (syn. crossing point or Ct). Among the various approaches developed for data analysis in real-time PCR, the Livak approach, also known as the $2^{-\Delta\Delta C_t}$ method, stands out for its simplicity and widespread use where the fold change (FC) exoression ($2^{-\Delta\Delta C_t}$) in Treatment (Tr) compared to Control (Co) condition is calculated according to equation:
@@ -57,20 +58,21 @@ $$\text{Fold change} = \frac{E^{-(C_{t_{\text{Tr}}}-C_{t_{\text{Co}}})_{target}}
 {E^{-(C_{t_{\text{Tr}}}-C_{t_{\text{Co}}})_{ref}}}$$
 
 # A generalized calculation method
-The rtpcr package was developed for the R environment in the major operating systems. The packager functions are mainly based on the calculation of efficiency-weighted $\Delta C_t$ ($w\Delta C_t$) values from target and reference gene Ct (equation 3). $w\Delta C_t$  values are weighted for the amplification efficiencies as described by Ganger et al. (2017):
+The rtpcr package was developed for the R environment in the major operating systems. The packager functions are mainly based on the calculation of efficiency-weighted $\Delta C_t$ ($w\Delta C_t$) values from target and reference gene Ct (equation 3). $w\Delta C_t$  values are weighted for the amplification efficiencies as described by Ganger et al. (2017) except that log2 was used instead of log10:
 
 
-$$w\Delta Ct =\log_{10}(E_{target}).Ct_{target}-\log_{10}(E_{ref}).Ct_{ref}$$
+$$w\Delta Ct =\log_{2}(E_{target}).Ct_{target}-\log_{2}(E_{ref}).Ct_{ref}$$
 
-From the mean wΔCt values over biological replicates, relative expression (RE) of a target gene can be calculated for each condition according to the equation 
 
-$$\text{Relative Expression} = 10^{-\overline{w\Delta Ct}}$$
-When there are only a two conditional factor (e.g. with treatment and control levels), or there is one multi-level factor that one of them is concidered as control, average fold change (FC) expression of target gene can be calculated according to:
+The relative expression of the target gene normalized to that of reference gene(s) within the same sample or condition is called relative expression (RE). From the mean wΔCt values over biological replicates, RE of a target gene can be calculated for each condition according to the equation 
 
-$$\text{Fold Change}=10^{-(\overline{w\Delta Ct}_{\text{Tr}}-{\overline{w\Delta Ct}_{\text{Co}}})}$$
+$$\text{Relative Expression} = 2^{-\overline{w\Delta Ct}}$$
+Often, one condition is considered as calibrator condition. Examples are Treatment versus Control where Control is served as the calibrator, or time 0 versus time 1 (e.g. after 1 hour) and time 2 (e.g. after 2 hours) where time 0 is served as the reference or calibrator level. So, calibrator is the reference level or sample that all others are compared to. The fold change (FC) expression of a target gene for the reference or calibrator level is 1 because it is not changed compared to itself. The fold change expression of a target gene due to the treatment can be calculated as follows: 
 
-in rtpcr package, ‘qpcrTTEST’, ‘qpcrTTESTplot’ finctions calcualtes FC for multi-genes-two conditional cases and ‘qpcrANCOVA’ represents FC for single-gene-single factor or single-gene-multi factorial experiments. If wDCt values is calculated from the E valuses, these calculations match the formula of Pfaffl while if 2 (complete efficiency) be used instead, the result match the $2^{-\Delta\Delta C_t}$ method. In any case we called these as Fold Change in the outputs of ‘rtpcr’. Under factorial experiments where the calculation of the expression of the target gene relative to the reference gene (called Relative Expression) in each condition is desired, ‘qpcrANOVA’, ‘oneFACTORplot’, ‘twoFACTORplot’ and ‘threeFACTORplot’ functions were developed for ANOVA analysis, and representing the plots from single, double or triple factor experiments, respectively. The last three functions generate ‘ggplot2’-derived graphs based on the output of the ‘qpcrANOVA’ function. If available, the blocking factor can laso be handled by ‘qpcrTTEST’ and ‘qpcrANOVA’ functions.
-Here, a brief methodology is presented but detailes about the $w\Delta C_t$  calculations and statistical analysis are available in. Importantly, because the relative or FC gene expression follow a lognormal distribution, a normal distribution is expected for the $w\Delta C_t$ or $w\Delta\Delta C_t$ values making it possible to apply t-test or analysis of variance to them. Following analysis, $w\Delta C_t$ values are statistically compared and standard deviations and confidence intervals is calculated, but the transformation $y = 10^x$ is applied in the final step in order to report the results (i.e. RE ratios, errors and confidence limits).
+$$\text{Fold Change due to Treatment}=2^{-(\overline{w\Delta Ct}_{\text{Tr}}-{\overline{w\Delta Ct}_{\text{Co}}})}$$
+
+`qpcrTTEST` and `qpcrTTESTplot` functions calculate FC for multi-genes-two conditional cases and `qpcrANCOVA` represents FC for single-gene-single factor or single-gene-multi factorial experiments. If wDCt values is calculated from the E valuses, these calculations match the formula of Pfaffl while if 2 (complete efficiency) be used instead, the result match the $2^{-\Delta\Delta C_t}$ method. In any case we called these as Fold Change in the outputs of `rtpcr`. Under factorial experiments where the calculation of the expression of the target gene relative to the reference gene (called Relative Expression) in each condition is desired, `qpcrANOVA`, `oneFACTORplot`, `twoFACTORplot` and `threeFACTORplot` functions were developed for ANOVA analysis, and representing the plots from single, double or triple factor experiments, respectively. The last three functions generate ‘ggplot2’-derived graphs based on the output of the `qpcrANOVA` function. If available, the blocking factor can also be handled by `qpcrTTEST`, `qpcrANOVA` and `qpcrANCOVA` functions. Standard error of the FC and RE means is calculated according to <a href="https://doi.org/10.1016/j.tibtech.2018.12.002">Taylor et al. 2019</a> in rtpcr package.
+Here, a brief methodology is presented but details about the $w\Delta C_t$  calculations and statistical analysis are available in. Importantly, because the relative or FC gene expression follow a lognormal distribution, a normal distribution is expected for the $w\Delta C_t$ or $w\Delta\Delta C_t$ values making it possible to apply t-test or analysis of variance to them. Following analysis, $w\Delta C_t$ values are statistically compared and standard deviations and confidence intervals is calculated, but the transformation $y = 2^{-x}$ is applied in the final step in order to report the results (i.e. RE ratios, errors and confidence limits).
 
 
 
@@ -116,8 +118,8 @@ To use the functions, input data should be prepared in the right format with app
 
 *Table 1. Data structure and column arrangement required for ‘rtpcr’ package.  rep: technical replicate; targetE and refE: amplification efficiency columns for target and reference genes respectively. targetCt and refCt: target and reference Ct columns, respectively. factors (factor1, factor2 and/or factor3): experimental factors.*
 
-| Experiment type   |                  Column arrangement of the input data | Example in the package |
- |:---------------------|:-----------------------------------|:----------------------------------|
+ | Experiment type     |  Column arrangement of the input data   | Example in the package                   |
+ |:---------------------|:---------------------------------------|:------------------------------------------|
  |Amplification efficiency             |Dilutions - targetCt - refCt | data_efficiency |
  |t-test (accepts multiple genes)      |condition (put the control level first) - gene (put reference gene(s) last.)- efficiency - Ct  | data_ttest |
  |Factorial (Up to three factors)      |factor1 - rep - targetE - targetCt - refE - refCt | data_1factor |
@@ -128,8 +130,11 @@ To use the functions, input data should be prepared in the right format with app
  |                                     |factor1 - factor2 - factor3 - block - rep - targetE - targetCt - refE - refCt | |
  |Two reference genes                  |. . . . . .  rep - targetE - targetCt - ref1E - ref1Ct - ref2E - ref2Ct | |
  |calculating biological replicated    |. . . . . .  biologicalRep - techcicalRep - Etarget - targetCt - Eref - refCt  | data_withTechRep |
- |                                       |. . . . . .  biologicalRep - techcicalRep - Etarget - targetCt - ref1E - ref1Ct - ref2E - ref2Ct  | |
+ |                |. . . . . .  biologicalRep - techcicalRep - Etarget - targetCt - ref1E - ref1Ct - ref2E - ref2Ct  | |
  
+
+To see list of data in the rtpcr package run `data(package = "rtpcr")`. 
+Example data sets can be presented by running the name of each data set. A description of the columns names in  each data set is called by "?" followed by the names of the data set, for example `?data_1factor`
 
 # functions usage
 
@@ -138,17 +143,19 @@ To simplify 'rtpcr' usage, examples for using the functions are presented below.
 
            
 *Table 2. Functions and examples for using them.*
-| function   |                 Analysis | Example (see package help for the more arguments) |
+
+ | function             |                 Analysis | Example (see package help for the more arguments) |
  |:---------------------|:-----------------------------------|:----------------------------------|
  | efficiency             | Efficiency, standard curves and related statistics | efficiency(data_efficiency) |
  | meanTech      | Calculating the mean of technical replicates | meanTech(data_withTechRep, groups = 1:4) |
  | qpcrANCOVA      | FC and bar plot of the target gene (one or multi-factorial experiments) | qpcrANCOVA(data_1factor, numberOfrefGenes = 1, mainFactor.column = 1, mainFactor.level.order = c("L1", "L2", "L3") |
- |  oneFACTORplot    | Bar plot of the relative gene expression from a one-factor experiment | out <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)$Result;   oneFACTORplot(out) |
- |  qpcrANOVA  | Analysis of Variance of the qpcr data  | qpcrANOVA(data_3factor, numberOfrefGenes = 1, p.adj = "none")|
+ |  oneFACTORplot    | Bar plot of the relative gene expression from a one-factor experiment | out <- qpcrANOVA(data_1factor, numberOfrefGenes = 1);   oneFACTORplot(out) |
+ |  qpcrANOVA  | Analysis of Variance of the qpcr data  | qpcrANOVA(data_3factor, numberOfrefGenes = 1)|
  | qpcrTTEST     | Computing the average fold change and related statistics | qpcrTTEST(data_ttest,  numberOfrefGenes = 1, paired = FALSE, var.equal = TRUE) |
  | qpcrTTESTplot  | Bar plot of the average fold change of the target genes	 | qpcrTTESTplot(data_ttest,  numberOfrefGenes = 1, order = c("C2H2-01", "C2H2-12", "C2H2-26")) |
- |  threeFACTORplot  | Bar plot of the relative gene expression from a three-factor experiment | res <- qpcrANOVA(data_3factor,  numberOfrefGenes = 1)$Result; threeFACTORplot(res, arrangement = c(3, 1, 2)) |
- | twoFACTORplot   | Bar plot of the relative gene expression from a two-factor experiment | res <- qpcrANOVA(data_2factor,  numberOfrefGenes = 1)$Result; twoFACTORplot(res, x.axis.factor = Genotype, group.factor = Drought) |
+ |  threeFACTORplot  | Bar plot of the relative gene expression from a three-factor experiment | res <- qpcrANOVA(data_3factor,  numberOfrefGenes = 1); threeFACTORplot(res, arrangement = c(3, 1, 2)) |
+ | twoFACTORplot   | Bar plot of the relative gene expression from a two-factor experiment | res <- qpcrANOVA(data_2factor, numberOfrefGenes = 1); twoFACTORplot(res, x.axis.factor = Genotype, group.factor = Drought) |
+ 
 
  
 *see package help for more arguments including the number of reference genes, levels arrangement, blocking, and arguments for adjusting the bar plots.*
@@ -169,11 +176,18 @@ data_efficiency
 
 
 ## Calculating amplification efficiency
-The following `efficiency` function calculates the amplification efficiency of a target and a reference gene and presents the related standard curves along with the Slope, Efficiency, and R2 statistics. The function also compares the slopes of the two standard curves. For this, a regression line is fitted using the $\Delta C_t$ values. If $2^{-\Delta\Delta C_t}$ method is intended, the slope should not exceed 0.2!
+
+Aplification efficiency in PCR can be either defined as percentage (from 0 to 1) or as time of PCR product increase per cycle (from 1 to 2).  in the present vignette, the amplification efficiency (E) has been refered to times of PCR product increase (1 to 2). A complete efficiency is equal to 2. The following `efficiency` function calculates the amplification efficiency of a target and a reference gene and presents the related standard curves along with the Slope, Efficiency, and R2 statistics. The function also compares the slopes of the two standard curves. For this, a regression line is fitted using the $\Delta C_t$ values. If $2^{-\Delta\Delta C_t}$ method is intended, the slope should not exceed 0.2!
+
+
 
 ```{r eval = T, fig.height = 3, fig.align = 'center', fig.cap = 'Standard curve and the amplification efficiency analysis of target and reference genes. A sample data arrangement that is required as input for the calculation of amplification efficiency by the efficiency function.', warning = FALSE, message = FALSE}
 efficiency(data_efficiency)
 ```
+
+
+Note: It is advised that the amplification efficiency be calcualted for each cDNA sample because the amplification efficiency not only depends on the PCR mic and primer characteristics, but also varies among different cDNA samples.
+
 
 # Expression data analysis
 
@@ -188,8 +202,7 @@ data_ttest
 
 ### Data analysis under two conditions
 
-Here, the above data set was used for the Fold Change expression analysis of the target genes using the `qpcrTTEST` function. This function performs a t-test-based analysis of any number of genes that 
-have been evaluated under control and treatment conditions. The analysis can be done for unpaired or paired conditions. The output is a table of target gene names, fold changes confidence limits, and the t.test derived p-values. The `qpcrTTEST` function includes the `var.equal` argument. When set to `FALSE`, `t.test` is performed under the unequal variances hypothesis.
+Here, the above data set was used for the Fold Change expression analysis of the target genes using the `qpcrTTEST` function. This function performs a t-test-based analysis of any number of genes that have been evaluated under control and treatment conditions. The output is a table of target gene names, fold changes confidence limits, and the t.test derived p-values. The `qpcrTTEST` function includes the `var.equal` argument. When set to `FALSE`, `t.test` is performed under the unequal variances hypothesis. Furthermore, the samples in qPCR may be unpaired or paired so the analysis can be done for unpaired or paired conditions. Paired samples refer to a situation where the measurements are made on the same set of subjects or individuals. This could occur if the data is aquired from the same set of individulas before and after a treatment. In such cases, the paired t-test is used for statistical comparisons by setting the t-test `paired` argument to `TRUE`.
 
 ```{r eval= T}
 qpcrTTEST(data_ttest, 
@@ -208,7 +221,8 @@ The `qpcrTTESTplot` function generates a bar plot of Fold Changes and confidence
 # Producing the plot
 t1 <- qpcrTTESTplot(data_ttest,
               numberOfrefGenes = 1,
-              fontsizePvalue = 4)
+              fontsizePvalue = 4,
+              errorbar = "ci")
 
 # Producing the plot: specifying gene order
 t2 <- qpcrTTESTplot(data_ttest,
@@ -218,9 +232,9 @@ t2 <- qpcrTTESTplot(data_ttest,
               var.equal = TRUE,
               width = 0.5,
               fill = "palegreen",
-              y.axis.adjust = 0,
+              y.axis.adjust = 3,
               y.axis.by = 2,
-              ylab = "Average Fold Change (FC)",
+              ylab = "Average Fold Change",
               xlab = "none",
               fontsizePvalue = 4)
 
@@ -231,8 +245,7 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
 ## Analysis of covariance (ANCOVA)
 
-analysis of covariance (ANCOVA) is a method based on both ANOVA and linear regression. It is basically suitable when the levels of a factor are also affected by an uncontrolled quantitative covariate. 
-For example, suppose that wDCt of a target gene in a plant is affected by temperature. The gene may also be affected by drought. since we already know that temperature affects the target gene, we are interesting now if the gene expression is also altered by the drought levels. We can design an experiment to understand the gene behavior at both temperature and drought levels at the same time. The drought is another factor (the covariate) that may affect the expression of our gene under the levels of the first factor i.e. temperature. The data of such an experiment can be analyzed by ANCOVA or even ANOVA based on a factorial experiment using `qpcrANCOVA` function, if more than a factor exist. Bar plot of fold changes (FCs) along with the 95\% confidence interval is also returned by the `qpcrANCOVA` function. There is also a function called `oneFACTORplot` which returns FC values and related plot for a one-factor-experiment with more than two levels. 
+analysis of covariance (ANCOVA) is a method based on both ANOVA and linear regression. It is basically suitable when the levels of a factor are also affected by an uncontrolled quantitative covariate. For example, suppose that wDCt of a target gene in a plant is affected by temperature. The gene may also be affected by drought. since we already know that temperature affects the target gene, we are interesting now if the gene expression is also altered by the drought levels. We can design an experiment to understand the gene behavior at both temperature and drought levels at the same time. The drought is another factor (the covariate) that may affect the expression of our gene under the levels of the first factor i.e. temperature. The data of such an experiment can be analyzed by ANCOVA or even ANOVA based on a factorial experiment using `qpcrANCOVA` function, if more than a factor exist. Bar plot of fold changes (FCs) along with the 95\% confidence interval is also returned by the `qpcrANCOVA` function. There is also a function called `oneFACTORplot` which returns FC values and related plot for a one-factor-experiment with more than two levels. 
 
 ```{r eval = T, fig.height = 3, fig.width = 5, fig.align='center'}
 # See sample data
@@ -263,7 +276,7 @@ The `qpcrANOVA` function performs ANOVA based on both factorial arrangement and 
 
 ### Reverse ordering of the grouping letters
 
-One may be interested in presenting the statistical mean comparison result in the frame of grouping letters. This is rather challenging because in the grouping output of mean comparisons (via the `LSD.test` function of agricolae package), means are sorted into descending order so that the largest mean, is the first in the table and "a" letter is assigned to it. If `LSD.test` is applied to the wCt means, the biggest wCt mean receives "a" letter as expected, but this value turns into the smallest mean after its reverse log transformation by  $10^{-(\Delta Ct)}$. to solve this issue, I used a function that assigns the grouping letters appropriately.
+One may be interested in presenting the statistical mean comparison result in the frame of grouping letters. This is rather challenging because in the grouping output of mean comparisons (via the `LSD.test` function of agricolae package), means are sorted into descending order so that the largest mean, is the first in the table and "a" letter is assigned to it. If `LSD.test` is applied to the wCt means, the biggest wCt mean receives "a" letter as expected, but this value turns into the smallest mean after its reverse log transformation by  $2^{-(\Delta Ct)}$. to solve this issue, I used a function that assigns the grouping letters appropriately.
 
 ### Output table of the analysis
 
@@ -286,7 +299,7 @@ res$Post_hoc_Test
 ```{r eval= T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "A) A bar plot representing Relative expression of a gene under three levels of a factor generated using ‘oneFACTORplot’ function, B) Plot of average Fold changes produced by the ‘qpcrANCOVA’ function from the same data as ‘C’. Check level can be changed by user. Error bars represent 95% confidence interval."}
 
 # Before plotting, the result needs to be extracted as below:
-out2 <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)$Result
+out2 <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)
 
 f1 <- oneFACTORplot(out2,
               width = 0.2,
@@ -417,16 +430,17 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 # An example of Showing point on the plot
 ```{r, eval=F, include = T}
 
+library(ggplot2)
 b <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Result
 a <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Final_data
 
-ggplot(b, aes(x = Genotype, y = RE, fill = factor(Drought))) +
+ggplot(b, aes(x = Type, y = RE, fill = factor(Conc))) +
   geom_bar(stat = "identity", position = "dodge") +
   facet_wrap(~ SA) +
   scale_fill_brewer(palette = "Reds") +
-  xlab("Genotype") +
+  xlab("Type") +
   ylab("Relative Expression") +
-  geom_point(data = a, aes(x = Genotype, y = (10^(-wDCt)), fill = factor(Drought)), 
+  geom_point(data = a, aes(x = Type, y = (2^(-wDCt)), fill = factor(Conc)), 
              position = position_dodge(width = 0.9), color = "black") +
   ylab("ylab") +
   xlab("xlab") +
@@ -459,7 +473,7 @@ qqline(residuals, col = "red")
 # Mean of technical replicates
 Calculating the mean of technical replicates and getting an output table appropriate for subsequent ANOVA analysis can be done using the `meanTech` function. For this, the input data set should follow the column arrangement of the following example data. Grouping columns must be specified under the `groups` argument of the `meanTech` function.
 
-```{r eval= T, eval= T}
+```{r eval= T}
 # See example input data frame:
 data_withTechRep
 
@@ -467,7 +481,32 @@ data_withTechRep
 meanTech(data_withTechRep, groups = 1:4)
 ```
 
+# How to edit ouptput graphs?
+
+the rtpcr graphical functions create a list containing the ggplot object so for editting or adding new layers to the graph output, you need to extract the ggplot object first:
+
+```{r eval= F, include = T, fig.height = 4, fig.width = 5}
+
+b <- qpcrANCOVA(data_2factor, 
+            numberOfrefGenes = 1,
+            mainFactor.column = 1,
+            mainFactor.level.order = c("S", "R"),
+            fill = c("#CDC673", "#EEDD82"),
+            analysisType = "ancova",
+            fontsizePvalue = 7,
+            y.axis.adjust = 0.1, width = 0.35)
+
+
+
+library(ggplot2)
+p2 <- b$FC_Plot_of_the_main_factor_levels
+p2 + theme_set(theme_classic(base_size = 20))
+
+```
+
+
 # Citation
+
 ```{r eval= F}
 citation("rtpcr")
 ```
@@ -480,11 +519,13 @@ Email: gh.mirzaghaderi at uok.ac.ir
 # References
 Livak, Kenneth J, and Thomas D Schmittgen. 2001. Analysis of Relative Gene Expression Data Using Real-Time Quantitative PCR and the Double Delta CT Method. Methods 25 (4). <a href="https://doi.org/10.1006/meth.2001.1262">doi.org/10.1006/meth.2001.1262</a>.
 
+Ganger, MT, Dietz GD, Ewing SJ. 2017. A common base method for analysis of qPCR data and the application of simple blocking in qPCR experiments. BMC bioinformatics 18, 1-11. <a href="https://doi.org/10.1186/s12859-017-1949-5">doi.org/10.1186/s12859-017-1949-5</a>.
 
-Ganger, MT, Dietz GD, and Ewing SJ. 2017. A common base method for analysis of qPCR data and the application of simple blocking in qPCR experiments. BMC bioinformatics 18, 1-11. <a href="https://doi.org/10.1186/s12859-017-1949-5">doi.org/10.1186/s12859-017-1949-5</a>.
+Pfaffl MW, Horgan GW, Dempfle L. 2002. Relative expression software tool (REST©) for group-wise comparison and statistical analysis of relative expression results in real-time PCR. Nucleic acids research 30, e36-e36. <a href="https://doi.org/10.1093/nar/30.9.e36">doi.org/10.1093/nar/30.9.e36</a>.
 
+Taylor SC, Nadeau K, Abbasi M, Lachance C, Nguyen M, Fenrich, J. 2019. The ultimate qPCR experiment: producing publication quality, reproducible data the first time. Trends in Biotechnology, 37(7), 761-774<a href="https://doi.org/10.1016/j.tibtech.2018.12.002">doi.org/10.1016/j.tibtech.2018.12.002</a>.
 
-Yuan, Joshua S, Ann Reed, Feng Chen, and Neal Stewart. 2006. Statistical Analysis of Real-Time PCR Data. BMC Bioinformatics 7 (85). <a href="https://doi.org/10.1186/1471-2105-7-85">doi.org/10.1186/1471-2105-7-85</a>.
+Yuan, JS, Ann Reed, Feng Chen, and Neal Stewart. 2006. Statistical Analysis of Real-Time PCR Data. BMC Bioinformatics 7 (85). <a href="https://doi.org/10.1186/1471-2105-7-85">doi.org/10.1186/1471-2105-7-85</a>.
 
 
 .

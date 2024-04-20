@@ -2,16 +2,16 @@
 % Please edit documentation in R/threeFACTORplot.r
 \name{threeFACTORplot}
 \alias{threeFACTORplot}
-\title{Bar plot of the relative gene expression (RE) from a three-factor experiment}
+\title{Bar plot of the relative gene expression (RE) from the \code{qpcrANOVA} output of a a three-factorial experiment data}
 \usage{
 threeFACTORplot(
-  x,
+  res,
   arrangement = c(1, 2, 3),
   bar.width = 0.5,
   fill = "Reds",
   xlab = "none",
   ylab = "Relative Expression",
-  errorbar = "std",
+  errorbar = "se",
   y.axis.adjust = 0.5,
   y.axis.by = 2,
   letter.position.adjust = 0.3,
@@ -25,9 +25,9 @@ threeFACTORplot(
 )
 }
 \arguments{
-\item{x}{a data frame created by \link{qpcrANOVA} function via running \code{res <- qpcrANOVA(x)$Result} on a three factorial data such as \code{datathreegr} example data.}
+\item{res}{an object created by \code{qpcrANOVA(x)} function on a three factorial data such as \code{data_3factor} example data frame.}
 
-\item{arrangement}{arrangement of the grouping columns in the output graph, for example c(2,3,1) or c(1,3,2). This affects grapg output.}
+\item{arrangement}{order based on the columns in the output table (e.g. c(2,3,1) or c(1,3,2)) affecting factor arrangement of the output graph.}
 
 \item{bar.width}{a positive number determining bar width.}
 
@@ -37,7 +37,7 @@ threeFACTORplot(
 
 \item{ylab}{the title of the y axis}
 
-\item{errorbar}{Type of error bar, can be \code{std} or \code{ci}.}
+\item{errorbar}{Type of error bar, can be \code{se} or \code{ci}.}
 
 \item{y.axis.adjust}{a negative or positive number for reducing or increasing the length of the y axis.}
 
@@ -66,7 +66,7 @@ Bar plot of the average fold change for target genes along with the significance
 Bar plot of the relative expression (RE) of a gene along with the confidence interval and significance
 }
 \details{
-The \code{threeFACTORplot} function generates the bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
+The \code{threeFACTORplot} function generates the bar plot of the average fold change for target genes along with the significance, standard error (se) and the 95\% confidence interval (ci).
 }
 \examples{
 
@@ -105,7 +105,7 @@ threeFACTORplot(res,
    fill = "Reds",
    xlab = "Drought",
    ylab = "Relative Expression",
-   errorbar = "std",
+   errorbar = "se",
    legend.title = "Genotype",
    legend.position = c(0.2, 0.8))
 

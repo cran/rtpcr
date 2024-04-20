@@ -42,7 +42,8 @@ qpcrTTEST(data_ttest,
 # Producing the plot
 t1 <- qpcrTTESTplot(data_ttest,
               numberOfrefGenes = 1,
-              fontsizePvalue = 4)
+              fontsizePvalue = 4,
+              errorbar = "ci")
 
 # Producing the plot: specifying gene order
 t2 <- qpcrTTESTplot(data_ttest,
@@ -52,9 +53,9 @@ t2 <- qpcrTTESTplot(data_ttest,
               var.equal = TRUE,
               width = 0.5,
               fill = "palegreen",
-              y.axis.adjust = 0,
+              y.axis.adjust = 3,
               y.axis.by = 2,
-              ylab = "Average Fold Change (FC)",
+              ylab = "Average Fold Change",
               xlab = "none",
               fontsizePvalue = 4)
 
@@ -93,7 +94,7 @@ res$Post_hoc_Test
 ## ----eval= T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "A) A bar plot representing Relative expression of a gene under three levels of a factor generated using ‘oneFACTORplot’ function, B) Plot of average Fold changes produced by the ‘qpcrANCOVA’ function from the same data as ‘C’. Check level can be changed by user. Error bars represent 95% confidence interval."----
 
 # Before plotting, the result needs to be extracted as below:
-out2 <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)$Result
+out2 <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)
 
 f1 <- oneFACTORplot(out2,
               width = 0.2,
@@ -209,16 +210,17 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
 ## ----eval=F, include = T------------------------------------------------------
 #  
+#  library(ggplot2)
 #  b <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Result
 #  a <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Final_data
 #  
-#  ggplot(b, aes(x = Genotype, y = RE, fill = factor(Drought))) +
+#  ggplot(b, aes(x = Type, y = RE, fill = factor(Conc))) +
 #    geom_bar(stat = "identity", position = "dodge") +
 #    facet_wrap(~ SA) +
 #    scale_fill_brewer(palette = "Reds") +
-#    xlab("Genotype") +
+#    xlab("Type") +
 #    ylab("Relative Expression") +
-#    geom_point(data = a, aes(x = Genotype, y = (10^(-wDCt)), fill = factor(Drought)),
+#    geom_point(data = a, aes(x = Type, y = (2^(-wDCt)), fill = factor(Conc)),
 #               position = position_dodge(width = 0.9), color = "black") +
 #    ylab("ylab") +
 #    xlab("xlab") +
@@ -240,12 +242,30 @@ shapiro.test(residuals)
 qqnorm(residuals)
 qqline(residuals, col = "red")
 
-## ----eval= T, eval= T---------------------------------------------------------
+## ----eval= T------------------------------------------------------------------
 # See example input data frame:
 data_withTechRep
 
 # Calculating mean of technical replicates
 meanTech(data_withTechRep, groups = 1:4)
+
+## ----eval= F, include = T, fig.height = 4, fig.width = 5----------------------
+#  
+#  b <- qpcrANCOVA(data_2factor,
+#              numberOfrefGenes = 1,
+#              mainFactor.column = 1,
+#              mainFactor.level.order = c("S", "R"),
+#              fill = c("#CDC673", "#EEDD82"),
+#              analysisType = "ancova",
+#              fontsizePvalue = 7,
+#              y.axis.adjust = 0.1, width = 0.35)
+#  
+#  
+#  
+#  library(ggplot2)
+#  p2 <- b$FC_Plot_of_the_main_factor_levels
+#  p2 + theme_set(theme_classic(base_size = 20))
+#  
 
 ## ----eval= F------------------------------------------------------------------
 #  citation("rtpcr")

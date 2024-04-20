@@ -1,4 +1,4 @@
-#' @title ANOVA of RE values based on CRD 
+#' @title Relative efficiency (RE) analysis using ANOVA 
 #' @description Analysis of Variance of relative efficiency (RE) values based on a completely randomized design (CRD). Even there are more than a factor in the experiment, it is still possible to apply CRD analysis on the factor-level combinations as treatments. Analysis of variance based on factorial design or analysis of covariance can be performed using \code{qpcrANCOVA} function.  
 #' @details The \code{qpcrANOVA} function performs analysis of variance (ANOVA) of relative efficiency (RE) values based on a completely randomized design (CRD). 
 #' It is suitable when relative expression (RE) analysis between different treatment combinations 
@@ -67,13 +67,13 @@ qpcrANOVA <- function(x,
   
   
   resultx <- .addwDCt(x)
-  x<- resultx$x
+  x <- resultx$x
   factors <- resultx$factors
   # Check if there is block
   if (is.null(block)) {
     # Concatenate the columns using paste0
     x$T <- do.call(paste, c(x[1:(ncol(x)-6)], sep = ":"))
-    x
+
     lm <- stats::lm(wDCt ~ T, x)
     anovaCRD <- stats::anova(lm)
     
@@ -105,31 +105,37 @@ qpcrANOVA <- function(x,
   ucl <- meanPairs$UCL
   lcl <- meanPairs$LCL
   Post_hoc_Testing <- data.frame(row.names = ROWS,
-                                 FC = round(10^(-diffs), 4),
+                                 FC = round(2^(-diffs), 4),
                                  pvalue = pval,
                                  signif. = signif,
-                                 LCL = round(10^(-ucl), 4),
-                                 UCL = round(10^(-lcl), 4))
+                                 LCL = round(2^(-ucl), 4),
+                                 UCL = round(2^(-lcl), 4))
   
   
   RowNames <- rownames(mean)
   mean$RowNames <- RowNames
-  mean <- separate(mean, RowNames, into = factors, sep = ":", remove = T)
+  
+  if (is.null(block)) {
+    mean <- separate(mean, RowNames, into = factors, sep = ":", remove = T)
+  } else {
+    mean <- separate(mean, RowNames, into = factors[-length(factors)], sep = ":", remove = T) 
+  }
+  
   mean <- mean[order(rownames(mean)),]
   g <- g[order(rownames(g)),]
   
-  bwDCt <- 10^(-x$wDCt)
+  bwDCt <- x$wDCt    #bwDCt <- 2^(-x$wDCt)
   sdRow <- summarise(
     group_by(data.frame(T = x$T, bwDCt = bwDCt), T),
-    sd = sd(bwDCt, na.rm = TRUE))
-  sd <- sdRow[order(sdRow$T),]
+    se = stats::sd(bwDCt/sqrt(length(bwDCt)), na.rm = TRUE))   #sd = sd(bwDCt, na.rm = TRUE))
+  se <- sdRow[order(sdRow$T),]      #sd <- sdRow[order(sdRow$T),]
   
   Results <- data.frame(mean[,(ncol(mean)-2):ncol(mean)],
-                        RE = round(10^(-mean$wDCt), 4),
-                        LCL = round(10^(-mean$LCL), 4),
-                        UCL = round(10^(-mean$UCL), 4),
+                        RE = round(2^(-mean$wDCt), 5),
+                        LCL = round(2^(-mean$LCL), 5),
+                        UCL = round(2^(-mean$UCL), 5),
                         letters = g$groups,
-                        std = round(sd$sd, 4))
+                        se = round(se$se, 5))     #std = round(sd$sd, 5))
   
   
   # removing additional columns!
@@ -146,13 +152,12 @@ qpcrANOVA <- function(x,
   
   
   xx <- x[, -(ncol(x))] # Removing the last column of T
-  
+  # rownames(Results) <- NULL # Removing rownames 
   
   outlist <- list(Final_data = xx,
                   lmCRD = lm,
                   ANOVA_CRD = anovaCRD,
-                  Result = Results,
-                  Post_hoc_Test = Post_hoc_Testing)
+                  Result = Results)  # Post_hoc_Test = Post_hoc_Testing
   
   
   return(outlist)

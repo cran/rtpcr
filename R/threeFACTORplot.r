@@ -1,6 +1,6 @@
-#' @title Bar plot of the relative gene expression (RE) from a three-factor experiment
+#' @title Bar plot of the relative gene expression (RE) from the \code{qpcrANOVA} output of a a three-factorial experiment data
 #' @description Bar plot of the relative expression (RE) of a gene along with the confidence interval and significance
-#' @details The \code{threeFACTORplot} function generates the bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
+#' @details The \code{threeFACTORplot} function generates the bar plot of the average fold change for target genes along with the significance, standard error (se) and the 95\% confidence interval (ci).
 #' @author Ghader Mirzaghaderi
 #' @export threeFACTORplot
 #' @import tidyr
@@ -9,13 +9,13 @@
 #' @import ggplot2
 #' @import lme4
 #' @import agricolae
-#' @param x a data frame created by \link{qpcrANOVA} function via running \code{res <- qpcrANOVA(x)$Result} on a three factorial data such as \code{datathreegr} example data.
-#' @param arrangement arrangement of the grouping columns in the output graph, for example c(2,3,1) or c(1,3,2). This affects grapg output.
+#' @param res an object created by \code{qpcrANOVA(x)} function on a three factorial data such as \code{data_3factor} example data frame.
+#' @param arrangement order based on the columns in the output table (e.g. c(2,3,1) or c(1,3,2)) affecting factor arrangement of the output graph.
 #' @param bar.width a positive number determining bar width.
 #' @param fill  a color vector specifying the fill color for the columns of the bar plot. One of the palettes in \code{\link[RColorBrewer]{display.brewer.all}} (e.g. "Reds" or "Blues", ...) can be applied.
 #' @param xlab  the title of the x axis
 #' @param ylab  the title of the y axis
-#' @param errorbar Type of error bar, can be \code{std} or \code{ci}.
+#' @param errorbar Type of error bar, can be \code{se} or \code{ci}.
 #' @param y.axis.adjust  a negative or positive number for reducing or increasing the length of the y axis.
 #' @param y.axis.by determines y axis step length
 #' @param letter.position.adjust adjust the distance between the grouping letters to the error bars
@@ -64,7 +64,7 @@
 #'    fill = "Reds",
 #'    xlab = "Drought",
 #'    ylab = "Relative Expression",
-#'    errorbar = "std",
+#'    errorbar = "se",
 #'    legend.title = "Genotype",
 #'    legend.position = c(0.2, 0.8))
 #'
@@ -90,13 +90,13 @@
 #'
 
 
-threeFACTORplot <- function(x,
+threeFACTORplot <- function(res,
                          arrangement = c(1, 2, 3),
                          bar.width = 0.5,
                          fill = "Reds",
                          xlab = "none",
                          ylab = "Relative Expression",
-                         errorbar = "std",
+                         errorbar = "se",
                          y.axis.adjust = 0.5,
                          y.axis.by = 2,
                          letter.position.adjust = 0.3,
@@ -108,26 +108,26 @@ threeFACTORplot <- function(x,
                          axis.text.x.angle = 0,
                          axis.text.x.hjust = 0.5){
   
-  x <- x$Result
+  x <- res$Result
   x <- x[, c(arrangement, 4:ncol(x))]
   RE <- x$RE
-  std <- x$std
+  se <- x$se
   LCL <- x$LCL
   UCL <- x$UCL
   
   
   pp1 <- ggplot(x, aes(x[,1], y = RE, fill = x[,2])) +
     geom_bar(stat = "identity", position = "dodge", width =  bar.width, col = "black") +
-    geom_errorbar(aes(ymax = RE + std, ymin = RE),
+    geom_errorbar(aes(ymax = RE + se, ymin = RE),
                   position = position_dodge(bar.width), width = 0.15, color = "black") +
     facet_grid( ~ x[,3])+
     ylab(ylab) +
     theme_bw() +
     theme(legend.position = legend.position) +
     scale_fill_brewer(palette = fill) +
-    scale_y_continuous(breaks = seq(0, max(x$RE) + max(x$std) +
+    scale_y_continuous(breaks = seq(0, max(x$RE) + max(x$se) +
                                       y.axis.adjust, by = y.axis.by),
-                       limits = c(0, max(x$RE) + max(x$std) + y.axis.adjust),
+                       limits = c(0, max(x$RE) + max(x$se) + y.axis.adjust),
                        expand = c(0, 0)) +
     theme(axis.text.x = element_text(size = fontsize, color = "black", angle = axis.text.x.angle, hjust = axis.text.x.hjust),
           axis.text.y = element_text(size = fontsize, color = "black", angle = 0, hjust = 0.5),
@@ -140,7 +140,7 @@ threeFACTORplot <- function(x,
   
   if (show.letters) {
     pp1 <- pp1 + 
-      geom_text(data = x, aes(label=letters, y = RE + std + letter.position.adjust), color = "black",
+      geom_text(data = x, aes(label=letters, y = RE + se + letter.position.adjust), color = "black",
                 show.legend = FALSE, position = position_dodge(bar.width), size = fontsizePvalue)
   }
   
@@ -191,7 +191,7 @@ threeFACTORplot <- function(x,
   }
   
   
-  if(errorbar == "std") {
+  if(errorbar == "se") {
     out <- list(plot = pp1)
     
   } else if(errorbar == "ci") {

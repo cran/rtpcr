@@ -2,15 +2,15 @@
 % Please edit documentation in R/oneFACTORplot.r
 \name{oneFACTORplot}
 \alias{oneFACTORplot}
-\title{Bar plot of the relative gene expression (RE) from a one-factor experiment}
+\title{Bar plot of the relative gene expression (RE) from the \code{qpcrANOVA} output of a one-factor experiment data}
 \usage{
 oneFACTORplot(
-  x,
+  res,
   width = 0.2,
   fill = "skyblue",
   y.axis.adjust = 0.5,
   y.axis.by = 2,
-  errorbar = "std",
+  errorbar = "se",
   show.letters = TRUE,
   letter.position.adjust = 0.1,
   ylab = "Relative Expression",
@@ -22,7 +22,7 @@ oneFACTORplot(
 )
 }
 \arguments{
-\item{x}{a data frame created by \link{qpcrANOVA} function via running \code{res <- qpcrANOVA(x)$Result}.}
+\item{res}{an object created by \code{qpcrANOVA(x)} function on a one factor data such as \code{data_1factor}.}
 
 \item{width}{a positive number determining bar width.}
 
@@ -32,7 +32,7 @@ oneFACTORplot(
 
 \item{y.axis.by}{determines y axis step length.}
 
-\item{errorbar}{Type of error bar, can be \code{std} or \code{ci}.}
+\item{errorbar}{Type of error bar, can be \code{se} or \code{ci}.}
 
 \item{show.letters}{a logical variable. If TRUE, mean grouping letters are added to the bars.}
 
@@ -54,7 +54,7 @@ oneFACTORplot(
 Bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
 }
 \description{
-Bar plot of the relative expression of a gene along with the 95\% confidence interval and significance. There is another function, \code{qpcrTTESTplot}, that is used when the factor has two levels and represents Fold Change. \code{oneFACTORplot} is mainly useful for a one-factor experiment with more than two levels.
+Bar plot of the relative expression of a gene along with the standard error (se), 95\% confidence interval (ci) and significance. \code{oneFACTORplot} is mainly useful for a one-factor experiment with more than two levels.
 }
 \details{
 The \code{oneFACTORplot} function generates the bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
@@ -62,15 +62,15 @@ The \code{oneFACTORplot} function generates the bar plot of the average fold cha
 \examples{
 
 # Before plotting, the result needs to be extracted as below:
-out <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)$Result
+res <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)
 
 # Bar plot
-oneFACTORplot(out,
+oneFACTORplot(res,
          width = 0.2,
          fill = "skyblue",
          y.axis.adjust = 0,
          y.axis.by = 0.2,
-         errorbar = "std",
+         errorbar = "se",
          show.letters = TRUE,
          letter.position.adjust = 0.05,
          ylab = "Relative Expression",

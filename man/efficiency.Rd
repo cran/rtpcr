@@ -2,7 +2,7 @@
 % Please edit documentation in R/efficiency.r
 \name{efficiency}
 \alias{efficiency}
-\title{efficiency, standard curves and related statistics}
+\title{Efficiency, standard curves and related statistics}
 \usage{
 efficiency(x)
 }
@@ -22,11 +22,10 @@ The \code{efficiency} function calculates amplification efficiency of a target a
 
 
 # locate and read the sample data
-df <- system.file('extdata', 'data_efficiency.csv', package = 'rtpcr')
-df <- read.csv(df)
+data_efficiency
 
 # Applying the efficiency function
-efficiency(df)
+efficiency(data_efficiency)
 
 
 }

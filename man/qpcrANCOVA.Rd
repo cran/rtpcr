@@ -23,19 +23,22 @@ qpcrANCOVA(
   axis.text.x.angle = 0,
   axis.text.x.hjust = 0.5,
   x.axis.labels.rename = "none",
-  p.adj = "none"
+  p.adj = "none",
+  errorbar = "se"
 )
 }
 \arguments{
-\item{x}{a data frame of condition (or conditions) levels, E (efficiency), genes and Ct values. Each Ct value in the data frame is the mean of technical replicates. Please refer to the vignette for preparing your data frame correctly.}
+\item{x}{a data frame of condition(s), biological replicates, efficiency (E) and Ct values of target and reference genes. Each Ct value in the data frame is the mean of technical replicates. Please refer to the vignette for preparing your data frame correctly.}
 
-\item{numberOfrefGenes}{number of reference genes. Up to two reference genes can be handled.}
+\item{numberOfrefGenes}{number of reference genes which is 1 or 2 (Up to two reference genes can be handled).}
 
 \item{analysisType}{should be one of "ancova" or "anova".}
 
-\item{mainFactor.column}{main factor for which the levels FC is compared. The remaining factors are considered as covariates.}
+\item{mainFactor.column}{the factor for which FC is calculated for its levels. The remaining factors (if any) are considered as covariate(s).}
 
-\item{mainFactor.level.order}{a vector of main factor level names. The first level in the vector is used as reference.}
+\item{mainFactor.level.order}{a vector of main factor level names. The first level in the vector is used 
+as reference or calibrator which is the reference level or sample that all others are compared to. Examples are untreated 
+of time 0. The FC value of the reference or calibrator level is 1 because it is not changed compared to itself.}
 
 \item{block}{column name of the block if there is a blocking factor (for correct column arrangement see example data.). When a qPCR experiment is done in multiple qPCR plates, variation resulting from the plates may interfere with the actual amount of gene expression. One solution is to conduct each plate as a complete randomized block so that at least one replicate of each treatment and control is present on a plate. Block effect is usually considered as random and its interaction with any main effect is not considered.}
 
@@ -64,11 +67,13 @@ qpcrANCOVA(
 \item{x.axis.labels.rename}{a vector replacing the x axis labels in the bar plot}
 
 \item{p.adj}{Method for adjusting p values}
+
+\item{errorbar}{Type of error bar, can be \code{se} or \code{ci}.}
 }
 \value{
-A list with 2 elements:
+A list with 7 elements:
 \describe{
-  \item{Final_data}{}
+  \item{Final_data}{Input data frame plus the weighted Delat Ct values (wDCt)}
   \item{lm_ANOVA}{lm of factorial analysis-tyle}
   \item{lm_ANCOVA}{lm of ANCOVA analysis-type}
   \item{ANOVA_table}{ANOVA table}
@@ -82,7 +87,7 @@ ANCOVA (analysis of covariance) and ANOVA (analysis of variance) can be performe
 \code{qpcrANCOVA} function, for uni- or multi-factorial experiment data. This function performs FC analysis even
 if there is only one factor (without covariate variable), although, for the data with 
 only one factor, the analysis turns into ANOVA. The bar plot of the fold changes (FC) 
-values along with the confidence interval is also returned by the \code{qpcrANCOVA} function.
+values along with the standard error (se) of confidence interval (ci) is also returned by the \code{qpcrANCOVA} function.
 }
 \details{
 The \code{qpcrANCOVA} function applies both ANCOVA and ANOVA analysis to the data of a uni- or 
@@ -109,8 +114,29 @@ is significant, suggesting that ANCOVA is not appropriate in this case.
 }
 \examples{
 
-# Data from Lee et al., 2020 
 
+ qpcrANCOVA(data_1factor, 
+            numberOfrefGenes = 1,
+            mainFactor.column = 1,
+            mainFactor.level.order = c("L1", "L2", "L3"),
+            fill = c("#CDC673", "#EEDD82"),
+            analysisType = "ancova",
+            fontsizePvalue = 5,
+            y.axis.adjust = 0.1)
+
+qpcrANCOVA(data_2factor, 
+           numberOfrefGenes = 1,
+           mainFactor.column = 2,
+           mainFactor.level.order = c("D0", "D1", "D2"),
+           fill = c("#79CDCD", "#B4EEB4"),
+           analysisType = "ancova",
+           fontsizePvalue = 5,
+           y.axis.adjust = 0.4)
+
+
+# Data from Lee et al., 2020 
+# Here, the data set contains technical replicates so 
+# we get mean of technical reps first:
 df <- meanTech(Lee_etal2020qPCR, groups = 1:3)
 order <- rev(unique(df$DS))
 qpcrANCOVA(df, 
