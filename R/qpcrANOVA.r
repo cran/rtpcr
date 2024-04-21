@@ -66,11 +66,73 @@ qpcrANOVA <- function(x,
                                 "hochberg", "bonferroni", "BH", "BY", "fdr")){
   
   
-  resultx <- .addwDCt(x)
-  x <- resultx$x
-  factors <- resultx$factors
-  # Check if there is block
+
+  
   if (is.null(block)) {
+    
+    
+    if(numberOfrefGenes == 1) {
+      
+      factors <- colnames(x)[1:(ncol(x)-5)]
+      colnames(x)[ncol(x)-4] <- "rep"
+      colnames(x)[ncol(x)-3] <- "Etarget"
+      colnames(x)[ncol(x)-2] <- "Cttarget"
+      colnames(x)[ncol(x)-1] <- "Eref"
+      colnames(x)[ncol(x)] <- "Ctref"
+      
+      x <- data.frame(x, wDCt = (log2(x$Etarget)*x$Cttarget)-(log2(x$Eref)*x$Ctref))
+      
+    } else if(numberOfrefGenes == 2) {
+      
+      factors <- colnames(x)[1:(ncol(x)-7)]
+      colnames(x)[ncol(x)-6] <- "rep"
+      colnames(x)[ncol(x)-5] <- "Etarget"
+      colnames(x)[ncol(x)-4] <- "Cttarget"
+      colnames(x)[ncol(x)-3] <- "Eref"
+      colnames(x)[ncol(x)-2] <- "Ctref"
+      colnames(x)[ncol(x)-1] <- "Eref2"
+      colnames(x)[ncol(x)] <- "Ctref2"
+      
+      x <- data.frame(x, wDCt = (log2(x$Etarget)*x$Cttarget)-
+                        ((log2(x$Eref)*x$Ctref) + (log2(x$Eref2)*x$Ctref2))/2)
+    }
+    
+  } else {
+    if(numberOfrefGenes == 1) {
+      
+      factors <- colnames(x)[1:(ncol(x)-6)]
+      colnames(x)[ncol(x)-5] <- "block"
+      colnames(x)[ncol(x)-4] <- "rep"
+      colnames(x)[ncol(x)-3] <- "Etarget"
+      colnames(x)[ncol(x)-2] <- "Cttarget"
+      colnames(x)[ncol(x)-1] <- "Eref"
+      colnames(x)[ncol(x)] <- "Ctref"
+      
+      x <- data.frame(x, wDCt = (log2(x$Etarget)*x$Cttarget)-(log2(x$Eref)*x$Ctref))
+      
+    } else if(numberOfrefGenes == 2) {
+      factors <- colnames(x)[1:(ncol(x)-8)]
+      colnames(x)[ncol(x)-7] <- "block"
+      colnames(x)[ncol(x)-6] <- "rep"
+      colnames(x)[ncol(x)-5] <- "Etarget"
+      colnames(x)[ncol(x)-4] <- "Cttarget"
+      colnames(x)[ncol(x)-3] <- "Eref"
+      colnames(x)[ncol(x)-2] <- "Ctref"
+      colnames(x)[ncol(x)-1] <- "Eref2"
+      colnames(x)[ncol(x)] <- "Ctref2"
+      
+      x <- data.frame(x, wDCt = (log2(x$Etarget)*x$Cttarget)-
+                        ((log2(x$Eref)*x$Ctref) + (log2(x$Eref2)*x$Ctref2))/2)
+    }
+  }
+  
+  
+  
+  
+  
+  # Check if there is block
+  if(numberOfrefGenes == 1) {
+    if (is.null(block)) {
     # Concatenate the columns using paste0
     x$T <- do.call(paste, c(x[1:(ncol(x)-6)], sep = ":"))
 
@@ -80,11 +142,25 @@ qpcrANOVA <- function(x,
   } else {
     # Concatenate the columns using paste0
     x$T <- do.call(paste, c(x[1:(ncol(x)-7)], sep = ":"))
-    x
     lm <- stats::lm(wDCt ~ block + T, x)
     anovaCRD <- stats::anova(lm)
   }
-  
+  } 
+  if(numberOfrefGenes == 2) {
+    if (is.null(block)) {
+      # Concatenate the columns using paste0
+      x$T <- do.call(paste, c(x[1:(ncol(x)-8)], sep = ":"))
+      
+      lm <- stats::lm(wDCt ~ T, x)
+      anovaCRD <- stats::anova(lm)
+      
+    } else {
+      # Concatenate the columns using paste0
+      x$T <- do.call(paste, c(x[1:(ncol(x)-9)], sep = ":"))
+      lm <- stats::lm(wDCt ~ block + T, x)
+      anovaCRD <- stats::anova(lm)
+    }
+  }
   
   
   # Preparing final result table including letter grouping of the means for T
@@ -115,11 +191,9 @@ qpcrANOVA <- function(x,
   RowNames <- rownames(mean)
   mean$RowNames <- RowNames
   
-  if (is.null(block)) {
-    mean <- separate(mean, RowNames, into = factors, sep = ":", remove = T)
-  } else {
-    mean <- separate(mean, RowNames, into = factors[-length(factors)], sep = ":", remove = T) 
-  }
+
+  mean <- separate(mean, RowNames, into = factors, sep = ":", remove = T)
+
   
   mean <- mean[order(rownames(mean)),]
   g <- g[order(rownames(g)),]
@@ -132,8 +206,8 @@ qpcrANOVA <- function(x,
   
   Results <- data.frame(mean[,(ncol(mean)-2):ncol(mean)],
                         RE = round(2^(-mean$wDCt), 5),
-                        LCL = round(2^(-mean$LCL), 5),
-                        UCL = round(2^(-mean$UCL), 5),
+                        LCL = round(2^(-mean$UCL), 5),
+                        UCL = round(2^(-mean$LCL), 5),
                         letters = g$groups,
                         se = round(se$se, 5))     #std = round(sd$sd, 5))
   
@@ -156,7 +230,7 @@ qpcrANOVA <- function(x,
   
   outlist <- list(Final_data = xx,
                   lmCRD = lm,
-                  ANOVA_CRD = anovaCRD,
+                  ANOVA = anovaCRD,
                   Result = Results)  # Post_hoc_Test = Post_hoc_Testing
   
   

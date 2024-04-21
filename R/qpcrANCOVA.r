@@ -117,14 +117,24 @@
 #' df <- meanTech(Lee_etal2020qPCR, groups = 1:3) 
 #' df2 <- df[df$factor1 == "DSWHi",][-1]
 #' qpcrANCOVA(df2, 
-#'           mainFactor.column = 1,
-#'           mainFactor.level.order = c("D7", "D12", "D15","D18"),
-#'           numberOfrefGenes = 1,
-#'           analysisType = "ancova",
-#'           fontsizePvalue = 5,
-#'           y.axis.adjust = 0.1)
+#'            mainFactor.column = 1,
+#'            mainFactor.level.order = c("D7", "D12", "D15","D18"),
+#'            numberOfrefGenes = 1,
+#'            analysisType = "ancova",
+#'            fontsizePvalue = 5,
+#'            y.axis.adjust = 0.1)
 #'
 #'
+#' qpcrANCOVA(data_2factorBlock,
+#'            numberOfrefGenes = 1,
+#'            mainFactor.column = 1, 
+#'            mainFactor.level.order = c("S", "R"),
+#'            block = "block", 
+#'            fill = c("#CDC673", "#EEDD82"),
+#'            analysisType = "ancova",
+#'            fontsizePvalue = 7,
+#'            y.axis.adjust = 0.1, 
+#'            width = 0.35)
 #'
 #' addline_format <- function(x,...){gsub('\\s','\n',x)}
 #' order <- unique(data_2factor$Drought)
@@ -176,9 +186,63 @@ qpcrANCOVA <- function(x,
   
   
   
-  resultx <- .addwDCt(x)
-  x <- resultx$x
-  factors <- resultx$factors
+  if (is.null(block)) {
+    
+    
+    if(numberOfrefGenes == 1) {
+      
+      factors <- colnames(x)[1:(ncol(x)-5)]
+      colnames(x)[ncol(x)-4] <- "rep"
+      colnames(x)[ncol(x)-3] <- "Etarget"
+      colnames(x)[ncol(x)-2] <- "Cttarget"
+      colnames(x)[ncol(x)-1] <- "Eref"
+      colnames(x)[ncol(x)] <- "Ctref"
+      
+      x <- data.frame(x, wDCt = (log2(x$Etarget)*x$Cttarget)-(log2(x$Eref)*x$Ctref))
+      
+    } else if(numberOfrefGenes == 2) {
+      
+      factors <- colnames(x)[1:(ncol(x)-7)]
+      colnames(x)[ncol(x)-6] <- "rep"
+      colnames(x)[ncol(x)-5] <- "Etarget"
+      colnames(x)[ncol(x)-4] <- "Cttarget"
+      colnames(x)[ncol(x)-3] <- "Eref"
+      colnames(x)[ncol(x)-2] <- "Ctref"
+      colnames(x)[ncol(x)-1] <- "Eref2"
+      colnames(x)[ncol(x)] <- "Ctref2"
+      
+      x <- data.frame(x, wDCt = (log2(x$Etarget)*x$Cttarget)-
+                        ((log2(x$Eref)*x$Ctref) + (log2(x$Eref2)*x$Ctref2))/2)
+    }
+    
+  } else {
+    if(numberOfrefGenes == 1) {
+      
+      factors <- colnames(x)[1:(ncol(x)-6)]
+      colnames(x)[ncol(x)-5] <- "block"
+      colnames(x)[ncol(x)-4] <- "rep"
+      colnames(x)[ncol(x)-3] <- "Etarget"
+      colnames(x)[ncol(x)-2] <- "Cttarget"
+      colnames(x)[ncol(x)-1] <- "Eref"
+      colnames(x)[ncol(x)] <- "Ctref"
+      
+      x <- data.frame(x, wDCt = (log2(x$Etarget)*x$Cttarget)-(log2(x$Eref)*x$Ctref))
+      
+    } else if(numberOfrefGenes == 2) {
+      factors <- colnames(x)[1:(ncol(x)-8)]
+      colnames(x)[ncol(x)-7] <- "block"
+      colnames(x)[ncol(x)-6] <- "rep"
+      colnames(x)[ncol(x)-5] <- "Etarget"
+      colnames(x)[ncol(x)-4] <- "Cttarget"
+      colnames(x)[ncol(x)-3] <- "Eref"
+      colnames(x)[ncol(x)-2] <- "Ctref"
+      colnames(x)[ncol(x)-1] <- "Eref2"
+      colnames(x)[ncol(x)] <- "Ctref2"
+      
+      x <- data.frame(x, wDCt = (log2(x$Etarget)*x$Cttarget)-
+                        ((log2(x$Eref)*x$Ctref) + (log2(x$Eref2)*x$Ctref2))/2)
+    }
+  }
   
   
   
@@ -198,12 +262,12 @@ qpcrANCOVA <- function(x,
   } else {
     # If ANOVA based on factorial design was desired with blocking factor:
     formula_ANOVA <- paste("wDCt ~", paste("as.factor(", "block",") +"), paste("as.factor(", factors, ")", collapse = " * "))
-    lmf <- lm(formula_ANOVA, data = x)
-    ANOVA <- stats::anova(lmf)
+    lmfb <- lm(formula_ANOVA, data = x)
+    ANOVA <- stats::anova(lmfb)
     # ANCOVA 
     formula_ANCOVA <- paste("wDCt ~", paste("as.factor(", "block",") +"), paste("as.factor(", rev(factors), ")", collapse = " + "))
-    lmc <- lm(formula_ANCOVA, data = x)
-    ANCOVA <- stats::anova(lmc)
+    lmcb <- lm(formula_ANCOVA, data = x)
+    ANCOVA <- stats::anova(lmcb)
   }
   
   
@@ -220,10 +284,10 @@ qpcrANCOVA <- function(x,
     }
   } else {
     if(analysisType == "ancova") {
-      lm <- lmc
+      lm <- lmcb
     } 
     else{
-      lm <- lmf
+      lm <- lmfb
     } 
   }
   
@@ -233,7 +297,7 @@ qpcrANCOVA <- function(x,
   pp1 <- emmeans(lm, colnames(x)[1], data = x, adjust = p.adj)
   pp <- as.data.frame(graphics::pairs(pp1), adjust = p.adj)
   pp <- pp[1:length(mainFactor.level.order)-1,]
-  
+
   
   # Preparing t-test results
   t_test_results <- list()
@@ -316,7 +380,6 @@ qpcrANCOVA <- function(x,
   UCL <- tableC$UCL
   FCp <- as.numeric(tableC$FC)
   significance <- tableC$sig
-  #sddiff <- tableC$sddiff
   se <- tableC$se
   
   
@@ -329,18 +392,20 @@ qpcrANCOVA <- function(x,
   
   if(errorbar == "ci") {
     pfc2 <- pfc2 +
-      geom_errorbar(aes(contrast, ymin = FCp - LCL, ymax =  FCp + UCL), width=0.1)
+      geom_errorbar(aes(contrast, ymin = LCL, ymax =  UCL), width=0.1) +
+      geom_text(aes(label = significance, x = contrast,
+                           y = UCL + letter.position.adjust),
+                       vjust = -0.5, size = fontsizePvalue)
   } else if(errorbar == "se") {
     pfc2 <- pfc2 +
-      geom_errorbar(aes(contrast, ymin = FCp, ymax =  FCp + se), width=0.1)
+      geom_errorbar(aes(contrast, ymin = FCp, ymax =  FCp + se), width=0.1) +
+      geom_text(aes(label = significance, x = contrast,
+                           y = FCp + se + letter.position.adjust),
+                       vjust = -0.5, size = fontsizePvalue)
     }
     
     
-    
-    pfc2 <- pfc2 + geom_text(aes(label = significance,
-                  x = contrast,
-                  y = FCp + se + letter.position.adjust),
-              vjust = -0.5, size = fontsizePvalue) +
+  pfc2 <- pfc2 +
     ylab(ylab) +
     theme_bw()+
     theme(axis.text.x = element_text(size = fontsize, color = "black", angle = axis.text.x.angle, hjust = axis.text.x.hjust),
@@ -375,25 +440,40 @@ qpcrANCOVA <- function(x,
   
   
   #changing as.factor(x) to x
-  lmf$coefficients <- gsub("as\\.factor\\(([^)]+)\\)", "\\1", lmf$coefficients)
-  lmf$coefficients <- gsub(":as factor", ":", lmf$coefficients)
-  
-  rownames(ANOVA) <- gsub("as\\.factor\\(([^)]+)\\)", "\\1", rownames(ANOVA))
-  rownames(ANOVA) <- gsub(":as factor", ":", rownames(ANOVA))
-  
-  lmc$coefficients <- gsub("as\\.factor\\(([^)]+)\\)", "\\1", lmc$coefficients)
-  lmc$coefficients <- gsub(":as factor", ":", lmc$coefficients)
-  
-  rownames(ANCOVA) <- gsub("as\\.factor\\(([^)]+)\\)", "\\1", rownames(ANCOVA))
-  rownames(ANCOVA) <- gsub(":as factor", ":", rownames(ANCOVA))
-  
-  
-  
-  
+
+  if (is.null(block)) {
+    lmf$coefficients <- gsub("as\\.factor\\(([^)]+)\\)", "\\1", lmf$coefficients)
+    lmf$coefficients <- gsub(":as factor", ":", lmf$coefficients)
+    
+    rownames(ANOVA) <- gsub("as\\.factor\\(([^)]+)\\)", "\\1", rownames(ANOVA))
+    rownames(ANOVA) <- gsub(":as factor", ":", rownames(ANOVA))
+    
+    lmc$coefficients <- gsub("as\\.factor\\(([^)]+)\\)", "\\1", lmc$coefficients)
+    lmc$coefficients <- gsub(":as factor", ":", lmc$coefficients)
+    
+    rownames(ANCOVA) <- gsub("as\\.factor\\(([^)]+)\\)", "\\1", rownames(ANCOVA))
+    rownames(ANCOVA) <- gsub(":as factor", ":", rownames(ANCOVA))
+    lm_ANOVA <- lmf
+    lm_ANCOVA <- lmc
+  } else {
+    lmfb$coefficients <- gsub("as\\.factor\\(([^)]+)\\)", "\\1", lmfb$coefficients)
+    lmfb$coefficients <- gsub(":as factor", ":", lmfb$coefficients)
+    
+    rownames(ANOVA) <- gsub("as\\.factor\\(([^)]+)\\)", "\\1", rownames(ANOVA))
+    rownames(ANOVA) <- gsub(":as factor", ":", rownames(ANOVA))
+    
+    lmcb$coefficients <- gsub("as\\.factor\\(([^)]+)\\)", "\\1", lmcb$coefficients)
+    lmcb$coefficients <- gsub(":as factor", ":", lmcb$coefficients)
+    
+    rownames(ANCOVA) <- gsub("as\\.factor\\(([^)]+)\\)", "\\1", rownames(ANCOVA))
+    rownames(ANCOVA) <- gsub(":as factor", ":", rownames(ANCOVA))
+    lm_ANOVA <- lmfb
+    lm_ANCOVA <- lmcb
+  }
   
   outlist2 <- list(Final_data = x,
-                   lm_ANOVA = lmf,
-                   lm_ANCOVA = lmc,
+                   lm_ANOVA = lm_ANOVA,
+                   lm_ANCOVA = lm_ANCOVA,
                    ANOVA_table = ANOVA,
                    ANCOVA_table = ANCOVA,
                    FC_statistics_of_the_main_factor  = tableC,

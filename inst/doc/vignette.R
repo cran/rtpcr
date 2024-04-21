@@ -37,7 +37,7 @@ qpcrTTEST(data_ttest,
           paired = F, 
           var.equal = T)
 
-## ----eval= T, fig.height=3, fig.width=8, fig.align='center', fig.cap = "Average Fold changes of three target genes relative to the control condition computed by unpaired t-tests via ‘qpcrTTESTplot’ function.", warning = F, message = F----
+## ----eval= T, fig.height=3, fig.width=8, fig.align='center', fig.cap = "Average Fold changes of three target genes relative to the control condition computed by unpaired t-tests via `qpcrTTESTplot` function. Confidence interval (ci) and standard error (se) has been used as error bar in 'A' and 'B', respectively.", warning = F, message = F----
 
 # Producing the plot
 t1 <- qpcrTTESTplot(data_ttest,
@@ -63,7 +63,7 @@ multiplot(t1, t2, cols = 2)
 grid.text("A", x = 0.02, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
-## ----eval = T, fig.height = 3, fig.width = 5, fig.align='center'--------------
+## ----eval = T, fig.height = 3, fig.width = 5, fig.align='center', fig.cap = "Statistical table and figure of the Fold change expression of a gene in three different levels of Drough stress relative to the D0 as reference or calibrator level produced by the `qpcrANCOVA` function. The other factor i.e. Genotype has been concidered as covariate."----
 # See sample data
 data_2factor
 
@@ -91,7 +91,7 @@ res <- qpcrANOVA(data_2factor,
 res$Result
 res$Post_hoc_Test
 
-## ----eval= T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "A) A bar plot representing Relative expression of a gene under three levels of a factor generated using ‘oneFACTORplot’ function, B) Plot of average Fold changes produced by the ‘qpcrANCOVA’ function from the same data as ‘C’. Check level can be changed by user. Error bars represent 95% confidence interval."----
+## ----eval= T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "A: bar plot representing Relative expression of a gene under three levels of a factor generated using `oneFACTORplot` function, B: Plot of the Fold change expression produced by the `qpcrANCOVA` function from the same data used for 'A'. The first element in the `mainFactor.level.order` argument (here L1) is served as the Reference level, although the x-axis names have later been renamed by the `x.axis.labels.rename` argument. Error bars represent 95% confidence interval in A and standard error in B."----
 
 # Before plotting, the result needs to be extracted as below:
 out2 <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)
@@ -134,7 +134,7 @@ multiplot(f1, f2, cols = 2)
 grid.text("A", x = 0.02, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
-## ----eval= T, include = T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "Average relative expression of a target gene under two different factors of genotype (with two levels) and drought (with three levels). Error bars represent standard deviations. Means (columns) lacking letters in common have significant difference at alpha = 0.05 as resulted from the `LSD.test` of agricolae package."----
+## ----eval= T, include = T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "Relative expression of a target gene under two different factors of genotype (with two levels) and drought (with three levels). Error bars represent standard error. Means (columns) lacking letters in common have significant difference at alpha = 0.05 as resulted from a `LSD.test`."----
 
 # Before plotting, the result needs to be extracted as below:
 res <- qpcrANOVA(data_2factor, numberOfrefGenes = 1)
@@ -169,7 +169,7 @@ multiplot(q1, q2, cols = 2)
 grid.text("A", x = 0.02, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
-## ----fig.height = 5, fig.width = 11, fig.align = 'center', fig.cap = "A and B) Relative expression (RE) of a target gene under two or three factors produced by ‘twoFACTORplot’ and ‘threeFACTORplot’ functions, respectively. Error bars represent standard deviations (can be set to confidence interval). Means (columns) lacking letters in common have significant differences at alpha = 0.05 as resulted from an ‘LSD.test’."----
+## ----fig.height = 5, fig.width = 11, fig.align = 'center', fig.cap = "A and B) Relative expression (RE) of a target gene from a three-factorial experiment data produced by  `threeFACTORplot`  function. Error bars represent standard error (A), although can be set to confidence interval (B). Means (columns) lacking letters in common have significant differences at alpha = 0.05 as resulted from an ‘LSD.test’."----
 # Before plotting, the result needs to be extracted as below:
 res <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)
 res
@@ -195,7 +195,7 @@ p2 <- threeFACTORplot(res,
    xlab = "Drought",
    ylab = "Relative Expression",
    errorbar = "ci",
-   y.axis.adjust = 8,
+   y.axis.adjust = 2,
    y.axis.by = 2,
    letter.position.adjust = 0.6,
    legend.title = "Genotype",
@@ -208,31 +208,31 @@ multiplot(p1, p2, cols = 2)
 grid.text("A", x = 0.02, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
-## ----eval=F, include = T------------------------------------------------------
-#  
-#  library(ggplot2)
-#  b <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Result
-#  a <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Final_data
-#  
-#  ggplot(b, aes(x = Type, y = RE, fill = factor(Conc))) +
-#    geom_bar(stat = "identity", position = "dodge") +
-#    facet_wrap(~ SA) +
-#    scale_fill_brewer(palette = "Reds") +
-#    xlab("Type") +
-#    ylab("Relative Expression") +
-#    geom_point(data = a, aes(x = Type, y = (2^(-wDCt)), fill = factor(Conc)),
-#               position = position_dodge(width = 0.9), color = "black") +
-#    ylab("ylab") +
-#    xlab("xlab") +
-#    theme_bw() +
-#    theme(axis.text.x = element_text(size = 12, color = "black", angle = 0, hjust = 0.5),
-#          axis.text.y = element_text(size = 12, color = "black", angle = 0, hjust = 0.5),
-#          axis.title  = element_text(size = 12),
-#          legend.text = element_text(size = 12)) +
-#    theme(legend.position  = c(0.2, 0.7)) +
-#    theme(legend.title = element_text(size = 12, color = "black")) +
-#    scale_y_continuous(breaks = seq(0, max(b$RE) + max(b$std) + 0.1, by = 5),
-#                       limits = c(0, max(b$RE) + max(b$std) + 0.1), expand = c(0, 0))
+## ----eval=T, include = T, fig.height = 4, fig.width = 6, fig.align = 'center'----
+
+library(ggplot2)
+b <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Result
+a <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Final_data
+
+ggplot(b, aes(x = Type, y = RE, fill = factor(Conc))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~ SA) +
+  scale_fill_brewer(palette = "Reds") +
+  xlab("Type") +
+  ylab("Relative Expression") +
+  geom_point(data = a, aes(x = Type, y = (2^(-wDCt)), fill = factor(Conc)), 
+             position = position_dodge(width = 0.9), color = "black") +
+  ylab("ylab") +
+  xlab("xlab") +
+  theme_bw() +
+  theme(axis.text.x = element_text(size = 12, color = "black", angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 12, color = "black", angle = 0, hjust = 0.5),
+        axis.title  = element_text(size = 12),
+        legend.text = element_text(size = 12)) +
+  theme(legend.position  = c(0.2, 0.7)) +
+  theme(legend.title = element_text(size = 12, color = "black")) +
+  scale_y_continuous(breaks = seq(0, max(b$RE) + max(b$se) + 0.1, by = 5), 
+                     limits = c(0, max(b$RE) + max(b$se) + 0.1), expand = c(0, 0)) 
 
 ## ----eval= T, eval= T, , fig.height = 4, fig.width = 5, fig.align = 'center', fig.cap = "QQ-plot for the normality assessment of the residuals derived from `t.test` or `lm` functions."----
 
