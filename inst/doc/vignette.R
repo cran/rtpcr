@@ -8,7 +8,6 @@ library(agricolae)
 library(dplyr)
 library(reshape2)
 library(tidyr)
-library(lme4)
 library(ggplot2)
 library(grid)
 
@@ -25,7 +24,7 @@ library(grid)
 ## ----eval= T------------------------------------------------------------------
 data_efficiency
 
-## ----eval = T, fig.height = 3, fig.align = 'center', fig.cap = 'Standard curve and the amplification efficiency analysis of target and reference genes. A sample data arrangement that is required as input for the calculation of amplification efficiency by the efficiency function.', warning = FALSE, message = FALSE----
+## ----eval = T, , fig.height = 3, fig.width = 5, fig.align = 'center', fig.cap = 'Standard curve and the amplification efficiency analysis of genes. Required iput data include dilutions and Ct value columns for different genes.', warning = FALSE, message = FALSE----
 efficiency(data_efficiency)
 
 ## ----eval= T, fig.height = 3, fig.width = 5, fig.align = 'center'-------------
@@ -94,7 +93,7 @@ res$Post_hoc_Test
 ## ----eval= T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "A: bar plot representing Relative expression of a gene under three levels of a factor generated using `oneFACTORplot` function, B: Plot of the Fold change expression produced by the `qpcrANCOVA` function from the same data used for 'A'. The first element in the `mainFactor.level.order` argument (here L1) is served as the Reference level, although the x-axis names have later been renamed by the `x.axis.labels.rename` argument. Error bars represent 95% confidence interval in A and standard error in B."----
 
 # Before plotting, the result needs to be extracted as below:
-out2 <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)
+out2 <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)$Result
 
 f1 <- oneFACTORplot(out2,
               width = 0.2,
@@ -137,7 +136,8 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 ## ----eval= T, include = T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "Relative expression of a target gene under two different factors of genotype (with two levels) and drought (with three levels). Error bars represent standard error. Means (columns) lacking letters in common have significant difference at alpha = 0.05 as resulted from a `LSD.test`."----
 
 # Before plotting, the result needs to be extracted as below:
-res <- qpcrANOVA(data_2factor, numberOfrefGenes = 1)
+res <- qpcrANOVA(data_2factor, numberOfrefGenes = 1)$Result
+Final_data <- qpcrANOVA(data_2factor, numberOfrefGenes = 1)$Final_data
 
 # Plot of the 'res' data with 'Genotype' as grouping factor
 q1 <- twoFACTORplot(res,
@@ -161,8 +161,7 @@ q2 <- twoFACTORplot(res,
    fill = "Blues",
    legend.position = c(0.15, 0.8),
    show.letters = FALSE,
-   show.errorbars = F,
-   show.points = T,
+   show.errorbars = T,
    fontsizePvalue = 4)
 
 multiplot(q1, q2, cols = 2)
@@ -171,7 +170,7 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
 ## ----fig.height = 5, fig.width = 11, fig.align = 'center', fig.cap = "A and B) Relative expression (RE) of a target gene from a three-factorial experiment data produced by  `threeFACTORplot`  function. Error bars represent standard error (A), although can be set to confidence interval (B). Means (columns) lacking letters in common have significant differences at alpha = 0.05 as resulted from an ‘LSD.test’."----
 # Before plotting, the result needs to be extracted as below:
-res <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)
+res <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Result
 res
 
 # releveling a factor levels first
@@ -208,6 +207,23 @@ multiplot(p1, p2, cols = 2)
 grid.text("A", x = 0.02, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
+## ----eval=T, fig.height = 4, fig.width = 7, fig.align = 'center', fig.cap = "Fold change expression (FC) of a target gene from a one and a two factorial experiment data produced by  `qpcrREPEATED`  function. Error bars represent standard error (A), although can be set to confidence interval."----
+
+a <- qpcrREPEATED(data_repeated_measure_1,
+                  numberOfrefGenes = 1,
+                  fill = c("#778899", "#BCD2EE"),
+                  factor = "time",
+                  axis.text.x.angle = 45,
+                  axis.text.x.hjust = 1)
+
+b <- qpcrREPEATED(data_repeated_measure_2,
+                  numberOfrefGenes = 1,
+                  factor = "time",
+                  axis.text.x.angle = 45,
+                  axis.text.x.hjust = 1)
+
+multiplot(a, b, cols = 2)
+
 ## ----eval=T, include = T, fig.height = 4, fig.width = 6, fig.align = 'center'----
 
 library(ggplot2)
@@ -234,13 +250,29 @@ ggplot(b, aes(x = Type, y = RE, fill = factor(Conc))) +
   scale_y_continuous(breaks = seq(0, max(b$RE) + max(b$se) + 0.1, by = 5), 
                      limits = c(0, max(b$RE) + max(b$se) + 0.1), expand = c(0, 0)) 
 
-## ----eval= T, eval= T, , fig.height = 4, fig.width = 5, fig.align = 'center', fig.cap = "QQ-plot for the normality assessment of the residuals derived from `t.test` or `lm` functions."----
+## ----eval= T, eval= T, , fig.height = 10, fig.width = 10, fig.align = 'center', fig.cap = "QQ-plot for the normality assessment of the residuals derived from `t.test` or `lm` functions."----
 
 residuals <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)$lmCRD$residuals
 shapiro.test(residuals) 
 
+par(mfrow = c(2,2))
+plot(residuals)
 qqnorm(residuals)
 qqline(residuals, col = "red")
+
+
+# For the repeated measure models, residulas can be extracted by `residuals(a$lm)` and plotted by `plot(residuals(a$lm))` where 'a' is an object created by the `qpcrREPEATED` function.
+
+a <- qpcrREPEATED(data_repeated_measure_2, 
+                  numberOfrefGenes = 1, 
+                  factor = "time", 
+                  y.axis.adjust = 0.4)
+
+
+residuals(a$lm)
+plot(residuals(a$lm))
+qqnorm(residuals(a$lm))
+qqline(residuals(a$lm), col = "red")
 
 ## ----eval= T------------------------------------------------------------------
 # See example input data frame:

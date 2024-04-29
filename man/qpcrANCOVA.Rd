@@ -9,7 +9,7 @@ qpcrANCOVA(
   numberOfrefGenes,
   analysisType = "ancova",
   mainFactor.column,
-  mainFactor.level.order,
+  mainFactor.level.order = NULL,
   block = NULL,
   width = 0.5,
   fill = "#BFEFFF",
@@ -28,17 +28,18 @@ qpcrANCOVA(
 )
 }
 \arguments{
-\item{x}{a data frame of condition(s), biological replicates, efficiency (E) and Ct values of target and reference genes. Each Ct value in the data frame is the mean of technical replicates. Please refer to the vignette for preparing your data frame correctly.}
+\item{x}{a data frame of condition(s), biological replicates, efficiency (E) and Ct values of target and reference genes. Each Ct value in the data frame is the mean of technical replicates. NOTE: Each line belongs to a separate individual reflecting a non-repeated measure experiment). Please refer to the vignette for preparing your data frame correctly.}
 
 \item{numberOfrefGenes}{number of reference genes which is 1 or 2 (Up to two reference genes can be handled).}
 
-\item{analysisType}{should be one of "ancova" or "anova".}
+\item{analysisType}{should be one of "ancova" or "anova". Default is "ancova".}
 
 \item{mainFactor.column}{the factor for which FC is calculated for its levels. The remaining factors (if any) are considered as covariate(s).}
 
-\item{mainFactor.level.order}{a vector of main factor level names. The first level in the vector is used 
-as reference or calibrator which is the reference level or sample that all others are compared to. Examples are untreated 
-of time 0. The FC value of the reference or calibrator level is 1 because it is not changed compared to itself.}
+\item{mainFactor.level.order}{NULL or a vector of main factor level names. If \code{NULL}, the first level of the \code{mainFactor.column} is used 
+as reference or calibrator. If a vector of main factor levels (in any order) is specified, the first level in the vector is used as calibrator. Calibrator is the reference level or sample that all others are compared to. Examples are untreated 
+of time 0. The FC value of the reference or calibrator level is 1 because it is not changed compared to itself.
+If NULL, the first level of the main factor column is used as calibrator.}
 
 \item{block}{column name of the block if there is a blocking factor (for correct column arrangement see example data.). When a qPCR experiment is done in multiple qPCR plates, variation resulting from the plates may interfere with the actual amount of gene expression. One solution is to conduct each plate as a complete randomized block so that at least one replicate of each treatment and control is present on a plate. Block effect is usually considered as random and its interaction with any main effect is not considered.}
 
@@ -87,7 +88,7 @@ ANCOVA (analysis of covariance) and ANOVA (analysis of variance) can be performe
 \code{qpcrANCOVA} function, for uni- or multi-factorial experiment data. This function performs FC analysis even
 if there is only one factor (without covariate variable), although, for the data with 
 only one factor, the analysis turns into ANOVA. The bar plot of the fold changes (FC) 
-values along with the standard error (se) of confidence interval (ci) is also returned by the \code{qpcrANCOVA} function.
+values along with the standard error (se) or confidence interval (ci) is also returned by the \code{qpcrANCOVA} function.
 }
 \details{
 The \code{qpcrANCOVA} function applies both ANCOVA and ANOVA analysis to the data of a uni- or 
@@ -118,9 +119,7 @@ is significant, suggesting that ANCOVA is not appropriate in this case.
  qpcrANCOVA(data_1factor, 
             numberOfrefGenes = 1,
             mainFactor.column = 1,
-            mainFactor.level.order = c("L1", "L2", "L3"),
             fill = c("#CDC673", "#EEDD82"),
-            analysisType = "ancova",
             fontsizePvalue = 5,
             y.axis.adjust = 0.1)
 

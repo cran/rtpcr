@@ -3,7 +3,7 @@
 #' \code{qpcrANCOVA} function, for uni- or multi-factorial experiment data. This function performs FC analysis even
 #' if there is only one factor (without covariate variable), although, for the data with 
 #' only one factor, the analysis turns into ANOVA. The bar plot of the fold changes (FC) 
-#' values along with the standard error (se) of confidence interval (ci) is also returned by the \code{qpcrANCOVA} function. 
+#' values along with the standard error (se) or confidence interval (ci) is also returned by the \code{qpcrANCOVA} function. 
 #' @details The \code{qpcrANCOVA} function applies both ANCOVA and ANOVA analysis to the data of a uni- or 
 #' multi-factorial experiment, although for the data with 
 #' only one factor, the analysis turns to ANOVA. ANCOVA is basically appropriate when the 
@@ -31,16 +31,17 @@
 #' @import dplyr
 #' @import reshape2
 #' @import ggplot2
-#' @import lme4
+#' @import lmerTest
 #' @import emmeans
-#' @param x a data frame of condition(s), biological replicates, efficiency (E) and Ct values of target and reference genes. Each Ct value in the data frame is the mean of technical replicates. Please refer to the vignette for preparing your data frame correctly.
+#' @param x a data frame of condition(s), biological replicates, efficiency (E) and Ct values of target and reference genes. Each Ct value in the data frame is the mean of technical replicates. NOTE: Each line belongs to a separate individual reflecting a non-repeated measure experiment). Please refer to the vignette for preparing your data frame correctly.
 #' @param numberOfrefGenes number of reference genes which is 1 or 2 (Up to two reference genes can be handled).
-#' @param analysisType should be one of "ancova" or "anova".
+#' @param analysisType should be one of "ancova" or "anova". Default is "ancova".
 #' @param mainFactor.column the factor for which FC is calculated for its levels. The remaining factors (if any) are considered as covariate(s).
-#' @param mainFactor.level.order  a vector of main factor level names. The first level in the vector is used 
-#' as reference or calibrator which is the reference level or sample that all others are compared to. Examples are untreated 
+#' @param mainFactor.level.order  NULL or a vector of main factor level names. If \code{NULL}, the first level of the \code{mainFactor.column} is used 
+#' as reference or calibrator. If a vector of main factor levels (in any order) is specified, the first level in the vector is used as calibrator. Calibrator is the reference level or sample that all others are compared to. Examples are untreated 
 #' of time 0. The FC value of the reference or calibrator level is 1 because it is not changed compared to itself.
-#' @param width a positive number determining bar width.
+#' If NULL, the first level of the main factor column is used as calibrator.
+#' @param width a positive number determining bar width. 
 #' @param fill  specify the fill color for the columns in the bar plot. If a vector of two colors is specified, the reference level is differentialy colored.
 #' @param y.axis.adjust  a negative or positive value for reducing or increasing the length of the y axis.
 #' @param letter.position.adjust adjust the distance between the signs and the error bars.
@@ -84,9 +85,7 @@
 #'  qpcrANCOVA(data_1factor, 
 #'             numberOfrefGenes = 1,
 #'             mainFactor.column = 1,
-#'             mainFactor.level.order = c("L1", "L2", "L3"),
 #'             fill = c("#CDC673", "#EEDD82"),
-#'             analysisType = "ancova",
 #'             fontsizePvalue = 5,
 #'             y.axis.adjust = 0.1)
 #'
@@ -161,7 +160,7 @@ qpcrANCOVA <- function(x,
                        numberOfrefGenes,
                        analysisType = "ancova",
                        mainFactor.column,
-                       mainFactor.level.order,
+                       mainFactor.level.order = NULL,
                        block = NULL,
                        width = 0.5,
                        fill = "#BFEFFF",
@@ -181,8 +180,20 @@ qpcrANCOVA <- function(x,
 
   
   x <- x[, c(mainFactor.column, (1:ncol(x))[-mainFactor.column])] 
-  x <- x[order(match(x[,1], mainFactor.level.order)), ]
-  x[,1] <- factor(x[,1], levels = mainFactor.level.order)
+  
+  
+  if (is.null(mainFactor.level.order)) {
+    mainFactor.level.order <- unique(x[,1])
+    calibrartor <- x[,1][1]
+    warning(paste("The", calibrartor, "level was used as calibrator."))
+  } else if (any(is.na(match(unique(x[,1]), mainFactor.level.order))) == TRUE){
+    stop("The `mainFactor.level.order` doesn't match main factor levels.")
+  } else {
+    x <- x[order(match(x[,1], mainFactor.level.order)), ]
+    x[,1] <- factor(x[,1], levels = mainFactor.level.order)
+  }
+  
+  
   
   
   
@@ -295,36 +306,11 @@ qpcrANCOVA <- function(x,
   
   
   pp1 <- emmeans(lm, colnames(x)[1], data = x, adjust = p.adj)
-  pp <- as.data.frame(graphics::pairs(pp1), adjust = p.adj)
-  pp <- pp[1:length(mainFactor.level.order)-1,]
+  pp2 <- as.data.frame(graphics::pairs(pp1), adjust = p.adj)
+  pp3 <- pp2[1:length(mainFactor.level.order)-1,]
+  ci <- as.data.frame(stats::confint(graphics::pairs(pp1)), adjust = p.adj)[1:length(unique(x[,1]))-1,]
+  pp <- cbind(pp3, lower.CL = ci$lower.CL, upper.CL = ci$upper.CL)
 
-  
-  # Preparing t-test results
-  t_test_results <- list()
-  
-  for (i in 1:length(mainFactor.level.order)) {
-    level_data <- subset(x, x[,1] == mainFactor.level.order[i])$wDCt
-    t_test_result <- stats::t.test(level_data, subset(x, x[,1] == mainFactor.level.order[1])$wDCt)
-    t_test_results[[paste("t_test_result_", mainFactor.level.order[i], "_vs_", mainFactor.level.order[1])]] <- t_test_result
-  }
-  
-  confidence_intervals <- data.frame(
-    Comparison = sapply(names(t_test_results), function(x) gsub("t_test_result_", "", x)),
-    CI_lower = sapply(t_test_results, function(x) x$conf.int[1]),
-    CI_upper = sapply(t_test_results, function(x) x$conf.int[2]),
-    df = sapply(t_test_results, function(x) x$parameter),
-    p.value = sapply(t_test_results, function(x) x$p.value))
-  
-  CI <- data.frame(Comparison = confidence_intervals$Comparison,
-                   LCL = 2^-confidence_intervals$CI_upper,
-                   UCL = 2^-confidence_intervals$CI_lower,
-                   df = confidence_intervals$df,
-                   p.value = confidence_intervals$p.value)
-
-  
-  
-  CI <- data.frame(CI, sddiff = (CI$UCL - CI$LCL)/(2*stats::qt(0.975, CI$df)))
-  
   
 
   bwDCt <- x$wDCt   
@@ -334,34 +320,26 @@ qpcrANCOVA <- function(x,
   
   
   sig <- .convert_to_character(pp$p.value)
-  
-  
-  
-  contrast <- pp[,1]
+  contrast <- pp$contrast
   post_hoc_test <- data.frame(contrast, 
-                              FC = round(1/(2^-(pp$estimate)), 4),
-                              pvalue = round(pp$p.value, 4),
+                              FC = round(1/(2^-(pp$estimate)), 7),
+                              pvalue = pp$p.value,
                               sig = sig,
-                              LCL = CI[-1,]$LCL,
-                              UCL = CI[-1,]$UCL,
-                              sddiff = CI[-1,]$sddiff,
+                              LCL = 1/(2^-pp$lower.CL),
+                              UCL = 1/(2^-pp$upper.CL),
                               se = se$se[-1])
   
   reference <- data.frame(contrast = mainFactor.level.order[1],
                           FC = "1",
                           pvalue = 1, 
                           sig = " ",
-                          LCL = CI[1,2],
-                          UCL = CI[1,3],
-                          sddiff = CI[1,6],
+                          LCL = 0,
+                          UCL = 0,
                           se = se$se[1])
   
-  post_hoc_test <- rbind(reference, post_hoc_test)
-  
-  
+  tableC <- rbind(reference, post_hoc_test)
   
   FINALDATA <- x
-  tableC <- post_hoc_test
   
   tableC$contrast <- sapply(strsplit(tableC$contrast, " - "), function(x) paste(rev(x), collapse = " vs "))
   

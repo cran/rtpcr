@@ -15,7 +15,7 @@
 
 #' Sample data (one factor three levels)
 #'
-#' A sample dataset for demonstration purposes.
+#' A sample dataset for demonstration purposes. Each line belongs to a separate individual (non-repeated measure experiment).
 #'
 #' @format A data frame with 9 observations and 6 variables:
 #' \describe{
@@ -33,7 +33,7 @@
 
 #' Sample data (two factor)
 #'
-#' A sample dataset for demonstration purposes.
+#' A sample dataset for demonstration purposes. Each line belongs to a separate individual (non-repeated measure experiment).
 #'
 #' @format A data frame with 18 observations and 7 variables:
 #' \describe{
@@ -52,7 +52,7 @@
 
 #' Sample data (two factor with blocking factor)
 #'
-#' A sample qPCR data set with blocking factor.
+#' A sample qPCR data set with blocking factor. Each line belongs to a separate individual (non-repeated measure experiment).
 #'
 #' @format A data frame with 18 observations and 8 variables:
 #' \describe{
@@ -72,7 +72,7 @@
 
 #' Sample data (three factor)
 #'
-#' A sample dataset for demonstration purposes.
+#' A sample dataset for demonstration purposes. Each line belongs to a separate individual (non-repeated measure experiment).
 #'
 #' @format A data frame with 36 observations and 8 variables:
 #' \describe{
@@ -91,9 +91,10 @@
 "data_3factor"
 
 
-#' Sample data (one factor-two level qPCR)
+#' Sample qPCR data of an experiment conducted under two different conditions
 #'
-#' A sample data for demonstrating qPCR data analysis.
+#' A sample data for demonstrating qPCR data analysis. In unpaired condition, each line belongs to a separate individual.
+#' However t-test can be applied for paired samples where the data is acquired from same individuals in two conditions e.g. before and after a treatment. 
 #'
 #' @format A data frame with 24 observations and 4 variables:
 #' \describe{
@@ -107,9 +108,10 @@
 #' @keywords internal
 "data_ttest"
 
-#' Sample data (one target, two reference)
+#' Sample data (one target and two reference genes under two different conditions)
 #'
-#' One target and two reference gens for demonstrating qPCR data analysis.
+#' One target and two reference gens for demonstrating qPCR data analysis. In unpaired condition, each line belongs to a separate individual.
+#' However t-test can be applied for paired samples where the data is acquired from same individuals in two conditions e.g. before and after a treatment. 
 #'
 #' @format A data frame with 18 observations and 4 variables:
 #' \describe{
@@ -125,7 +127,7 @@
 
 #' Sample data (with technical replicates)
 #'
-#' A sample data for calculating biological replicated.
+#' A sample data for calculating biological replicated. Each line belongs to a separate individual (non-repeated measure experiment).
 #'
 #' @format A data frame with 18 observations and 9 variables:
 #' \describe{
@@ -147,7 +149,7 @@
 
 #' Sample data (with technical replicates)
 #'
-#' A sample data for calculating biological replicated.
+#' A sample data for calculating biological replicated. Each line belongs to a separate individual (non-repeated measure experiment).
 #'
 #' @format A data frame with 72 observations and 8 variables:
 #' \describe{
@@ -164,3 +166,47 @@
 #' @source Lee et al, (2020) <doi:10.12688/f1000research.23580.2>
 #' @keywords internal
 "Lee_etal2020qPCR"
+
+
+
+#' Repeated measure sample data
+#'
+#' A repeated measure sample data in which 6 individuals have been analysed.  In the "id" column, a unique number is assigned to each individual,  e.g. all the three number 1 indicate one individual.
+#' samples are taken or measurements are scored over different time points (time column) from each individual.
+#'
+#' @format A data frame with 18 observations and 7 variables:
+#' \describe{
+#'   \item{id}{experimental factor}
+#'   \item{treatment}{treatment}
+#'   \item{time}{time course levels}
+#'   \item{Eg}{Amplification efficiency of target gene}
+#'   \item{Ctg}{Ct of target gene}
+#'   \item{Eref}{Amplification efficiency of reference gene}
+#'   \item{Ctref}{Ct of reference gene}
+#' }
+#' 
+#' @source NA
+#' @keywords internal
+
+"data_repeated_measure_2"
+
+
+#' Repeated measure sample data
+#'
+#' A repeated measure sample data in which 3 individuals have been analysed.  In the "id" column, a unique number is assigned to each individual, e.g. all the three number 1 indicate one individual.
+#' samples are taken or measurements are scored over different time points (time column) from each individual.
+#'
+#' @format A data frame with 9 observations and 6 variables:
+#' \describe{
+#'   \item{id}{experimental factor}
+#'   \item{time}{time course levels}
+#'   \item{Eg}{Amplification efficiency of target gene}
+#'   \item{Ctg}{Ct of target gene}
+#'   \item{Eref}{Amplification efficiency of reference gene}
+#'   \item{Ctref}{Ct of reference gene}
+#' }
+#' 
+#' @source NA
+#' @keywords internal
+
+"data_repeated_measure_1"
