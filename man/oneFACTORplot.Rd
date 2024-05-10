@@ -2,11 +2,11 @@
 % Please edit documentation in R/oneFACTORplot.r
 \name{oneFACTORplot}
 \alias{oneFACTORplot}
-\title{Bar plot of the relative gene expression (RE) from the \code{qpcrANOVA} output of a one-factor experiment data}
+\title{Bar plot of the relative gene expression (\eqn{\Delta C_T} method) from the \code{qpcrANOVARE} output of a one-factor experiment data}
 \usage{
 oneFACTORplot(
   res,
-  width = 0.2,
+  width = 0.4,
   fill = "skyblue",
   y.axis.adjust = 0.5,
   y.axis.by = 2,
@@ -16,13 +16,13 @@ oneFACTORplot(
   ylab = "Relative Expression",
   xlab = "none",
   fontsize = 12,
-  fontsizePvalue = 7,
+  fontsizePvalue = 5,
   axis.text.x.angle = 0,
   axis.text.x.hjust = 0.5
 )
 }
 \arguments{
-\item{res}{an FC data frame object created by \code{qpcrANOVA(x)$Result} function on a one factor data such as \code{data_1factor}.}
+\item{res}{an FC data frame object created by \code{qpcrANOVARE(x)$Result} function on a one factor data such as \code{data_1factor}.}
 
 \item{width}{a positive number determining bar width.}
 
@@ -62,7 +62,7 @@ The \code{oneFACTORplot} function generates the bar plot of the average fold cha
 \examples{
 
 # Before plotting, the result needs to be extracted as below:
-res <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)$Result
+res <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1)$Result
 
 # Bar plot
 oneFACTORplot(res,

@@ -2,7 +2,7 @@
 % Please edit documentation in R/twoFACTORplot.r
 \name{twoFACTORplot}
 \alias{twoFACTORplot}
-\title{Bar plot of the relative gene expression (RE) from the \code{qpcrANOVA} output of a two-factorial experiment data}
+\title{Bar plot of the relative gene expression (\eqn{\Delta C_T} method) from the \code{qpcrANOVARE} output of a two-factorial experiment data}
 \usage{
 twoFACTORplot(
   res,
@@ -20,13 +20,13 @@ twoFACTORplot(
   xlab = "none",
   legend.position = c(0.09, 0.8),
   fontsize = 12,
-  fontsizePvalue = 7,
+  fontsizePvalue = 5,
   axis.text.x.angle = 0,
   axis.text.x.hjust = 0.5
 )
 }
 \arguments{
-\item{res}{the FC data frame created by \code{qpcrANOVA(x)$Result} function on a two factor data such as \code{data_2factor}.}
+\item{res}{the FC data frame created by \code{qpcrANOVARE(x)$Result} function on a two factor data such as \code{data_2factor}.}
 
 \item{x.axis.factor}{x-axis factor.}
 
@@ -66,7 +66,7 @@ twoFACTORplot(
 Bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
 }
 \description{
-Bar plot of the relative expression (RE) of a gene along with the standard error (se), 95\% confidence interval (ci) and significance
+Bar plot of the relative expression (\eqn{\Delta C_T} method) of a gene along with the standard error (se), 95\% confidence interval (ci) and significance
 }
 \details{
 The \code{twoFACTORplot} function generates the bar plot of the average fold change for target genes along with the significance, standard error (se) and the 95\% confidence interval (ci) as error bars.
@@ -77,7 +77,7 @@ The \code{twoFACTORplot} function generates the bar plot of the average fold cha
 data_2factor
 
 # Before generating plot, the result table needs to be extracted as below:
-res <- qpcrANOVA(data_2factor, numberOfrefGenes = 1)$Result
+res <- qpcrANOVARE(data_2factor, numberOfrefGenes = 1)$Result
 
 # Plot of the 'res' data with 'Genotype' as grouping factor
 twoFACTORplot(res,
@@ -92,6 +92,7 @@ twoFACTORplot(res,
    letter.position.adjust = 0.2,
    legend.position = c(0.2, 0.8),
    errorbar = "se")
+   
 
 # Plotting the same data with 'Drought' as grouping factor
 twoFACTORplot(res,
@@ -101,6 +102,28 @@ twoFACTORplot(res,
               fill = "Blues",
               fontsizePvalue = 5,
               errorbar = "ci")
+              
+              
+              
+# Combining FC results of two different genes:
+a <- qpcrREPEATED(data_repeated_measure_1,
+                  numberOfrefGenes = 1,
+                  factor = "time")
+
+b <- qpcrREPEATED(data_repeated_measure_2,
+                  factor = "time",
+                  numberOfrefGenes = 1)
+
+a1 <- a$FC_statistics_of_the_main_factor
+b1 <- b$FC_statistics_of_the_main_factor
+c <- rbind(a1, b1)
+c$gene <- factor(c(1,1,1,2,2,2))
+c
+
+twoFACTORplot(c, x.axis.factor = contrast, 
+              group.factor = gene, fill = 'Reds',
+              ylab = "FC", axis.text.x.angle = 45,
+              axis.text.x.hjust = 1)
 
 
 }

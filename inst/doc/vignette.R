@@ -62,12 +62,12 @@ multiplot(t1, t2, cols = 2)
 grid.text("A", x = 0.02, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
-## ----eval = T, fig.height = 3, fig.width = 5, fig.align='center', fig.cap = "Statistical table and figure of the Fold change expression of a gene in three different levels of Drough stress relative to the D0 as reference or calibrator level produced by the `qpcrANCOVA` function. The other factor i.e. Genotype has been concidered as covariate."----
+## ----eval = T, fig.height = 3, fig.width = 5, fig.align='center', fig.cap = "Statistical table and figure of the Fold change expression of a gene in three different levels of Drough stress relative to the D0 as reference or calibrator level produced by the `qpcrANOVAFC` function. The other factor i.e. Genotype has been concidered as covariate."----
 # See sample data
 data_2factor
 
 order <- unique(data_2factor$Drought)
-qpcrANCOVA(data_2factor, 
+qpcrANOVAFC(data_2factor, 
            numberOfrefGenes = 1, 
            analysisType = "ancova",
            mainFactor.column = 2,
@@ -84,16 +84,16 @@ data_3factor
 # should be calculated first using meanTech function.
 
 # Applying ANOVA analysis
-res <- qpcrANOVA(data_2factor,
+res <- qpcrANOVARE(data_2factor,
           numberOfrefGenes = 1,
           p.adj = "none")
 res$Result
 res$Post_hoc_Test
 
-## ----eval= T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "A: bar plot representing Relative expression of a gene under three levels of a factor generated using `oneFACTORplot` function, B: Plot of the Fold change expression produced by the `qpcrANCOVA` function from the same data used for 'A'. The first element in the `mainFactor.level.order` argument (here L1) is served as the Reference level, although the x-axis names have later been renamed by the `x.axis.labels.rename` argument. Error bars represent 95% confidence interval in A and standard error in B."----
+## ----eval= T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "A: bar plot representing Relative expression of a gene under three levels of a factor generated using `oneFACTORplot` function, B: Plot of the Fold change expression produced by the `qpcrANOVAFC` function from the same data used for 'A'. The first element in the `mainFactor.level.order` argument (here L1) is served as the Reference level, although the x-axis names have later been renamed by the `x.axis.labels.rename` argument. Error bars represent 95% confidence interval in A and standard error in B."----
 
 # Before plotting, the result needs to be extracted as below:
-out2 <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)$Result
+out2 <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1)$Result
 
 f1 <- oneFACTORplot(out2,
               width = 0.2,
@@ -113,7 +113,7 @@ addline_format <- function(x,...){
     gsub('\\s','\n',x)
 }
 order <- unique(data_2factor$Drought)
-f2 <- qpcrANCOVA(data_1factor,
+f2 <- qpcrANOVAFC(data_1factor,
                  numberOfrefGenes = 1,
                  mainFactor.column = 1,
                  mainFactor.level.order = c("L1","L2","L3"),
@@ -129,15 +129,15 @@ f2 <- qpcrANCOVA(data_1factor,
                                                        "Treatment_2 vs Control")))
 
 
-multiplot(f1, f2, cols = 2)
+multiplot(f1, f2$FC_Plot_of_the_main_factor_levels, cols = 2)
 grid.text("A", x = 0.02, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
 ## ----eval= T, include = T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "Relative expression of a target gene under two different factors of genotype (with two levels) and drought (with three levels). Error bars represent standard error. Means (columns) lacking letters in common have significant difference at alpha = 0.05 as resulted from a `LSD.test`."----
 
 # Before plotting, the result needs to be extracted as below:
-res <- qpcrANOVA(data_2factor, numberOfrefGenes = 1)$Result
-Final_data <- qpcrANOVA(data_2factor, numberOfrefGenes = 1)$Final_data
+res <- qpcrANOVARE(data_2factor, numberOfrefGenes = 1)$Result
+Final_data <- qpcrANOVARE(data_2factor, numberOfrefGenes = 1)$Final_data
 
 # Plot of the 'res' data with 'Genotype' as grouping factor
 q1 <- twoFACTORplot(res,
@@ -170,7 +170,7 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
 ## ----fig.height = 5, fig.width = 11, fig.align = 'center', fig.cap = "A and B) Relative expression (RE) of a target gene from a three-factorial experiment data produced by  `threeFACTORplot`  function. Error bars represent standard error (A), although can be set to confidence interval (B). Means (columns) lacking letters in common have significant differences at alpha = 0.05 as resulted from an ‘LSD.test’."----
 # Before plotting, the result needs to be extracted as below:
-res <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Result
+res <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1)$Result
 res
 
 # releveling a factor levels first
@@ -224,12 +224,35 @@ b <- qpcrREPEATED(data_repeated_measure_2,
 
 multiplot(a, b, cols = 2)
 
+## ----eval=T-------------------------------------------------------------------
+# Returning fold change values from a fitted model.
+# Firstly, result of `qpcrANOVAFC` or `qpcrREPEATED` is 
+# acquired which includes a model object:
+res <- qpcrANOVAFC(data_3factor, numberOfrefGenes = 1, mainFactor.column = 1)
+
+# Returning fold change values of Conc levels from a fitted model:
+qpcrMeans(res$lm_ANOVA, specs = "Conc")
+
+# Returning fold change values of Conc levels sliced by Type:
+qpcrMeans(res$lm_ANOVA, specs = "Conc | Type")
+
+# Returning fold change values of Conc levels sliced by Type*SA:
+qpcrMeans(res$lm_ANOVA, specs = "Conc | (Type*SA)")
+
+# Returning fold change values of Conc
+qpcrMeans(res$lm_ANOVA, specs = "Conc * Type")
+
 ## ----eval=T, include = T, fig.height = 4, fig.width = 6, fig.align = 'center'----
 
 library(ggplot2)
-b <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Result
-a <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Final_data
+b <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1)$Result
+a <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1)$Final_data
 
+# Arrange factor levels to your desired order:
+b$Conc <- factor(b$Conc, levels = c("L","M","H"))
+a$Conc <- factor(a$Conc, levels = c("L","M","H"))
+
+# Generating plot
 ggplot(b, aes(x = Type, y = RE, fill = factor(Conc))) +
   geom_bar(stat = "identity", position = "dodge") +
   facet_wrap(~ SA) +
@@ -250,18 +273,17 @@ ggplot(b, aes(x = Type, y = RE, fill = factor(Conc))) +
   scale_y_continuous(breaks = seq(0, max(b$RE) + max(b$se) + 0.1, by = 5), 
                      limits = c(0, max(b$RE) + max(b$se) + 0.1), expand = c(0, 0)) 
 
-## ----eval= T, eval= T, , fig.height = 10, fig.width = 10, fig.align = 'center', fig.cap = "QQ-plot for the normality assessment of the residuals derived from `t.test` or `lm` functions."----
+## ----eval= T, eval= T, fig.height = 5, fig.width = 10, fig.align = 'center', fig.cap = "QQ-plot for the normality assessment of the residuals derived from `t.test` or `lm` functions."----
 
-residuals <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)$lmCRD$residuals
+residuals <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1)$lmCRD$residuals
 shapiro.test(residuals) 
 
-par(mfrow = c(2,2))
+par(mfrow = c(1,2))
 plot(residuals)
 qqnorm(residuals)
 qqline(residuals, col = "red")
 
-
-# For the repeated measure models, residulas can be extracted by `residuals(a$lm)` and plotted by `plot(residuals(a$lm))` where 'a' is an object created by the `qpcrREPEATED` function.
+## ----eval= T, eval= T, fig.height = 4, fig.width = 4, fig.align = 'center', fig.cap = "QQ-plot for the normality assessment of the residuals derived from `t.test` or `lm` functions."----
 
 a <- qpcrREPEATED(data_repeated_measure_2, 
                   numberOfrefGenes = 1, 
@@ -281,9 +303,32 @@ data_withTechRep
 # Calculating mean of technical replicates
 meanTech(data_withTechRep, groups = 1:4)
 
+## ----eval= T, eval= T, , fig.height = 4, fig.width = 5, fig.align = 'center', fig.cap = "Fold change expression of two different genes. FC tables of any number of genes can be combined and used as input data frame for `twoFACTORplot` function."----
+
+a <- qpcrREPEATED(data_repeated_measure_1,
+             numberOfrefGenes = 1,
+             factor = "time")
+
+b <- qpcrREPEATED(data_repeated_measure_2,
+                  factor = "time",
+                  numberOfrefGenes = 1)
+
+
+a1 <- a$FC_statistics_of_the_main_factor
+b1 <- b$FC_statistics_of_the_main_factor
+
+c <- rbind(a1, b1)
+c$gene <- factor(c(1,1,1,2,2,2))
+c
+
+twoFACTORplot(c, x.axis.factor = contrast, 
+              group.factor = gene, fill = 'Reds',
+              ylab = "FC", axis.text.x.angle = 45,
+              axis.text.x.hjust = 1, legend.position = c(0.2, 0.8))
+
 ## ----eval= F, include = T, fig.height = 4, fig.width = 5----------------------
 #  
-#  b <- qpcrANCOVA(data_2factor,
+#  b <- qpcrANOVAFC(data_2factor,
 #              numberOfrefGenes = 1,
 #              mainFactor.column = 1,
 #              mainFactor.level.order = c("S", "R"),

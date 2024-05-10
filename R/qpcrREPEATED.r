@@ -1,11 +1,11 @@
-#' @title Fold change (FC) analysis of repeated measure qPCR data
+#' @title Fold change (\eqn{\Delta \Delta C_T} method) analysis of repeated measure qPCR data
 #' 
-#' @description \code{qpcrREPEATED} function performs fold change (FC) analysis of observations repeatedly taken over different time courses, 
+#' @description \code{qpcrREPEATED} function performs fold change (\eqn{\Delta \Delta C_T} method) analysis of observations repeatedly taken over different time courses, 
 #' Data may be obtained over time from a uni- or multi-factorial experiment. The bar plot of the fold changes (FC) 
 #' values along with the standard error (se) or confidence interval (ci) is also returned by the \code{qpcrREPEATED} function. 
 #' 
 #' @details The \code{qpcrREPEATED} function performs fold change (FC) analysis of observations repeatedly taken over time. 
-#' The intended factor (could be time or any other factor) is defined for the analysis by the \code{factor} argument, then the function performs FC analyses on its levels
+#' The intended factor (could be time or any other factor) is defined for the analysis by the \code{factor} argument, then the function performs FC analysis on its levels
 #' so that the first levels (as appears in the input data frame) is used as reference or calibrator. the function returns FC values along with confidence interval and standard error for the FC values.
 #' 
 #' @author Ghader Mirzaghaderi
@@ -17,9 +17,12 @@
 #' @import emmeans
 #' @import lmerTest
 #' @param x input data frame in which the first column is id, 
-#' followed by the factor(s) which include at least time factor. Additional factor(s) may also be present. Other columns are efficiency and Ct values of target and reference genes.
-#' In the "id" column, a unique number is assigned to each individual from which samples have been takes over time, for example in the \code{data_repeated_measure_1}, 
-#' all the three number 1 indicate one individual which has been sampled over different time courses.
+#' followed by the factor(s) which include at least time factor. 
+#' The first level of time factor in data set is used as calibrator or reference level.
+#' Additional factor(s) may also be present. Other columns are efficiency and Ct values of target and reference genes.
+#' In the "id" column, a unique number is assigned to each individual from which samples have been takes over time, 
+#' for example in the \code{data_repeated_measure_1}, 
+#' all the three number 1 indicate one individual which has been sampled over three different time courses.
 #' To prepare a data frame from a  repeated measure analysis, please refer to the vignette. 
 #' @param numberOfrefGenes number of reference genes which is 1 or 2 (Up to two reference genes can be handled).
 #' as reference or calibrator which is the reference level or sample that all others are compared to. Examples are untreated 
@@ -168,10 +171,8 @@ qpcrREPEATED <- function(x,
       formula <- wDCt ~ time + (1 | id)
     } else {
       formula <- paste("wDCt ~", paste("time"," *"), paste(factors, collapse = " * "), "+ (1 | id)")
-      #formula <- paste("wDCt ~", paste("as.factor(","time",") *"), paste("as.factor(", factors, ")", collapse = " * "), "+ (1 | id)")
     }
   } else {
-    #x <- x[, c(match("block", names(x)), (1:ncol(x))[-match("block", names(x))])]
     if((ncol(x)-6) <= 2){
       formula <- wDCt ~ time + (1|id) + (1|block/id)
     } else {
@@ -201,7 +202,6 @@ qpcrREPEATED <- function(x,
     pp3 <- pp2
   }
   ci <- as.data.frame(stats::confint(graphics::pairs(pp1)), adjust = p.adj)[1:length(lvls)-1,]
-  #confint(contrast(pp1, interaction = "pairwise", by = NULL)
   pp <- cbind(pp3, lower.CL = ci$lower.CL, upper.CL = ci$upper.CL)
   
   bwDCt <- x$wDCt   
@@ -213,7 +213,7 @@ qpcrREPEATED <- function(x,
   sig <- .convert_to_character(pp$p.value)
   contrast <- pp$contrast
   post_hoc_test <- data.frame(contrast, 
-                              FC = round(1/(2^-(pp$estimate)), 7),
+                              FC = 1/(2^-(pp$estimate)),
                               pvalue = pp$p.value,
                               sig = sig,
                               LCL = 1/(2^-pp$lower.CL),
@@ -226,7 +226,7 @@ qpcrREPEATED <- function(x,
  
   
   reference <- data.frame(contrast = as.character(referencelevel),
-                          FC = "1",
+                          FC = 1,
                           pvalue = 1, 
                           sig = " ",
                           LCL = 0,
@@ -235,7 +235,8 @@ qpcrREPEATED <- function(x,
   
   tableC  <- rbind(reference, post_hoc_test)
   
-  factor
+  #round tableC to 4 decimal places
+  tableC[, sapply(tableC, is.numeric)] <- lapply(tableC[, sapply(tableC, is.numeric)], function(x) round(x, 4))
   
   FINALDATA <- x
   
@@ -321,14 +322,20 @@ qpcrREPEATED <- function(x,
   
   
   
-  outlist2 <- list(Final_data = x,
-                   lm = lm,
-                   ANOVA_table = ANOVA,
-                   FC_statistics_of_the_main_factor  = tableC,
-                   FC_Plot = pfc2)
+  outlist2 <- structure(list(Final_data = x,
+                             lm = lm,
+                             ANOVA_table = ANOVA,
+                             FC_statistics_of_the_main_factor  = tableC,
+                             FC_Plot = pfc2), class = "XX")
   
-  return(outlist2)
-  
-  
-  
+  print.XX <- function(outlist2){
+    cat("ANOVA table:", "\n")
+    print(outlist2$ANOVA_table)
+    cat("\n","Fold Change table:", "\n")
+    print(outlist2$FC_statistics_of_the_main_factor)
+    cat("\n","Fold Change plot of the main factor levels:", "\n")
+    print(outlist2$FC_Plot)
+    invisible(outlist2)
+  }
+  print.XX(outlist2)
 }

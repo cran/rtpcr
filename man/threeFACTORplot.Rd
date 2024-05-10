@@ -2,7 +2,7 @@
 % Please edit documentation in R/threeFACTORplot.r
 \name{threeFACTORplot}
 \alias{threeFACTORplot}
-\title{Bar plot of the relative gene expression (RE) from the \code{qpcrANOVA} output of a a three-factorial experiment data}
+\title{Bar plot of the relative gene expression (\eqn{\Delta C_T} method) from the \code{qpcrANOVARE} output of a a three-factorial experiment data}
 \usage{
 threeFACTORplot(
   res,
@@ -18,14 +18,14 @@ threeFACTORplot(
   legend.title = "Legend Title",
   legend.position = c(0.4, 0.8),
   fontsize = 12,
-  fontsizePvalue = 7,
+  fontsizePvalue = 5,
   show.letters = TRUE,
   axis.text.x.angle = 0,
   axis.text.x.hjust = 0.5
 )
 }
 \arguments{
-\item{res}{the FC data frame created by \code{qpcrANOVA(x)$Result} function on a three factorial data such as \code{data_3factor} example data frame.}
+\item{res}{the FC data frame created by \code{qpcrANOVARE(x)$Result} function on a three factorial data such as \code{data_3factor} example data frame.}
 
 \item{arrangement}{order based on the columns in the output table (e.g. c(2,3,1) or c(1,3,2)) affecting factor arrangement of the output graph.}
 
@@ -63,7 +63,7 @@ threeFACTORplot(
 Bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
 }
 \description{
-Bar plot of the relative expression (RE) of a gene along with the confidence interval and significance
+Bar plot of the relative expression (\eqn{\Delta C_T} method) of a gene along with the confidence interval and significance
 }
 \details{
 The \code{threeFACTORplot} function generates the bar plot of the average fold change for target genes along with the significance, standard error (se) and the 95\% confidence interval (ci).
@@ -74,7 +74,7 @@ The \code{threeFACTORplot} function generates the bar plot of the average fold c
 data_3factor
 
 # Before plotting, the result needs to be extracted as below:
-res <- qpcrANOVA(data_3factor, numberOfrefGenes = 1)$Result
+res <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1)$Result
 res
 
 # Arrange the first three colunms of the result table.

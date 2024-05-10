@@ -1,6 +1,9 @@
-#' @title Bar plot of the relative gene expression (RE) from the \code{qpcrANOVA} output of a one-factor experiment data
+#' @title Bar plot of the relative gene expression (\eqn{\Delta C_T} method) from the \code{qpcrANOVARE} output of a one-factor experiment data
+#' 
 #' @description Bar plot of the relative expression of a gene along with the standard error (se), 95\% confidence interval (ci) and significance. \code{oneFACTORplot} is mainly useful for a one-factor experiment with more than two levels.
+#' 
 #' @details The \code{oneFACTORplot} function generates the bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
+#' 
 #' @author Ghader Mirzaghaderi
 #' @export oneFACTORplot
 #' @import tidyr
@@ -8,7 +11,7 @@
 #' @import reshape2
 #' @import ggplot2
 #' @import agricolae
-#' @param res an FC data frame object created by \code{qpcrANOVA(x)$Result} function on a one factor data such as \code{data_1factor}.
+#' @param res an FC data frame object created by \code{qpcrANOVARE(x)$Result} function on a one factor data such as \code{data_1factor}.
 #' @param width a positive number determining bar width.
 #' @param fill  specify a fill color.
 #' @param y.axis.adjust  a negative or positive number for reducing or increasing the length of the y axis.
@@ -26,7 +29,7 @@
 #' @examples
 #'
 #' # Before plotting, the result needs to be extracted as below:
-#' res <- qpcrANOVA(data_1factor, numberOfrefGenes = 1)$Result
+#' res <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1)$Result
 #'
 #' # Bar plot
 #' oneFACTORplot(res,
@@ -46,7 +49,7 @@
 
 
 oneFACTORplot <- function(res,
-                          width = 0.2,
+                          width = 0.4,
                           fill = "skyblue",
                           y.axis.adjust = 0.5,
                           y.axis.by = 2,
@@ -56,7 +59,7 @@ oneFACTORplot <- function(res,
                           ylab = "Relative Expression",
                           xlab = "none",
                           fontsize = 12,
-                          fontsizePvalue = 7,
+                          fontsizePvalue = 5,
                           axis.text.x.angle = 0,
                           axis.text.x.hjust = 0.5){
 
@@ -68,8 +71,7 @@ oneFACTORplot <- function(res,
   
   if (any(grepl("RE", names(x)))) {
   RE <- x$RE
-  
-  
+  if(errorbar == "se") {
   q1f1 <- ggplot(x, aes(rownames(x), y = RE, group = rownames(x))) +
     geom_col(color = "black", fill = fill[1], width = width) + 
   #geom_hline(aes(yintercept = 1), col = "red", linetype = 2, show.legend = FALSE) +
@@ -97,10 +99,8 @@ oneFACTORplot <- function(res,
     q1f1 <- q1f1 +
       xlab(xlab)
   }
-
-
-
-  q1f2 <- ggplot(x, aes(rownames(x), y = RE, group = rownames(x))) +
+} else if(errorbar == "ci") {
+  q1f1 <- ggplot(x, aes(rownames(x), y = RE, group = rownames(x))) +
     geom_col(color = "black",  fill = fill[1], width = width) +
   #geom_hline(aes(yintercept = 1), col = "red", linetype = 2, show.legend = FALSE) +
   geom_errorbar(aes(ymin = LCL, ymax = UCL), width = 0.1) +
@@ -114,30 +114,33 @@ oneFACTORplot <- function(res,
                        limits = c(0, max(RE) + max(LCL) + y.axis.adjust), expand = c(0, 0))
 
   if (show.letters) {
-    q1f2 <- q1f2 +
+    q1f1 <- q1f1 +
       geom_text(data = x, aes(label = letters, x = rownames(x), y = UCL + letter.position.adjust),
                 vjust = -0.5, size = fontsizePvalue)
   }
 
   if(xlab == "none"){
-    q1f2 <- q1f2 + 
+    q1f1 <- q1f1 + 
       labs(x = NULL)
   }else{
-    q1f2 <- q1f2 +
+    q1f1 <- q1f1 +
       xlab(xlab)
   }
+  } 
+
+  
+  # if(errorbar == "se") {
+  #   out1 <- list(plot = q1f1)
+  #   
+  # } else if(errorbar == "ci") {
+  #   out1 <- list(plot = q1f1)
+  # }
+  }
   
 
   
-  if(errorbar == "se") {
-    out1 <- list(plot = q1f1)
-    
-  } else if(errorbar == "ci") {
-    out1 <- list(plot = q1f2)
-  }
-  }
   
-
+  
   
   
   
@@ -147,7 +150,7 @@ oneFACTORplot <- function(res,
     x$FC <- as.numeric(x$FC)
     letters <- x$sig
     FC <- x$FC
-    
+    if(errorbar == "se") {
     
     q1f1 <- ggplot(x, aes(contrast, y = FC, fill = contrast, group = contrast)) +
       geom_col(color = "black", width = width) 
@@ -187,26 +190,24 @@ oneFACTORplot <- function(res,
       q1f1 <- q1f1 +
         xlab(xlab)
     }
-    
-    
-    
-    q1f2 <- ggplot(x, aes(contrast, y = FC, fill = contrast, group = contrast)) +
+    }  else if(errorbar == "ci") {
+    q1f1 <- ggplot(x, aes(contrast, y = FC, fill = contrast, group = contrast)) +
       geom_col(color = "black", width = width) 
     
     
     if(length(fill) == 2) {
-      q1f2 <- q1f2 +
+      q1f1 <- q1f1 +
         scale_fill_manual(values = c(fill[1], rep(fill[2], nrow(x)-1))) + guides(fill = "none")
     } 
     if (length(fill) == 1) {
-      q1f2 <- q1f2 +
+      q1f1 <- q1f1 +
         scale_fill_manual(values = rep(fill, nrow(x))) + guides(fill = "none")
     }
     
     
     
       #geom_hline(aes(yintercept = 1), col = "red", linetype = 2, show.legend = FALSE) +
-    q1f2 <- q1f2 + geom_errorbar(aes(ymin = LCL, ymax = UCL), width = 0.1) +
+    q1f1 <- q1f1 + geom_errorbar(aes(ymin = LCL, ymax = UCL), width = 0.1) +
       ylab(ylab) +
       theme_bw() +
       theme(axis.text.x = element_text(size = fontsize, color = "black", angle = axis.text.x.angle, hjust = axis.text.x.hjust),
@@ -217,30 +218,30 @@ oneFACTORplot <- function(res,
                          limits = c(0, max(FC) + max(LCL) + y.axis.adjust), expand = c(0, 0))
     
     if (show.letters) {
-      q1f2 <- q1f2 +
+      q1f1 <- q1f1 +
         geom_text(data = x, aes(label = letters, x = contrast, y = UCL + letter.position.adjust),
                   vjust = -0.5, size = fontsizePvalue)
     }
     
     if(xlab == "none"){
-      q1f2 <- q1f2 + 
+      q1f1 <- q1f1 + 
         labs(x = NULL)
     }else{
-      q1f2 <- q1f2 +
+      q1f1 <- q1f1 +
         xlab(xlab)
     }
-    
-    
-    
-    if(errorbar == "se") {
-      out1 <- list(plot = q1f1)
-      
-    } else if(errorbar == "ci") {
-      out1 <- list(plot = q1f2)
     }
+    
+    
+    # if(errorbar == "se") {
+    #   out1 <- list(plot = q1f1)
+    #   
+    # } else if(errorbar == "ci") {
+    #   out1 <- list(plot = q1f1)
+    # }
   }
   
-  return(out1)
+  return(q1f1)
 }
 
 
