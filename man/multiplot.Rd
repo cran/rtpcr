@@ -15,10 +15,10 @@ multiplot(..., cols = 1)
 A  multiple-plots plate
 }
 \description{
-Multiple plot function
+\code{multiplot} function combines multiple ggplot objects into a single plate.
 }
 \details{
-Producing multiple plots plate using ggplot objects
+Combining multiple ggplot objects into a single plate.
 }
 \examples{
 
@@ -30,7 +30,7 @@ p1 <- qpcrTTESTplot(data_ttest,
 
 out2 <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1)$Result
 p2 <- oneFACTORplot(out2,
-                    width = 0.2,
+                    width = 0.4,
                     fill = "skyblue",
                     y.axis.adjust = 0.5,
                     y.axis.by = 1,

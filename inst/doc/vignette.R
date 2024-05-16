@@ -4,7 +4,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## ----eval= T, include= F, message=FALSE, warning = FALSE----------------------
 library(rtpcr)
-library(agricolae)
+library(multcomp)
 library(dplyr)
 library(reshape2)
 library(tidyr)
@@ -85,8 +85,7 @@ data_3factor
 
 # Applying ANOVA analysis
 res <- qpcrANOVARE(data_2factor,
-          numberOfrefGenes = 1,
-          p.adj = "none")
+                   numberOfrefGenes = 1)
 res$Result
 res$Post_hoc_Test
 
@@ -123,7 +122,7 @@ f2 <- qpcrANOVAFC(data_1factor,
                  letter.position.adjust = 0,
                  y.axis.adjust = 1,
                  ylab = "Fold Change",
-                 fontsize = 12,
+                 fontsize = 12, plot = F,
                  x.axis.labels.rename = addline_format(c("Control", 
                                                        "Treatment_1 vs Control", 
                                                        "Treatment_2 vs Control")))
@@ -214,13 +213,15 @@ a <- qpcrREPEATED(data_repeated_measure_1,
                   fill = c("#778899", "#BCD2EE"),
                   factor = "time",
                   axis.text.x.angle = 45,
-                  axis.text.x.hjust = 1)
+                  axis.text.x.hjust = 1,
+                  plot = F)
 
 b <- qpcrREPEATED(data_repeated_measure_2,
                   numberOfrefGenes = 1,
                   factor = "time",
                   axis.text.x.angle = 45,
-                  axis.text.x.hjust = 1)
+                  axis.text.x.hjust = 1,
+                  plot = F)
 
 multiplot(a, b, cols = 2)
 

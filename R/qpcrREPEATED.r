@@ -45,6 +45,7 @@
 #' Block effect is usually considered as random and its interaction with any main effect is not considered.
 #' @param p.adj Method for adjusting p values
 #' @param errorbar Type of error bar, can be \code{se} or \code{ci}.
+#' @param plot  if \code{FALSE}, prevents the plot.
 #' @return A list with 5 elements:
 #' \describe{
 #'   \item{Final_data}{Input data frame plus the weighted Delat Ct values (wDCt)}
@@ -70,24 +71,11 @@
 
 
 
-qpcrREPEATED <- function(x,
-                         numberOfrefGenes,
-                         factor,
-                         block = NULL,
-                         width = 0.5,
-                         fill = "#BFEFFF",
-                         y.axis.adjust = 1,
-                         y.axis.by = 1,
-                         ylab = "Fold Change",
-                         xlab = "none",
-                         fontsize = 12,
-                         fontsizePvalue = 7,
-                         axis.text.x.angle = 0,
-                         axis.text.x.hjust = 0.5,
-                         x.axis.labels.rename = "none",
-                         letter.position.adjust = 0,
-                         p.adj = "none",
-                         errorbar = "se"){
+qpcrREPEATED <- function(x, numberOfrefGenes, factor, block = NULL,
+                         width = 0.5, fill = "#BFEFFF", y.axis.adjust = 1, y.axis.by = 1,
+                         ylab = "Fold Change", xlab = "none", fontsize = 12, fontsizePvalue = 7,
+                         axis.text.x.angle = 0, axis.text.x.hjust = 0.5, x.axis.labels.rename = "none",
+                         letter.position.adjust = 0, p.adj = "none", errorbar = "se", plot = TRUE){
   
   
   
@@ -333,8 +321,12 @@ qpcrREPEATED <- function(x,
     print(outlist2$ANOVA_table)
     cat("\n","Fold Change table:", "\n")
     print(outlist2$FC_statistics_of_the_main_factor)
+    
+    if (plot == TRUE){
     cat("\n","Fold Change plot of the main factor levels:", "\n")
     print(outlist2$FC_Plot)
+    }
+    
     invisible(outlist2)
   }
   print.XX(outlist2)

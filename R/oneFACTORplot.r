@@ -10,7 +10,6 @@
 #' @import dplyr
 #' @import reshape2
 #' @import ggplot2
-#' @import agricolae
 #' @param res an FC data frame object created by \code{qpcrANOVARE(x)$Result} function on a one factor data such as \code{data_1factor}.
 #' @param width a positive number determining bar width.
 #' @param fill  specify a fill color.
@@ -48,26 +47,22 @@
 
 
 
-oneFACTORplot <- function(res,
-                          width = 0.4,
-                          fill = "skyblue",
-                          y.axis.adjust = 0.5,
-                          y.axis.by = 2,
-                          errorbar = "se",
-                          show.letters = TRUE,
-                          letter.position.adjust = 0.1,
-                          ylab = "Relative Expression",
-                          xlab = "none",
-                          fontsize = 12,
-                          fontsizePvalue = 5,
-                          axis.text.x.angle = 0,
-                          axis.text.x.hjust = 0.5){
+oneFACTORplot <- function(res, width = 0.4, fill = "skyblue", y.axis.adjust = 0.5, y.axis.by = 2,
+                          errorbar = "se", show.letters = TRUE, letter.position.adjust = 0.1,
+                          ylab = "Relative Expression", xlab = "none", fontsize = 12,
+                          fontsizePvalue = 5, axis.text.x.angle = 0, axis.text.x.hjust = 0.5){
 
   
   x <- res
   LCL <- x$LCL
   UCL <- x$UCL
   se <- x$se
+  
+  
+  if (any(grepl("letters", names(x)))) {
+    x$letters <- gsub(" ", "", x$letters)
+  }
+  
   
   if (any(grepl("RE", names(x)))) {
   RE <- x$RE

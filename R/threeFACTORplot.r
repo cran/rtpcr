@@ -10,7 +10,6 @@
 #' @import dplyr
 #' @import reshape2
 #' @import ggplot2
-#' @import agricolae
 #' @param res the FC data frame created by \code{qpcrANOVARE(x)$Result} function on a three factorial data such as \code{data_3factor} example data frame.
 #' @param arrangement order based on the columns in the output table (e.g. c(2,3,1) or c(1,3,2)) affecting factor arrangement of the output graph.
 #' @param bar.width a positive number determining bar width.
@@ -45,14 +44,8 @@
 #'     xlab = "condition")
 #'
 #'
-#'
-#' threeFACTORplot(res,
-#'    arrangement = c(1, 2, 3),
-#'    bar.width = 0.5,
-#'    fill = "Greys",
-#'    xlab = "Genotype",
-#'    ylab = "Relative Expression")
-#'
+#' threeFACTORplot(res, arrangement = c(1, 2, 3), bar.width = 0.5, fill = "Greys", 
+#' xlab = "Genotype", ylab = "Relative Expression")
 #'
 #'
 #' # Reordering factor levels to a desired order.
@@ -60,61 +53,40 @@
 #' res$Type <- factor(res$Type, levels = c("S","R"))
 #'
 #' # Producing the plot
-#' threeFACTORplot(res,
-#'    arrangement = c(2, 3, 1),
-#'    bar.width = 0.5,
-#'    fill = "Reds",
-#'    xlab = "Drought",
-#'    ylab = "Relative Expression",
-#'    errorbar = "se",
-#'    legend.title = "Genotype",
-#'    legend.position = c(0.2, 0.8))
+#' threeFACTORplot(res, arrangement = c(2, 3, 1), bar.width = 0.5, 
+#' fill = "Reds", xlab = "Drought", ylab = "Relative Expression", 
+#' errorbar = "se", legend.title = "Genotype", legend.position = c(0.2, 0.8))
 #'
 #'
 #' # When using ci as error, increase the 
 #' # y.axis.adjust value to see the plot correctly!
-#' threeFACTORplot(res,
-#'    arrangement = c(2, 3, 1),
-#'    bar.width = 0.8,
-#'    fill = "Greens",
-#'    xlab = "Drought",
-#'    ylab = "Relative Expression",
-#'    errorbar = "ci",
-#'    y.axis.adjust = 1,
-#'    y.axis.by = 2,
-#'    letter.position.adjust = 0.6,
-#'    legend.title = "Genotype",
-#'    fontsize = 12,
-#'    legend.position = c(0.2, 0.8),
-#'    show.letters = TRUE)
+#' threeFACTORplot(res, arrangement = c(2, 3, 1), bar.width = 0.8, fill = "Greens", 
+#' xlab = "Drought", ylab = "Relative Expression", errorbar = "ci", 
+#' y.axis.adjust = 1, y.axis.by = 2, letter.position.adjust = 0.6, 
+#' legend.title = "Genotype", fontsize = 12, legend.position = c(0.2, 0.8), 
+#' show.letters = TRUE)
 #'
 #'
 #'
 
 
-threeFACTORplot <- function(res,
-                         arrangement = c(1, 2, 3),
-                         bar.width = 0.5,
-                         fill = "Reds",
-                         xlab = "none",
-                         ylab = "Relative Expression",
-                         errorbar = "se",
-                         y.axis.adjust = 0.5,
-                         y.axis.by = 2,
-                         letter.position.adjust = 0.3,
-                         legend.title = "Legend Title",
-                         legend.position = c(0.4, 0.8),
-                         fontsize = 12,
-                         fontsizePvalue = 5,
-                         show.letters = TRUE,
-                         axis.text.x.angle = 0,
-                         axis.text.x.hjust = 0.5){
+threeFACTORplot <- function(res, arrangement = c(1, 2, 3), bar.width = 0.5, fill = "Reds", 
+                            xlab = "none", ylab = "Relative Expression", errorbar = "se", 
+                            y.axis.adjust = 0.5, y.axis.by = 2, letter.position.adjust = 0.3, 
+                            legend.title = "Legend Title", legend.position = c(0.4, 0.8), 
+                            fontsize = 12, fontsizePvalue = 5, show.letters = TRUE, 
+                            axis.text.x.angle = 0, axis.text.x.hjust = 0.5){
   
   x <- res
   x <- x[, c(arrangement, 4:ncol(x))]
   se <- x$se
   LCL <- x$LCL
   UCL <- x$UCL
+  
+  
+  if (any(grepl("letters", names(x)))) {
+    x$letters <- gsub(" ", "", x$letters)
+  }
   
   
   if (any(grepl("RE", names(x)))) {

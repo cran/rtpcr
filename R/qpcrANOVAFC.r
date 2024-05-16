@@ -59,6 +59,7 @@
 #' @param block column name of the block if there is a blocking factor (for correct column arrangement see example data.). When a qPCR experiment is done in multiple qPCR plates, variation resulting from the plates may interfere with the actual amount of gene expression. One solution is to conduct each plate as a complete randomized block so that at least one replicate of each treatment and control is present on a plate. Block effect is usually considered as random and its interaction with any main effect is not considered.
 #' @param p.adj Method for adjusting p values
 #' @param errorbar Type of error bar, can be \code{se} or \code{ci}.
+#' @param plot  if \code{FALSE}, prevents the plot.
 #' @return A list with 7 elements:
 #' \describe{
 #'   \item{Final_data}{Input data frame plus the weighted Delat Ct values (wDCt)}
@@ -85,21 +86,12 @@
 #' @examples
 #'
 #'
-#'  qpcrANOVAFC(data_1factor, 
-#'             numberOfrefGenes = 1,
-#'             mainFactor.column = 1,
-#'             fill = c("#CDC673", "#EEDD82"),
-#'             fontsizePvalue = 5,
-#'             y.axis.adjust = 0.1)
+#' qpcrANOVAFC(data_1factor, numberOfrefGenes = 1, mainFactor.column = 1, 
+#' fill = c("#CDC673", "#EEDD82"), fontsizePvalue = 5, y.axis.adjust = 0.1)
+#' 
 #'
-#' qpcrANOVAFC(data_2factor, 
-#'            numberOfrefGenes = 1,
-#'            mainFactor.column = 2,
-#'            mainFactor.level.order = c("D0", "D1", "D2"),
-#'            fill = c("#79CDCD", "#B4EEB4"),
-#'            analysisType = "ancova",
-#'            fontsizePvalue = 5,
-#'            y.axis.adjust = 0.4)
+#' qpcrANOVAFC(data_2factor, numberOfrefGenes = 1, mainFactor.column = 2,  
+#' analysisType = "ancova", fontsizePvalue = 5, y.axis.adjust = 0.4)
 #'
 #'
 #' # Data from Lee et al., 2020 
@@ -107,81 +99,60 @@
 #' # we get mean of technical reps first:
 #' df <- meanTech(Lee_etal2020qPCR, groups = 1:3)
 #' order <- rev(unique(df$DS))
-#' qpcrANOVAFC(df, 
-#'            numberOfrefGenes = 1, 
-#'            analysisType = "ancova", 
-#'            mainFactor.column = 2,
-#'            mainFactor.level.order = order,
-#'            fill = c("skyblue", "#BFEFFF"),
-#'            y.axis.adjust = 0.05)
+#' qpcrANOVAFC(df, numberOfrefGenes = 1, analysisType = "ancova", 
+#' mainFactor.column = 2, fill = c("skyblue", "#BFEFFF"), y.axis.adjust = 0.05)
 #' 
 #'
 #' df <- meanTech(Lee_etal2020qPCR, groups = 1:3) 
 #' df2 <- df[df$factor1 == "DSWHi",][-1]
-#' qpcrANOVAFC(df2, 
-#'            mainFactor.column = 1,
-#'            mainFactor.level.order = c("D7", "D12", "D15","D18"),
-#'            numberOfrefGenes = 1,
-#'            analysisType = "ancova",
-#'            fontsizePvalue = 5,
-#'            y.axis.adjust = 0.1)
+#' qpcrANOVAFC(df2, mainFactor.column = 1, fontsizePvalue = 5, y.axis.adjust = 0.1,
+#' mainFactor.level.order = c("D7", "D12", "D15","D18"),
+#' numberOfrefGenes = 1, analysisType = "ancova")
 #'
 #'
-#' qpcrANOVAFC(data_2factorBlock,
-#'            numberOfrefGenes = 1,
-#'            mainFactor.column = 1, 
-#'            mainFactor.level.order = c("S", "R"),
-#'            block = "block", 
-#'            fill = c("#CDC673", "#EEDD82"),
-#'            analysisType = "ancova",
-#'            fontsizePvalue = 7,
-#'            y.axis.adjust = 0.1, 
-#'            width = 0.35)
+#' qpcrANOVAFC(data_2factorBlock,  numberOfrefGenes = 1, mainFactor.column = 1, 
+#' mainFactor.level.order = c("S", "R"), block = "block", 
+#' fill = c("#CDC673", "#EEDD82"), analysisType = "ancova",
+#' fontsizePvalue = 7, y.axis.adjust = 0.1, width = 0.35)
+#' 
 #'
 #' addline_format <- function(x,...){gsub('\\s','\n',x)}
 #' order <- unique(data_2factor$Drought)
-#' qpcrANOVAFC(data_1factor,
-#'    numberOfrefGenes = 1,
-#'    mainFactor.column = 1,
-#'    mainFactor.level.order = c("L1","L2","L3"),
-#'    width = 0.5,
-#'    fill = c("skyblue","#79CDCD"),
-#'    y.axis.by = 1,
-#'    letter.position.adjust = 0,
-#'    y.axis.adjust = 1,
-#'    ylab = "Fold Change",
-#'    fontsize = 12,
-#'    x.axis.labels.rename = addline_format(c("Control", 
+#' qpcrANOVAFC(data_1factor, numberOfrefGenes = 1, mainFactor.column = 1,
+#' mainFactor.level.order = c("L1","L2","L3"), width = 0.5,
+#' fill = c("skyblue","#79CDCD"), y.axis.by = 1, letter.position.adjust = 0,
+#' y.axis.adjust = 1, ylab = "Fold Change", fontsize = 12,
+#' x.axis.labels.rename = addline_format(c("Control", 
 #'                                          "Treatment_1 vs Control", 
 #'                                          "Treatment_2 vs Control")))
 #'                                                        
 #'                                                        
 
+qpcrANOVAFC <- function(
+x, 
+numberOfrefGenes, 
+analysisType = "anova", 
+mainFactor.column, 
+mainFactor.level.order = NULL, 
+block = NULL, 
+width = 0.5, 
+fill = "#BFEFFF", 
+y.axis.adjust = 1, 
+y.axis.by = 1, 
+letter.position.adjust = 0.1, 
+ylab = "Fold Change", 
+xlab = "none", 
+fontsize = 12, 
+fontsizePvalue = 7, 
+axis.text.x.angle = 0, 
+axis.text.x.hjust = 0.5, 
+x.axis.labels.rename = "none",
+p.adj = "none",  
+errorbar = "se", 
+plot = TRUE
+)
+{
 
-
-qpcrANOVAFC <- function(x,
-                       numberOfrefGenes,
-                       analysisType = "anova",
-                       mainFactor.column,
-                       mainFactor.level.order = NULL,
-                       block = NULL,
-                       width = 0.5,
-                       fill = "#BFEFFF",
-                       y.axis.adjust = 1,
-                       y.axis.by = 1,
-                       letter.position.adjust = 0.1,
-                       ylab = "Fold Change",
-                       xlab = "none",
-                       fontsize = 12,
-                       fontsizePvalue = 7,
-                       axis.text.x.angle = 0,
-                       axis.text.x.hjust = 0.5,
-                       x.axis.labels.rename = "none",
-                       p.adj = "none",
-                       errorbar = "se"){
-
-
-  
   x <- x[, c(mainFactor.column, (1:ncol(x))[-mainFactor.column])] 
   
   
@@ -465,8 +436,12 @@ qpcrANOVAFC <- function(x,
     print(outlist2$ANCOVA_table)
     cat("\n","Fold Change table:", "\n")
     print(outlist2$Fold_Change)
-    cat("\n","Fold Change plot of the main factor levels:", "\n")
-    print(outlist2$FC_Plot_of_the_main_factor_levels )
+    
+    if (plot == TRUE){
+      cat("\n","Fold Change plot of the main factor levels:", "\n")
+    print(outlist2$FC_Plot_of_the_main_factor_levels)
+    }
+    
     invisible(outlist2)
   }
   print.XX(outlist2)

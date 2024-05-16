@@ -1,6 +1,6 @@
 #' @title Multiple plot function
-#' @description Multiple plot function
-#' @details Producing multiple plots plate using ggplot objects
+#' @description \code{multiplot} function combines multiple ggplot objects into a single plate.
+#' @details Combining multiple ggplot objects into a single plate.
 #' @author gist.github.com/pedroj/ffe89c67282f82c1813d
 #' @export multiplot
 #' @import grid
@@ -17,7 +17,7 @@
 #' 
 #' out2 <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1)$Result
 #' p2 <- oneFACTORplot(out2,
-#'                     width = 0.2,
+#'                     width = 0.4,
 #'                     fill = "skyblue",
 #'                     y.axis.adjust = 0.5,
 #'                     y.axis.by = 1,
@@ -34,8 +34,7 @@
 #'
 #'
 #'
-multiplot <- function(...,
-                      cols=1) {
+multiplot <- function(..., cols=1) {
   
   # Make a list from the ... arguments
   plots <- c(list(...))
