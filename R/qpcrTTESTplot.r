@@ -1,15 +1,18 @@
-#' @title Bar plot of the average fold change (\eqn{\Delta \Delta C_T} method) of the target genes
+#' @title Bar plot of the average fold change (\eqn{\Delta \Delta C_T} method) of target genes
 #' 
-#' @description Bar plot of the average fold change (\eqn{\Delta \Delta C_T} method) values for for any number of target genes under a two-level conditional experimental (e.g. control and treatment).
+#' @description Bar plot of the fold change (\eqn{\Delta \Delta C_T} method) values for for any number of target 
+#' genes under a two-level conditional experimental (e.g. control and treatment).
 #' 
 #' @details The \code{qpcrTTESTplot} function applies a t.test based analysis to any number of target genes 
 #' along with one or two reference gene(s), that have been evaluated under control and treatment conditions. 
-#' It returns the bar plot of the fold change (FC) values for target genes along with the 95\% CI and significance. Sampling may be paired or 
-#' unpaired. Paired samples in quantitative PCR refer to two sample data that are collected from one set of individuals 
+#' It returns the bar plot of the fold change (FC) values for target genes along with the 95\% CI and significance. 
+#' Sampling may be unpaired or paired. Unpaired and paired samples are commonly analyzed using unpaired and 
+#' paired t-test, respectively.Paired samples in quantitative PCR refer to two sample data that are collected 
+#' from one set of individuals 
 #' at two different conditions, for example before and after a treatment or at two different time points. While 
 #' for unpaired samples, two sets of individuals are used: one under untreated and the other set under treated 
 #' condition. Paired samples allow to compare gene expression changes within the same individual, reducing 
-#' inter-individual variability. Unpaired and paired samples are commonly analyzed using unpaired and paired t-test, respectively.
+#' inter-individual variability. 
 #' 
 #' @author Ghader Mirzaghaderi
 #' @export qpcrTTESTplot
@@ -17,7 +20,13 @@
 #' @import dplyr
 #' @import reshape2
 #' @import ggplot2
-#' @param x a data frame. The data frame consists of 4 columns belonging to condition levels, E (efficiency), genes and Ct values, respectively. Each Ct in the following data frame is the mean of technical replicates. Complete amplification efficiencies of 2 is assumed here for all wells but the calculated efficienies can be used we well. We use this data set for Fold Change expression analysis of the target genes in treatment condition compared to normal condition.
+#' 
+#' @param x a data frame. The data frame consists of 4 columns belonging to condition levels, 
+#' E (efficiency), genes and Ct values, respectively. Each Ct in the following data frame is 
+#' the mean of technical replicates. Complete amplification efficiencies of 2 is assumed here 
+#' for all wells but the calculated efficienies can be used we well. We use this data set for 
+#' fold change expression analysis of the target genes in treatment condition compared to 
+#' normal condition. See \href{../doc/vignette.html}{\code{vignette}} for details.
 #' @param numberOfrefGenes number of reference genes. Up to two reference genes can be handled.
 #' @param order a vector determining genes order on the output graph.
 #' @param paired  a logical indicating whether you want a paired t-test.
@@ -138,7 +147,7 @@ qpcrTTESTplot <- function(x, order = "none", numberOfrefGenes, paired = FALSE,
         geom_errorbar(aes(Gene, ymin=as.numeric(Lower.Er), ymax = as.numeric(Upper.Er)), width=0.1)
     } else if(errorbar == "se") {
       p <- p +
-        geom_errorbar(aes(Gene, ymin = as.numeric(Fold_Change), ymax = as.numeric(Fold_Change) + as.numeric(se)), width=0.1)
+        geom_errorbar(aes(Gene, ymin = 2^(log2(as.numeric(Fold_Change)) - as.numeric(se)), ymax =  2^(log2(as.numeric(Fold_Change)) + as.numeric(se))), width=0.1)
     }
     
 
@@ -153,7 +162,7 @@ qpcrTTESTplot <- function(x, order = "none", numberOfrefGenes, paired = FALSE,
     p <- p +
       geom_text(aes(label = convert_to_character(pvalue),
                     x = Gene,
-                    y = as.numeric(Fold_Change) + as.numeric(se)),
+                    y = 2^(log2(as.numeric(Fold_Change)) + as.numeric(se))),
                 vjust = -0.5, size = fontsizePvalue)
   }
 
@@ -172,7 +181,7 @@ qpcrTTESTplot <- function(x, order = "none", numberOfrefGenes, paired = FALSE,
                            limits = c(0, max(as.numeric(Fold_Change)) + max(as.numeric(Upper.Er) + y.axis.adjust) + 1), expand = c(0, 0))
     } else if(errorbar == "se") {
       p <- p +
-        scale_y_continuous(breaks=seq(0, max(as.numeric(Fold_Change)) + max(as.numeric(se) + y.axis.adjust) + 1, by = y.axis.by),
+        scale_y_continuous(breaks = seq(0, max(as.numeric(Fold_Change)) + max(as.numeric(se) + y.axis.adjust) + 1, by = y.axis.by),
                            limits = c(0, max(as.numeric(Fold_Change)) + max(as.numeric(se) + y.axis.adjust) + 1), expand = c(0, 0))
       }
     

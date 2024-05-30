@@ -66,12 +66,11 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 # See sample data
 data_2factor
 
-order <- unique(data_2factor$Drought)
 qpcrANOVAFC(data_2factor, 
            numberOfrefGenes = 1, 
+           block = NULL,
            analysisType = "ancova",
            mainFactor.column = 2,
-           mainFactor.level.order = order,
            fontsizePvalue = 4,
            x.axis.labels.rename = "none")
 
@@ -85,14 +84,15 @@ data_3factor
 
 # Applying ANOVA analysis
 res <- qpcrANOVARE(data_2factor,
-                   numberOfrefGenes = 1)
+                   numberOfrefGenes = 1,
+                   block = NULL)
 res$Result
 res$Post_hoc_Test
 
 ## ----eval= T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "A: bar plot representing Relative expression of a gene under three levels of a factor generated using `oneFACTORplot` function, B: Plot of the Fold change expression produced by the `qpcrANOVAFC` function from the same data used for 'A'. The first element in the `mainFactor.level.order` argument (here L1) is served as the Reference level, although the x-axis names have later been renamed by the `x.axis.labels.rename` argument. Error bars represent 95% confidence interval in A and standard error in B."----
 
 # Before plotting, the result needs to be extracted as below:
-out2 <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1)$Result
+out2 <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1, block = NULL)$Result
 
 f1 <- oneFACTORplot(out2,
               width = 0.2,
@@ -111,10 +111,10 @@ f1 <- oneFACTORplot(out2,
 addline_format <- function(x,...){
     gsub('\\s','\n',x)
 }
-order <- unique(data_2factor$Drought)
 f2 <- qpcrANOVAFC(data_1factor,
                  numberOfrefGenes = 1,
                  mainFactor.column = 1,
+                 block = NULL,
                  mainFactor.level.order = c("L1","L2","L3"),
                  width = 0.5,
                  fill = c("skyblue","#79CDCD"),
@@ -135,13 +135,14 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 ## ----eval= T, include = T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "Relative expression of a target gene under two different factors of genotype (with two levels) and drought (with three levels). Error bars represent standard error. Means (columns) lacking letters in common have significant difference at alpha = 0.05 as resulted from a `LSD.test`."----
 
 # Before plotting, the result needs to be extracted as below:
-res <- qpcrANOVARE(data_2factor, numberOfrefGenes = 1)$Result
-Final_data <- qpcrANOVARE(data_2factor, numberOfrefGenes = 1)$Final_data
+res <- qpcrANOVARE(data_2factor, numberOfrefGenes = 1, block = NULL)$Result
+Final_data <- qpcrANOVARE(data_2factor, numberOfrefGenes = 1, block = NULL)$Final_data
 
 # Plot of the 'res' data with 'Genotype' as grouping factor
 q1 <- twoFACTORplot(res,
    x.axis.factor = Drought,
    group.factor = Genotype,
+   errorbar = "se",
    width = 0.5,
    fill = "Greens",
    y.axis.adjust = 0.5,
@@ -156,6 +157,7 @@ q1 <- twoFACTORplot(res,
 q2 <- twoFACTORplot(res,
    x.axis.factor = Genotype,
    group.factor = Drought,
+   errorbar = "se",
    xlab = "Genotype",
    fill = "Blues",
    legend.position = c(0.15, 0.8),
@@ -169,7 +171,7 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
 ## ----fig.height = 5, fig.width = 11, fig.align = 'center', fig.cap = "A and B) Relative expression (RE) of a target gene from a three-factorial experiment data produced by  `threeFACTORplot`  function. Error bars represent standard error (A), although can be set to confidence interval (B). Means (columns) lacking letters in common have significant differences at alpha = 0.05 as resulted from an ‘LSD.test’."----
 # Before plotting, the result needs to be extracted as below:
-res <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1)$Result
+res <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1, block = NULL)$Result
 res
 
 # releveling a factor levels first
@@ -180,6 +182,7 @@ res$Type <- factor(res$Type, levels = c("S","R"))
 # This determines the columns order and shapes the plot output.
 p1 <- threeFACTORplot(res,
     arrangement = c(3, 1, 2),
+    errorbar = "se",
     legend.position = c(0.2, 0.85),
     xlab = "condition",
     fontsizePvalue = 4)
@@ -210,6 +213,7 @@ grid.text("B", x = 0.52, y = 1, just = c("right", "top"), gp=gpar(fontsize=16))
 
 a <- qpcrREPEATED(data_repeated_measure_1,
                   numberOfrefGenes = 1,
+                  block = NULL,
                   fill = c("#778899", "#BCD2EE"),
                   factor = "time",
                   axis.text.x.angle = 45,
@@ -219,6 +223,7 @@ a <- qpcrREPEATED(data_repeated_measure_1,
 b <- qpcrREPEATED(data_repeated_measure_2,
                   numberOfrefGenes = 1,
                   factor = "time",
+                  block = NULL,
                   axis.text.x.angle = 45,
                   axis.text.x.hjust = 1,
                   plot = F)
@@ -229,13 +234,11 @@ multiplot(a, b, cols = 2)
 # Returning fold change values from a fitted model.
 # Firstly, result of `qpcrANOVAFC` or `qpcrREPEATED` is 
 # acquired which includes a model object:
-res <- qpcrANOVAFC(data_3factor, numberOfrefGenes = 1, mainFactor.column = 1)
+res <- qpcrANOVAFC(data_3factor, numberOfrefGenes = 1, mainFactor.column = 1, block = NULL)
 
 # Returning fold change values of Conc levels from a fitted model:
 qpcrMeans(res$lm_ANOVA, specs = "Conc")
 
-# Returning fold change values of Conc levels sliced by Type:
-qpcrMeans(res$lm_ANOVA, specs = "Conc | Type")
 
 # Returning fold change values of Conc levels sliced by Type*SA:
 qpcrMeans(res$lm_ANOVA, specs = "Conc | (Type*SA)")
@@ -243,11 +246,16 @@ qpcrMeans(res$lm_ANOVA, specs = "Conc | (Type*SA)")
 # Returning fold change values of Conc
 qpcrMeans(res$lm_ANOVA, specs = "Conc * Type")
 
+# Returning fold change values of Conc levels sliced by Type:
+res2 <- qpcrMeans(res$lm_ANOVA, specs = "Conc | Type")
+twoFACTORplot(res2, x.axis.factor = contrast, ylab = "Fold Change",
+              group.factor = Type, errorbar = "ci")
+
 ## ----eval=T, include = T, fig.height = 4, fig.width = 6, fig.align = 'center'----
 
 library(ggplot2)
-b <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1)$Result
-a <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1)$Final_data
+b <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1, block = NULL)$Result
+a <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1, block = NULL)$Final_data
 
 # Arrange factor levels to your desired order:
 b$Conc <- factor(b$Conc, levels = c("L","M","H"))
@@ -276,7 +284,7 @@ ggplot(b, aes(x = Type, y = RE, fill = factor(Conc))) +
 
 ## ----eval= T, eval= T, fig.height = 5, fig.width = 10, fig.align = 'center', fig.cap = "QQ-plot for the normality assessment of the residuals derived from `t.test` or `lm` functions."----
 
-residuals <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1)$lmCRD$residuals
+residuals <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1, block = NULL)$lmCRD$residuals
 shapiro.test(residuals) 
 
 par(mfrow = c(1,2))
@@ -289,7 +297,8 @@ qqline(residuals, col = "red")
 a <- qpcrREPEATED(data_repeated_measure_2, 
                   numberOfrefGenes = 1, 
                   factor = "time", 
-                  y.axis.adjust = 0.4)
+                  block = NULL,
+                  y.axis.adjust = 1.5)
 
 
 residuals(a$lm)
@@ -308,11 +317,11 @@ meanTech(data_withTechRep, groups = 1:4)
 
 a <- qpcrREPEATED(data_repeated_measure_1,
              numberOfrefGenes = 1,
-             factor = "time")
+             factor = "time", block = NULL)
 
 b <- qpcrREPEATED(data_repeated_measure_2,
                   factor = "time",
-                  numberOfrefGenes = 1)
+                  numberOfrefGenes = 1, block = NULL)
 
 
 a1 <- a$FC_statistics_of_the_main_factor
@@ -323,8 +332,8 @@ c$gene <- factor(c(1,1,1,2,2,2))
 c
 
 twoFACTORplot(c, x.axis.factor = contrast, 
-              group.factor = gene, fill = 'Reds',
-              ylab = "FC", axis.text.x.angle = 45,
+              group.factor = gene, fill = 'Reds', errorbar = "se",
+              ylab = "FC", axis.text.x.angle = 45, y.axis.adjust = 1.5,
               axis.text.x.hjust = 1, legend.position = c(0.2, 0.8))
 
 ## ----eval= F, include = T, fig.height = 4, fig.width = 5----------------------
@@ -332,6 +341,7 @@ twoFACTORplot(c, x.axis.factor = contrast,
 #  b <- qpcrANOVAFC(data_2factor,
 #              numberOfrefGenes = 1,
 #              mainFactor.column = 1,
+#              block = NULL,
 #              mainFactor.level.order = c("S", "R"),
 #              fill = c("#CDC673", "#EEDD82"),
 #              analysisType = "ancova",

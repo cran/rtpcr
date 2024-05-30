@@ -2,7 +2,7 @@
 % Please edit documentation in R/oneFACTORplot.r
 \name{oneFACTORplot}
 \alias{oneFACTORplot}
-\title{Bar plot of the relative gene expression (\eqn{\Delta C_T} method) from the \code{qpcrANOVARE} output of a one-factor experiment data}
+\title{Bar plot of the relative gene expression (\eqn{\Delta C_T} method) from the \code{qpcrANOVARE} output of a single-factor experiment data}
 \usage{
 oneFACTORplot(
   res,
@@ -10,7 +10,7 @@ oneFACTORplot(
   fill = "skyblue",
   y.axis.adjust = 0.5,
   y.axis.by = 2,
-  errorbar = "se",
+  errorbar,
   show.letters = TRUE,
   letter.position.adjust = 0.1,
   ylab = "Relative Expression",
@@ -51,7 +51,7 @@ oneFACTORplot(
 \item{axis.text.x.hjust}{horizontal justification of x axis text}
 }
 \value{
-Bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
+Bar plot of the average fold change for target genes along with the significance and the standard error or 95\% confidence interval as error bars.
 }
 \description{
 Bar plot of the relative expression of a gene along with the standard error (se), 95\% confidence interval (ci) and significance. \code{oneFACTORplot} is mainly useful for a one-factor experiment with more than two levels.
@@ -62,13 +62,13 @@ The \code{oneFACTORplot} function generates the bar plot of the average fold cha
 \examples{
 
 # Before plotting, the result needs to be extracted as below:
-res <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1)$Result
+res <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1, block = NULL)$Result
 
 # Bar plot
 oneFACTORplot(res,
-         width = 0.2,
+         width = 0.4,
          fill = "skyblue",
-         y.axis.adjust = 0,
+         y.axis.adjust = 1,
          y.axis.by = 0.2,
          errorbar = "se",
          show.letters = TRUE,

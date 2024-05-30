@@ -1,33 +1,31 @@
 #' @title Fold change (\eqn{\Delta \Delta C_T} method) analysis using ANOVA and ANCOVA
 #' 
-#' @description ANOVA (analysis of variance) and ANCOVA (analysis of covariance) can be performed using 
-#' \code{qpcrANOVAFC} function, for uni- or multi-factorial experiment data. This function performs fold 
-#' change or \eqn{\Delta \Delta C_T} method analysis for the target gene even
-#' if there is only one factor (without covariate variable), although, for the data with 
-#' only one factor, ANCOVA is equivalent to ANOVA. The bar plot of the fold changes (FC) 
-#' values along with the standard error (se) and confidence interval (ci) is also returned by 
+#' @description Fold change (\eqn{\Delta \Delta C_T} method) analysis of qPCR data can be done using 
+#' ANOVA (analysis of variance) and ANCOVA (analysis of covariance) by the 
+#' \code{qpcrANOVAFC} function, for uni- or multi-factorial experiment data. The bar plot of the fold changes (FC) 
+#' values along with the standard error (se) and confidence interval (ci) is returned by 
 #' the \code{qpcrANOVAFC} function. 
 #' 
-#' @details The \code{qpcrANOVAFC} function applies both ANOVA and ANCOVA analysis to the data of a uni- or 
-#' multi-factorial experiment, although for the data with 
-#' only one factor, the ANCOVA analysis is equivalent to ANOVA. ANCOVA is basically appropriate when the 
-#' levels of a factor are #' also affected by uncontrolled quantitative covariate(s). 
+#' @details Fold change (\eqn{\Delta \Delta C_T} method) analysis of qPCR data can be done using 
+#' ANOVA (analysis of variance) and ANCOVA (analysis of covariance) by the 
+#' \code{qpcrANOVAFC} function, for uni- or multi-factorial experiment data. 
+#' If there are more than one factor, FC value calculations for 
+#' the `mainFactor.column` and the statistical analysis is performed based on a full model factorial 
+#' experiment by default. However, if `ancova` is defined for the `analysisType` argument,
+#' FC values are calculated for the levels of the `mainFactor.column` and the other factors are 
+#' used as covariate(s) in the analysis of variance, but we should consider ANCOVA table:
+#' if the interaction between the main factor and covariate is significant, ANCOVA is not appropriate in this case. 
+#' ANCOVA is basically used when a factor is affected by uncontrolled quantitative covariate(s). 
 #' For example, suppose that wDCt of a target gene in a plant is affected by temperature. The gene may 
 #' also be affected by drought. Since we already know that temperature affects the target gene, we are 
 #' interested to know if the gene expression is also altered by the drought levels. We can design an 
 #' experiment to understand the gene behavior at both temperature and drought levels at the same time. 
 #' The drought is another factor (the covariate) that may affect the expression of our gene under the 
 #' levels of the first factor i.e. temperature. The data of such an experiment can be analyzed by ANCOVA 
-#' or even ANOVA based on a factorial experiment using \code{qpcrANOVAFC}. This function performs FC 
+#' or using ANOVA based on a factorial experiment using \code{qpcrANOVAFC}. \code{qpcrANOVAFC} function performs FC 
 #' analysis even there is only one factor (without covariate or factor  variable). Bar plot of fold changes 
-#' (FC) values along with the pair-wise errors (square roots of pooled variances of each pair of samples) are also returned by the 
-#' \code{qpcrANOVAFC} function. There is also a function called \code{oneFACTORplot} which returns RE values 
-#' and related plot for a one-factor-experiment with more than two levels.
-#' Along with the ANCOVA, the \code{qpcrANOVAFC} also performs a full model factorial analysis of variance. 
-#' If there is covariate variable(s), before ANCOVA analysis, it is better to run ANOVA based on a 
-#' factorial design to see if the main factor and covariate(s) interaction is significant or not. 
-#' If the pvalue of the interaction effect is smaller than 0.05, then the interaction between the main factor and covariate 
-#' is significant, suggesting that ANCOVA is not appropriate in this case.
+#' (FC) values along with the standard errors are also returned by the \code{qpcrANOVAFC} function.
+#'  
 #' @author Ghader Mirzaghaderi
 #' @export qpcrANOVAFC
 #' @import tidyr
@@ -36,16 +34,24 @@
 #' @import ggplot2
 #' @import lmerTest
 #' @import emmeans
-#' @param x a data frame of condition(s), biological replicates, efficiency (E) and Ct values of target and reference genes. Each Ct value in the data frame is the mean of technical replicates. NOTE: Each line belongs to a separate individual reflecting a non-repeated measure experiment). Please refer to the vignette for preparing your data frame correctly.
-#' @param numberOfrefGenes number of reference genes which is 1 or 2 (Up to two reference genes can be handled).
+#' @param x a data frame of condition(s), biological replicates, efficiency (E) and Ct values of 
+#' target and reference genes. Each Ct value in the data frame is the mean of technical replicates. 
+#' \strong{NOTE:} Each line belongs to a separate individual reflecting a non-repeated measure experiment). 
+#' See \href{../doc/vignette.html}{\code{vignette}}, section "data structure and column arrangement" for details.
+#' 
+#' @param numberOfrefGenes number of reference genes which is 1 or 2 (up to two reference genes can be handled).
 #' @param analysisType should be one of "ancova" or "anova". Default is "anova".
-#' @param mainFactor.column the factor for which FC is calculated for its levels. If \code{ancova} is selected as \code{analysisType}, the remaining factors (if any) are considered as covariate(s).
-#' @param mainFactor.level.order  NULL or a vector of main factor level names. If \code{NULL}, the first level of the \code{mainFactor.column} is used 
-#' as reference or calibrator. If a vector of main factor levels (in any order) is specified, the first level in the vector is used as calibrator. Calibrator is the reference level or sample that all others are compared to. Examples are untreated 
+#' @param mainFactor.column the factor for which fold change expression is calculated for its levels. 
+#' If \code{ancova} is selected as \code{analysisType}, the remaining factors (if any) are considered as covariate(s).
+#' @param mainFactor.level.order  NULL (default) or a vector of main factor level names. If \code{NULL}, 
+#' the first level of the \code{mainFactor.column} is used 
+#' as calibrator. If a vector of main factor levels (in any order) is specified, the first level in the vector is 
+#' used as calibrator. Calibrator is the reference level or sample that all others are compared to. Examples are untreated 
 #' of time 0. The FC value of the reference or calibrator level is 1 because it is not changed compared to itself.
-#' If NULL, the first level of the main factor column is used as calibrator.
+#' 
 #' @param width a positive number determining bar width. 
-#' @param fill  specify the fill color for the columns in the bar plot. If a vector of two colors is specified, the reference level is differentialy colored.
+#' @param fill  specify the fill color for the columns in the bar plot. If a vector of two colors is specified, 
+#' the reference level is differentialy colored.
 #' @param y.axis.adjust  a negative or positive value for reducing or increasing the length of the y axis.
 #' @param letter.position.adjust adjust the distance between the signs and the error bars.
 #' @param y.axis.by determines y axis step length
@@ -56,7 +62,12 @@
 #' @param axis.text.x.angle angle of x axis text
 #' @param axis.text.x.hjust horizontal justification of x axis text
 #' @param x.axis.labels.rename a vector replacing the x axis labels in the bar plot
-#' @param block column name of the block if there is a blocking factor (for correct column arrangement see example data.). When a qPCR experiment is done in multiple qPCR plates, variation resulting from the plates may interfere with the actual amount of gene expression. One solution is to conduct each plate as a complete randomized block so that at least one replicate of each treatment and control is present on a plate. Block effect is usually considered as random and its interaction with any main effect is not considered.
+#' @param block column name of the block if there is a blocking factor (for correct column arrangement see 
+#' example data.). When a qPCR experiment is done in multiple qPCR plates, variation resulting from the 
+#' plates may interfere with the actual amount of gene expression. One solution is to conduct each plate 
+#' as a complete randomized block so that at least one replicate of each treatment and control is present 
+#' on a plate. Block effect is usually considered as random and its interaction with any main effect 
+#' is not considered.
 #' @param p.adj Method for adjusting p values
 #' @param errorbar Type of error bar, can be \code{se} or \code{ci}.
 #' @param plot  if \code{FALSE}, prevents the plot.
@@ -67,7 +78,7 @@
 #'   \item{lm_ANCOVA}{lm of ANCOVA analysis-type}
 #'   \item{ANOVA_table}{ANOVA table}
 #'   \item{ANCOVA_table}{ANCOVA table}
-#'   \item{FC Table}{Table of FC values, significance and confidence limits for the main factor levels.}
+#'   \item{FC Table}{Table of FC values, significance and confidence interval and standard error with the lower and upper limits for the main factor levels.}
 #'   \item{Bar plot of FC values}{Bar plot of the fold change values for the main factor levels.}
 #' }
 #' 
@@ -86,43 +97,38 @@
 #' @examples
 #'
 #'
-#' qpcrANOVAFC(data_1factor, numberOfrefGenes = 1, mainFactor.column = 1, 
+#' qpcrANOVAFC(data_1factor, numberOfrefGenes = 1, mainFactor.column = 1, block = NULL, 
 #' fill = c("#CDC673", "#EEDD82"), fontsizePvalue = 5, y.axis.adjust = 0.1)
 #' 
 #'
-#' qpcrANOVAFC(data_2factor, numberOfrefGenes = 1, mainFactor.column = 2,  
-#' analysisType = "ancova", fontsizePvalue = 5, y.axis.adjust = 0.4)
+#' qpcrANOVAFC(data_2factor, numberOfrefGenes = 1, mainFactor.column = 2, block = NULL, 
+#' analysisType = "ancova", fontsizePvalue = 5, y.axis.adjust = 1)
 #'
 #'
-#' # Data from Lee et al., 2020 
-#' # Here, the data set contains technical replicates so 
-#' # we get mean of technical reps first:
+#' # Data from Lee et al., 2020, Here, the data set contains technical 
+#' # replicates so we get mean of technical replicates first:
 #' df <- meanTech(Lee_etal2020qPCR, groups = 1:3)
-#' order <- rev(unique(df$DS))
-#' qpcrANOVAFC(df, numberOfrefGenes = 1, analysisType = "ancova", 
+#' qpcrANOVAFC(df, numberOfrefGenes = 1, analysisType = "ancova", block = NULL, 
 #' mainFactor.column = 2, fill = c("skyblue", "#BFEFFF"), y.axis.adjust = 0.05)
 #' 
-#'
-#' df <- meanTech(Lee_etal2020qPCR, groups = 1:3) 
-#' df2 <- df[df$factor1 == "DSWHi",][-1]
-#' qpcrANOVAFC(df2, mainFactor.column = 1, fontsizePvalue = 5, y.axis.adjust = 0.1,
-#' mainFactor.level.order = c("D7", "D12", "D15","D18"),
-#' numberOfrefGenes = 1, analysisType = "ancova")
-#'
-#'
+#' 
 #' qpcrANOVAFC(data_2factorBlock,  numberOfrefGenes = 1, mainFactor.column = 1, 
 #' mainFactor.level.order = c("S", "R"), block = "block", 
 #' fill = c("#CDC673", "#EEDD82"), analysisType = "ancova",
 #' fontsizePvalue = 7, y.axis.adjust = 0.1, width = 0.35)
 #' 
+#' 
+#' df <- meanTech(Lee_etal2020qPCR, groups = 1:3) 
+#' df2 <- df[df$factor1 == "DSWHi",][-1]
+#' qpcrANOVAFC(df2, mainFactor.column = 1, fontsizePvalue = 5, y.axis.adjust = 2,
+#' block = NULL, numberOfrefGenes = 1, analysisType = "anova")
+#' 
 #'
 #' addline_format <- function(x,...){gsub('\\s','\n',x)}
-#' order <- unique(data_2factor$Drought)
 #' qpcrANOVAFC(data_1factor, numberOfrefGenes = 1, mainFactor.column = 1,
-#' mainFactor.level.order = c("L1","L2","L3"), width = 0.5,
-#' fill = c("skyblue","#79CDCD"), y.axis.by = 1, letter.position.adjust = 0,
-#' y.axis.adjust = 1, ylab = "Fold Change", fontsize = 12,
-#' x.axis.labels.rename = addline_format(c("Control", 
+#' block = NULL, fill = c("skyblue","#79CDCD"), y.axis.by = 1, 
+#' letter.position.adjust = 0, y.axis.adjust = 1, ylab = "Fold Change", 
+#' fontsize = 12, x.axis.labels.rename = addline_format(c("Control", 
 #'                                          "Treatment_1 vs Control", 
 #'                                          "Treatment_2 vs Control")))
 #'                                                        
@@ -131,13 +137,13 @@
 qpcrANOVAFC <- function(
 x, 
 numberOfrefGenes, 
-analysisType = "anova", 
 mainFactor.column, 
+analysisType = "anova",
 mainFactor.level.order = NULL, 
-block = NULL, 
+block, 
 width = 0.5, 
 fill = "#BFEFFF", 
-y.axis.adjust = 1, 
+y.axis.adjust = 2, 
 y.axis.by = 1, 
 letter.position.adjust = 0.1, 
 ylab = "Fold Change", 
@@ -153,6 +159,17 @@ plot = TRUE
 )
 {
 
+  if (missing(numberOfrefGenes)) {
+    stop("argument 'numberOfrefGenes' is missing, with no default")
+  }
+  if (missing(mainFactor.column)) {
+    stop("argument 'mainFactor.column' is missing, with no default")
+  }
+  if (missing(block)) {
+    stop("argument 'block' is missing, with no default. Requires NULL or a blocking factor column.")
+  }
+  
+  
   x <- x[, c(mainFactor.column, (1:ncol(x))[-mainFactor.column])] 
   
   
@@ -160,7 +177,8 @@ plot = TRUE
     x[,1] <- factor(x[,1], levels = unique(x[,1]))
     mainFactor.level.order <- unique(x[,1])
     calibrartor <- x[,1][1]
-    warning(paste("The", calibrartor, "level was used as calibrator."))
+    #warning(paste("The", calibrartor, "level was used as calibrator."))
+    warning(structure(paste("The", calibrartor, "level was used as calibrator."), foreground = "blue"))
   } else if (any(is.na(match(unique(x[,1]), mainFactor.level.order))) == TRUE){
     stop("The `mainFactor.level.order` doesn't match main factor levels.")
   } else {
@@ -366,9 +384,9 @@ plot = TRUE
                        vjust = -0.5, size = fontsizePvalue)
   } else if(errorbar == "se") {
     pfc2 <- pfc2 +
-      geom_errorbar(aes(contrast, ymin = FCp, ymax =  FCp + se), width=0.1) +
+      geom_errorbar(aes(contrast, ymin = 2^(log2(FCp) - se), ymax =  2^(log2(FCp) + se)), width=0.1) +
       geom_text(aes(label = significance, x = contrast,
-                           y = FCp + se + letter.position.adjust),
+                           y = 2^(log2(FCp) + se) + letter.position.adjust),
                        vjust = -0.5, size = fontsizePvalue)
     }
     
@@ -419,7 +437,9 @@ plot = TRUE
   
   
   
-  
+  tableC <- data.frame(tableC, 
+                       Lower.se = round(2^(log2(tableC$FC) - tableC$se), 4), 
+                       Upper.se = round(2^(log2(tableC$FC) + tableC$se), 4))
   
   outlist2 <- structure(list(Final_data = x,
                    lm_ANOVA = lm_ANOVA,
@@ -430,15 +450,15 @@ plot = TRUE
                    FC_Plot_of_the_main_factor_levels = pfc2), class = "XX")
   
   print.XX <- function(outlist2){
-    cat("ANOVA table:", "\n")
+    cat("ANOVA table", "\n")
     print(outlist2$ANOVA_table)
-    cat("\n","ANCOVA table:", "\n")
+    cat("\n", sep = '', "ANCOVA table", "\n")
     print(outlist2$ANCOVA_table)
-    cat("\n","Fold Change table:", "\n")
+    cat("\n", sep = '', "Fold Change table", "\n")
     print(outlist2$Fold_Change)
     
     if (plot == TRUE){
-      cat("\n","Fold Change plot of the main factor levels:", "\n")
+      cat("\n", sep = '', "Fold Change plot of the main factor levels", "\n")
     print(outlist2$FC_Plot_of_the_main_factor_levels)
     }
     

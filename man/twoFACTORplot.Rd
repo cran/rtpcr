@@ -13,7 +13,7 @@ twoFACTORplot(
   y.axis.adjust = 0.5,
   y.axis.by = 2,
   show.errorbars = TRUE,
-  errorbar = "se",
+  errorbar,
   show.letters = TRUE,
   letter.position.adjust = 0.1,
   ylab = "Relative Expression",
@@ -63,7 +63,7 @@ twoFACTORplot(
 \item{axis.text.x.hjust}{horizontal justification of x axis text}
 }
 \value{
-Bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
+Bar plot of the average fold change for target genes along with the standard error or 95\% confidence interval as error bars.
 }
 \description{
 Bar plot of the relative expression (\eqn{\Delta C_T} method) of a gene along with the standard error (se), 95\% confidence interval (ci) and significance
@@ -77,7 +77,7 @@ The \code{twoFACTORplot} function generates the bar plot of the average fold cha
 data_2factor
 
 # Before generating plot, the result table needs to be extracted as below:
-res <- qpcrANOVARE(data_2factor, numberOfrefGenes = 1)$Result
+res <- qpcrANOVARE(data_2factor, numberOfrefGenes = 1, block = NULL)$Result
 
 # Plot of the 'res' data with 'Genotype' as grouping factor
 twoFACTORplot(res,
@@ -108,11 +108,11 @@ twoFACTORplot(res,
 # Combining FC results of two different genes:
 a <- qpcrREPEATED(data_repeated_measure_1,
                   numberOfrefGenes = 1,
-                  factor = "time")
+                  factor = "time", block = NULL, plot = FALSE)
 
 b <- qpcrREPEATED(data_repeated_measure_2,
                   factor = "time",
-                  numberOfrefGenes = 1)
+                  numberOfrefGenes = 1, block = NULL, plot = FALSE)
 
 a1 <- a$FC_statistics_of_the_main_factor
 b1 <- b$FC_statistics_of_the_main_factor
@@ -123,6 +123,7 @@ c
 twoFACTORplot(c, x.axis.factor = contrast, 
               group.factor = gene, fill = 'Reds',
               ylab = "FC", axis.text.x.angle = 45,
+              errorbar = "se", y.axis.adjust = 1,
               axis.text.x.hjust = 1)
 
 

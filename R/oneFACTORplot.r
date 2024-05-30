@@ -1,4 +1,4 @@
-#' @title Bar plot of the relative gene expression (\eqn{\Delta C_T} method) from the \code{qpcrANOVARE} output of a one-factor experiment data
+#' @title Bar plot of the relative gene expression (\eqn{\Delta C_T} method) from the \code{qpcrANOVARE} output of a single-factor experiment data
 #' 
 #' @description Bar plot of the relative expression of a gene along with the standard error (se), 95\% confidence interval (ci) and significance. \code{oneFACTORplot} is mainly useful for a one-factor experiment with more than two levels.
 #' 
@@ -24,17 +24,17 @@
 #' @param show.letters a logical variable. If TRUE, mean grouping letters are added to the bars.
 #' @param axis.text.x.angle angle of x axis text
 #' @param axis.text.x.hjust horizontal justification of x axis text
-#' @return Bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
+#' @return Bar plot of the average fold change for target genes along with the significance and the standard error or 95\% confidence interval as error bars.
 #' @examples
 #'
 #' # Before plotting, the result needs to be extracted as below:
-#' res <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1)$Result
+#' res <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1, block = NULL)$Result
 #'
 #' # Bar plot
 #' oneFACTORplot(res,
-#'          width = 0.2,
+#'          width = 0.4,
 #'          fill = "skyblue",
-#'          y.axis.adjust = 0,
+#'          y.axis.adjust = 1,
 #'          y.axis.by = 0.2,
 #'          errorbar = "se",
 #'          show.letters = TRUE,
@@ -48,10 +48,19 @@
 
 
 oneFACTORplot <- function(res, width = 0.4, fill = "skyblue", y.axis.adjust = 0.5, y.axis.by = 2,
-                          errorbar = "se", show.letters = TRUE, letter.position.adjust = 0.1,
+                          errorbar, show.letters = TRUE, letter.position.adjust = 0.1,
                           ylab = "Relative Expression", xlab = "none", fontsize = 12,
                           fontsizePvalue = 5, axis.text.x.angle = 0, axis.text.x.hjust = 0.5){
 
+  
+  if (!("data.frame" %in% class(res))) {
+    stop(deparse(substitute(res)), " is not a data frame")
+  }
+  
+  if (missing(errorbar)) {
+    stop("argument 'errorbar' is missing, with no default")
+  }
+  
   
   x <- res
   LCL <- x$LCL
@@ -70,7 +79,8 @@ oneFACTORplot <- function(res, width = 0.4, fill = "skyblue", y.axis.adjust = 0.
   q1f1 <- ggplot(x, aes(rownames(x), y = RE, group = rownames(x))) +
     geom_col(color = "black", fill = fill[1], width = width) + 
   #geom_hline(aes(yintercept = 1), col = "red", linetype = 2, show.legend = FALSE) +
-  geom_errorbar(aes(ymin = RE, ymax = RE + se), width = 0.1) +
+  geom_errorbar(aes(ymin = 2^(log2(RE) - se), ymax =  2^(log2(RE) + se)), width = 0.1) +
+    # ymin = RE, ymax = RE + se
     ylab(ylab) +
     xlab(xlab) +
     theme_bw() +
@@ -83,7 +93,7 @@ oneFACTORplot <- function(res, width = 0.4, fill = "skyblue", y.axis.adjust = 0.
 
   if (show.letters) {
     q1f1 <-q1f1 +
-      geom_text(data = x, aes(label = letters, x = rownames(x), y = RE + se + letter.position.adjust),
+      geom_text(data = x, aes(label = letters, x = rownames(x), y = 2^(log2(RE) + se) + letter.position.adjust),
                 vjust = -0.5, size = fontsizePvalue)
   }
   
@@ -122,21 +132,7 @@ oneFACTORplot <- function(res, width = 0.4, fill = "skyblue", y.axis.adjust = 0.
       xlab(xlab)
   }
   } 
-
-  
-  # if(errorbar == "se") {
-  #   out1 <- list(plot = q1f1)
-  #   
-  # } else if(errorbar == "ci") {
-  #   out1 <- list(plot = q1f1)
-  # }
   }
-  
-
-  
-  
-  
-  
   
   
   
@@ -161,7 +157,7 @@ oneFACTORplot <- function(res, width = 0.4, fill = "skyblue", y.axis.adjust = 0.
     }
     
     #geom_hline(aes(yintercept = 1), col = "red", linetype = 2, show.legend = FALSE) +
-    q1f1 <- q1f1 + geom_errorbar(aes(ymin = FC, ymax = FC + se), width = 0.1) +
+    q1f1 <- q1f1 + geom_errorbar(aes(ymin = 2^(log2(FC) - se), ymax =  2^(log2(FC) + se)), width = 0.1) +
       ylab(ylab) +
       xlab(xlab) +
       theme_bw() +
@@ -174,7 +170,7 @@ oneFACTORplot <- function(res, width = 0.4, fill = "skyblue", y.axis.adjust = 0.
     
     if (show.letters) {
       q1f1 <-q1f1 +
-        geom_text(data = x, aes(label = letters, x = contrast, y = FC + se + letter.position.adjust),
+        geom_text(data = x, aes(label = letters, x = contrast, y = 2^(log2(FC) + se) + letter.position.adjust),
                   vjust = -0.5, size = fontsizePvalue)
     }
     
@@ -226,14 +222,6 @@ oneFACTORplot <- function(res, width = 0.4, fill = "skyblue", y.axis.adjust = 0.
         xlab(xlab)
     }
     }
-    
-    
-    # if(errorbar == "se") {
-    #   out1 <- list(plot = q1f1)
-    #   
-    # } else if(errorbar == "ci") {
-    #   out1 <- list(plot = q1f1)
-    # }
   }
   
   return(q1f1)

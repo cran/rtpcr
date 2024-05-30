@@ -1,34 +1,46 @@
 #' @title Relative expression (\eqn{\Delta C_T} method) analysis using ANOVA 
 #' 
-#' @description Analysis of variance of relative expression (\eqn{\Delta C_T} method) values based on a completely randomized design (CRD). Even there are more than a factor in the experiment, it is still possible to apply CRD analysis on the factor-level combinations as treatments. Analysis of variance based on factorial design or analysis of covariance can be performed using \code{qpcrANOVAFC} function.  
-#' @details The \code{qpcrANOVARE} function performs analysis of variance (ANOVA) of relative expression (RE) values based on a completely randomized design (CRD). 
-#' It is suitable when relative expression (RE) analysis between different treatment combinations 
-#' (in a Uni- or multi-factorial experiment) is desired. If there are more than a factor in the experiment, 
-#' it is still possible to apply CRD analysis on the factor-level combinations as treatments. 
-#' For this, a column of treatment combinations is made first as a grouping factor Fold change analysis based 
-#' on factorial design or analysis of covariance for the can be performed using \link{qpcrANOVAFC}.
+#' @description Analysis of variance of relative expression (\eqn{\Delta C_T} method) values for 
+#' all factor level combinations in the experiment in which the expression level of a 
+#' reference gene is used as normalizer. 
+#' 
+#' @details The \code{qpcrANOVARE} function performs analysis of variance (ANOVA) of relative 
+#' expression (RE) values for all factor level combinations as treatments using the expression 
+#' level of a reference gene is used as normalizer. To get a reliable result, the expression of 
+#' the reference gene needs to be constant across all test samples and it expression should not 
+#' be affected by the experimental treatment under study.
+#' 
 #' @author Ghader Mirzaghaderi
 #' @export qpcrANOVARE
 #' @import dplyr
 #' @import tidyr
 #' @import reshape2
-#' @import ggplot2
 #' @import lmerTest
 #' @import multcomp
 #' @import multcompView
-#' @param x A data frame consisting of condition columns, target gene efficiency (E), target Gene Ct, reference gene efficiency and reference gene Ct values, respectively. Each Ct in the data frame is the mean of technical replicates. Complete amplification efficiencies of 2 was assumed in the example data for all wells but the calculated efficienies can be used instead. NOTE: Each line belongs to a separate individual reflecting a non-repeated measure experiment).
+#' @param x a data frame consisting of condition columns, target gene efficiency (E), target Gene Ct, reference 
+#' gene efficiency and reference gene Ct values, respectively. Each Ct in the data frame is the mean of 
+#' technical replicates. Complete amplification efficiencies of 2 was assumed in the example data for 
+#' all wells but the calculated efficienies can be used instead.  \strong{NOTE:} Each line belongs to a separate 
+#' individual reflecting a non-repeated measure experiment). See \href{../doc/vignette.html}{\code{vignette}}, 
+#' section "data structure and column arrangement" for details.
+#' 
 #' @param numberOfrefGenes number of reference genes (1 or 2). Up to two reference genes can be handled.
-#' @param block column name of the blocking factor (for correct column arrangement see example data.). When a qPCR experiment is done in multiple qPCR plates, variation resulting from the plates may interfere with the actual amount of gene expression. One solution is to conduct each plate as a complete randomized block so that at least one replicate of each treatment and control is present on a plate. Block effect is usually considered as random and its interaction with any main effect is not considered.
+#' @param block column name of the blocking factor (for correct column arrangement see example data.). 
+#' When a qPCR experiment is done in multiple qPCR plates, variation resulting from the plates may 
+#' interfere with the actual amount of gene expression. One solution is to conduct each plate as a 
+#' complete randomized block so that at least one replicate of each treatment and control is present 
+#' on a plate. Block effect is usually considered as random and its interaction with any main effect is 
+#' not considered.
 #' @param alpha significance level
-#' @param adjust Method for adjusting p values
-#' @return A list with 5 elements:
+#' @param adjust method for adjusting p-values
+#' @return A list with 4 elements:
 #' \describe{
 #'   \item{Final_data}{The row data plus weighed delta Ct (wDCt) values.}
-#'   \item{lm}{The output of linear model analysis including ANOVA tables based on factorial experiment and completely randomized design (CRD).}
-#'   \item{ANOVA_factorial}{ANOVA table based on factorial arrangement}
-#'   \item{ANOVA_CRD}{ANOVA table based on CRD}
-#'   \item{Result}{The result table including treatments and factors, RE (Relative Expression), LCL, UCL, letter display for pair-wise comparisons and standard deviation of relative expression.}
-#'   \item{Post_hoc_Test}{Post hoc test of FC (Fold Change), pvalue, significance and confidence interval (LCL, UCL).}
+#'   \item{lm}{The output of linear model analysis including ANOVA tables}
+#'   \item{ANOVA}{ANOVA table based on CRD}
+#'   \item{Result}{The result table including treatments and factors, RE (Relative Expression), LCL, UCL, 
+#'   letter display for pair-wise comparisons and standard error with the lower and upper limits.}
 #' }
 #'
 #' @references Livak, Kenneth J, and Thomas D Schmittgen. 2001. Analysis of
@@ -45,8 +57,8 @@
 #'
 #' # If the data include technical replicates, means of technical replicates
 #' # should be calculated first using meanTech function.
-#' # Applying ANOVA analysis
-#' qpcrANOVARE(data_3factor, numberOfrefGenes = 1)
+#' # Applying ANOVA
+#' qpcrANOVARE(data_3factor, numberOfrefGenes = 1, block = NULL)
 #'
 #'
 #' qpcrANOVARE(data_2factorBlock, block = "Block", numberOfrefGenes = 1)
@@ -54,8 +66,16 @@
 #'
 
 
-qpcrANOVARE <- function(x, numberOfrefGenes, block = NULL, alpha = 0.05, adjust= "none")
-  {
+qpcrANOVARE <- function(x, numberOfrefGenes, block, alpha = 0.05, adjust= "none")
+{
+  
+  
+  if (missing(numberOfrefGenes)) {
+    stop("argument 'numberOfrefGenes' is missing, with no default")
+  }
+  if (missing(block)) {
+    stop("argument 'block' is missing, with no default. Requires NULL or a blocking factor column.")
+  }
   
   if (is.null(block)) {
     
@@ -170,7 +190,7 @@ qpcrANOVARE <- function(x, numberOfrefGenes, block = NULL, alpha = 0.05, adjust=
                         RE = round(2^(-diffs), 4),
                         LCL = round(2^(-ucl), 4),
                         UCL = round(2^(-lcl), 4),
-                        se = se$se,
+                        se = round(se$se, 4),
                         letters)
   
   
@@ -186,7 +206,17 @@ qpcrANOVARE <- function(x, numberOfrefGenes, block = NULL, alpha = 0.05, adjust=
   
   
   xx <- x[, -(ncol(x))] # Removing the last column of T
- 
+  
+  
+  
+  Lower.se <- round(2^(log2(Results$RE) - Results$se), 4) 
+  Upper.se <- round(2^(log2(Results$RE) + Results$se), 4)
+  Results <- data.frame(Results, 
+                       Lower.se = Lower.se, 
+                       Upper.se = Upper.se)
+  
+  Results <- Results %>%
+    relocate(Lower.se, Upper.se, .before = letters)
   
   outlist2 <- structure(list(Final_data = xx,
                              lmCRD = lm,
@@ -194,12 +224,10 @@ qpcrANOVARE <- function(x, numberOfrefGenes, block = NULL, alpha = 0.05, adjust=
                              Results = Results), class = "XX")
   
   print.XX <- function(outlist2){
-    cat("ANOVA table:", "\n")
     print(outlist2$ANOVA)
-    cat("\n","Relative expression table:", "\n")
+    cat("\n", sep = '',"Relative expression table", "\n")
     print(outlist2$Results)
     invisible(outlist2)
   }
   print.XX(outlist2)
 }
-

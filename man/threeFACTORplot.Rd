@@ -11,7 +11,7 @@ threeFACTORplot(
   fill = "Reds",
   xlab = "none",
   ylab = "Relative Expression",
-  errorbar = "se",
+  errorbar,
   y.axis.adjust = 0.5,
   y.axis.by = 2,
   letter.position.adjust = 0.3,
@@ -60,7 +60,7 @@ threeFACTORplot(
 \item{axis.text.x.hjust}{horizontal justification of x axis text}
 }
 \value{
-Bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
+Bar plot of the average fold change for target genes along with the standard error or 95\% confidence interval as error bars.
 }
 \description{
 Bar plot of the relative expression (\eqn{\Delta C_T} method) of a gene along with the confidence interval and significance
@@ -74,18 +74,17 @@ The \code{threeFACTORplot} function generates the bar plot of the average fold c
 data_3factor
 
 # Before plotting, the result needs to be extracted as below:
-res <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1)$Result
+res <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1, block = NULL)$Result
 res
 
 # Arrange the first three colunms of the result table.
 # This determines the columns order and shapes the plot output.
-threeFACTORplot(res,
-    arrangement = c(3, 1, 2),
+threeFACTORplot(res, arrangement = c(3, 1, 2), errorbar = "se",
     xlab = "condition")
 
 
 threeFACTORplot(res, arrangement = c(1, 2, 3), bar.width = 0.5, fill = "Greys", 
-xlab = "Genotype", ylab = "Relative Expression")
+xlab = "Genotype", ylab = "Relative Expression", errorbar = "se")
 
 
 # Reordering factor levels to a desired order.

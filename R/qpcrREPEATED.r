@@ -1,12 +1,15 @@
 #' @title Fold change (\eqn{\Delta \Delta C_T} method) analysis of repeated measure qPCR data
 #' 
-#' @description \code{qpcrREPEATED} function performs fold change (\eqn{\Delta \Delta C_T} method) analysis of observations repeatedly taken over different time courses, 
+#' @description \code{qpcrREPEATED} function performs fold change (\eqn{\Delta \Delta C_T} method) 
+#' analysis of observations repeatedly taken over different time courses. 
 #' Data may be obtained over time from a uni- or multi-factorial experiment. The bar plot of the fold changes (FC) 
 #' values along with the standard error (se) or confidence interval (ci) is also returned by the \code{qpcrREPEATED} function. 
 #' 
 #' @details The \code{qpcrREPEATED} function performs fold change (FC) analysis of observations repeatedly taken over time. 
-#' The intended factor (could be time or any other factor) is defined for the analysis by the \code{factor} argument, then the function performs FC analysis on its levels
-#' so that the first levels (as appears in the input data frame) is used as reference or calibrator. the function returns FC values along with confidence interval and standard error for the FC values.
+#' The intended factor (could be time or any other factor) is defined for the analysis by the \code{factor} argument, 
+#' then the function performs FC analysis on its levels
+#' so that the first levels (as appears in the input data frame) is used as reference or calibrator. 
+#' The function returns FC values along with confidence interval and standard error for the FC values.
 #' 
 #' @author Ghader Mirzaghaderi
 #' @export qpcrREPEATED
@@ -17,13 +20,13 @@
 #' @import emmeans
 #' @import lmerTest
 #' @param x input data frame in which the first column is id, 
-#' followed by the factor(s) which include at least time factor. 
-#' The first level of time factor in data set is used as calibrator or reference level.
+#' followed by the factor column(s) which include at least time. 
+#' The first level of time in data frame is used as calibrator or reference level.
 #' Additional factor(s) may also be present. Other columns are efficiency and Ct values of target and reference genes.
-#' In the "id" column, a unique number is assigned to each individual from which samples have been takes over time, 
-#' for example in the \code{data_repeated_measure_1}, 
+#'  \strong{NOTE:} In the "id" column, a unique number is assigned to each individual from which samples have been taken over time, 
+#' for example see \code{data_repeated_measure_1}, 
 #' all the three number 1 indicate one individual which has been sampled over three different time courses.
-#' To prepare a data frame from a  repeated measure analysis, please refer to the vignette. 
+#' See \href{../doc/vignette.html}{\code{vignette}}, section "data structure and column arrangement" for details.
 #' @param numberOfrefGenes number of reference genes which is 1 or 2 (Up to two reference genes can be handled).
 #' as reference or calibrator which is the reference level or sample that all others are compared to. Examples are untreated 
 #' of time 0. The FC value of the reference or calibrator level is 1 because it is not changed compared to itself.
@@ -51,7 +54,7 @@
 #'   \item{Final_data}{Input data frame plus the weighted Delat Ct values (wDCt)}
 #'   \item{lm}{lm of factorial analysis-tyle}
 #'   \item{ANOVA_table}{ANOVA table}
-#'   \item{FC Table}{Table of FC values, significance, confidence interval and standard error for the selected factor levels.}
+#'   \item{FC Table}{Table of FC values, significance, confidence interval and standard error with the lower and upper limits for the selected factor levels.}
 #'   \item{Bar plot of FC values}{Bar plot of the fold change values for the main factor levels.}
 #' }
 #' 
@@ -61,23 +64,32 @@
 #' 
 #' qpcrREPEATED(data_repeated_measure_1,
 #'             numberOfrefGenes = 1,
-#'             factor = "time")
+#'             factor = "time", block = NULL)
 #'
 #' qpcrREPEATED(data_repeated_measure_2,
 #'              numberOfrefGenes = 1,
-#'              factor = "time")
+#'              factor = "time", block = NULL)
 #'                                                        
 #'                                                        
 
 
 
-qpcrREPEATED <- function(x, numberOfrefGenes, factor, block = NULL,
-                         width = 0.5, fill = "#BFEFFF", y.axis.adjust = 1, y.axis.by = 1,
+qpcrREPEATED <- function(x, numberOfrefGenes, factor, block,
+                         width = 0.5, fill = "#BFEFFF", y.axis.adjust = 2, y.axis.by = 1,
                          ylab = "Fold Change", xlab = "none", fontsize = 12, fontsizePvalue = 7,
                          axis.text.x.angle = 0, axis.text.x.hjust = 0.5, x.axis.labels.rename = "none",
                          letter.position.adjust = 0, p.adj = "none", errorbar = "se", plot = TRUE){
   
   
+  if (missing(numberOfrefGenes)) {
+    stop("argument 'numberOfrefGenes' is missing, with no default")
+  }
+  if (missing(factor)) {
+    stop("argument 'factor' is missing, with no default")
+  }
+  if (missing(block)) {
+    stop("argument 'block' is missing, with no default. Requires NULL or a blocking factor column.")
+  }
   
   
   if (is.null(block)) {
@@ -268,9 +280,9 @@ qpcrREPEATED <- function(x, numberOfrefGenes, factor, block = NULL,
                 vjust = -0.5, size = fontsizePvalue)
   } else if(errorbar == "se") {
     pfc2 <- pfc2 +
-      geom_errorbar(aes(contrast, ymin = FCp, ymax =  FCp + se), width=0.1) +
+      geom_errorbar(aes(contrast, ymin = 2^(log2(FCp) - se), ymax =  2^(log2(FCp) + se)), width=0.1) +
       geom_text(aes(label = significance, x = contrast,
-                    y = FCp + se + letter.position.adjust),
+                    y = 2^(log2(FCp) + se) + letter.position.adjust),
                 vjust = -0.5, size = fontsizePvalue)
   }
   
@@ -309,6 +321,9 @@ qpcrREPEATED <- function(x, numberOfrefGenes, factor, block = NULL,
   
   
   
+  tableC <- data.frame(tableC, 
+                       Lower.se = round(2^(log2(tableC$FC) - tableC$se), 4), 
+                       Upper.se = round(2^(log2(tableC$FC) + tableC$se), 4))
   
   outlist2 <- structure(list(Final_data = x,
                              lm = lm,
@@ -317,13 +332,12 @@ qpcrREPEATED <- function(x, numberOfrefGenes, factor, block = NULL,
                              FC_Plot = pfc2), class = "XX")
   
   print.XX <- function(outlist2){
-    cat("ANOVA table:", "\n")
     print(outlist2$ANOVA_table)
-    cat("\n","Fold Change table:", "\n")
+    cat("\n", sep = '',"Fold Change table", "\n")
     print(outlist2$FC_statistics_of_the_main_factor)
     
     if (plot == TRUE){
-    cat("\n","Fold Change plot of the main factor levels:", "\n")
+    cat("\n", sep = '',"Fold Change plot of the main factor levels", "\n")
     print(outlist2$FC_Plot)
     }
     

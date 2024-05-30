@@ -7,7 +7,7 @@
 qpcrTTEST(x, numberOfrefGenes, paired = FALSE, var.equal = TRUE)
 }
 \arguments{
-\item{x}{a data frame of 4 columns including Conditions, E (efficiency), Gene and Ct values (see example below). Biological replicates needs to be equal for all Genes. Each Ct value is the mean of technical replicates. Complete amplification efficiencies of 2 is assumed here for all wells but the calculated efficienies can be used instead.}
+\item{x}{a data frame of 4 columns including Conditions, E (efficiency), Gene and Ct values (see examples below). Biological replicates needs to be equal for all Genes. Each Ct value is the mean of technical replicates. Complete amplification efficiencies of 2 is assumed here for all wells but the calculated efficienies can be used instead. See \href{../doc/vignette.html}{\code{vignette}} for details about "data structure and column arrangement".}
 
 \item{numberOfrefGenes}{number of reference genes. Up to two reference genes can be handled.}
 
@@ -19,7 +19,7 @@ qpcrTTEST(x, numberOfrefGenes, paired = FALSE, var.equal = TRUE)
 A list of two elements:
 \describe{
   \item{Row_data}{The row data including Genes and weighed delta Ct (wDCt) values.}
-  \item{Result}{Output table including the Fold Change values, lower and upper confidence interval and the pvalues from compairing fold change between treated and non-treated conditions}
+  \item{Result}{Output table including the Fold Change values, lower and upper confidence interval, pvalue and standard error with the lower and upper limits.}
 }
 For more information about the test procedure and its arguments,
 refer \code{\link[stats]{t.test}}, and \code{\link[stats]{lm}}.
@@ -29,13 +29,16 @@ If the residuals of the model do not follow normal distribution and variances be
 t.test based analysis of the fold change expression for any number of target genes.
 }
 \details{
-The \code{qpcrTTEST} function applies a t.test based analysis to calculate fold change (\eqn{\Delta \Delta C_T} method) expression and returns related statistics for any number of target genes along with one or two 
-reference gene(s), that have been evaluated under control and treatment conditions. Sampling may be paired or 
-unpaired. Paired samples in quantitative PCR refer to two sample data that are collected from one set of individuals 
+The \code{qpcrTTEST} function applies a t.test based analysis to calculate 
+fold change (\eqn{\Delta \Delta C_T} method) expression and returns related statistics for any number of 
+target genes that have been evaluated under control and treatment conditions. Sampling may be paired or 
+unpaired. One or two reference genes can be used. Unpaired and paired samples are commonly analyzed 
+using unpaired and paired t-test, respectively.  \strong{NOTE:} Paired samples in quantitative PCR refer to two sample 
+data that are collected from one set of individuals 
 at two different conditions, for example before and after a treatment or at two different time points. While 
 for unpaired samples, two sets of individuals are used: one under untreated and the other set under treated 
 condition.  Paired samples allow to compare gene expression changes within the same individual, reducing 
-inter-individual variability. Unpaired and paired samples are commonly analyzed using unpaired and paired t-test, respectively.
+inter-individual variability.
 }
 \examples{
 
@@ -54,12 +57,6 @@ qpcrTTEST(Taylor_etal2019,
           numberOfrefGenes = 2, 
           var.equal = TRUE)
  
-          
-qpcrTTESTplot(Taylor_etal2019, 
-              numberOfrefGenes = 2, 
-              var.equal = TRUE,
-              y.axis.adjust = -0.7,
-              y.axis.by = 0.5)
 
 
 }

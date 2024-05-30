@@ -27,25 +27,24 @@
 #' @param show.letters a logical variable. If TRUE, mean grouping letters are added to the bars. 
 #' @param axis.text.x.angle angle of x axis text
 #' @param axis.text.x.hjust horizontal justification of x axis text
-#' @return Bar plot of the average fold change for target genes along with the significance and the 95\% confidence interval as error bars.
+#' @return Bar plot of the average fold change for target genes along with the standard error or 95\% confidence interval as error bars.
 #' @examples
 #' 
 #' #' # See a sample data frame
 #' data_3factor
 #'
 #' # Before plotting, the result needs to be extracted as below:
-#' res <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1)$Result
+#' res <- qpcrANOVARE(data_3factor, numberOfrefGenes = 1, block = NULL)$Result
 #' res
 #'
 #' # Arrange the first three colunms of the result table.
 #' # This determines the columns order and shapes the plot output.
-#' threeFACTORplot(res,
-#'     arrangement = c(3, 1, 2),
+#' threeFACTORplot(res, arrangement = c(3, 1, 2), errorbar = "se",
 #'     xlab = "condition")
 #'
 #'
 #' threeFACTORplot(res, arrangement = c(1, 2, 3), bar.width = 0.5, fill = "Greys", 
-#' xlab = "Genotype", ylab = "Relative Expression")
+#' xlab = "Genotype", ylab = "Relative Expression", errorbar = "se")
 #'
 #'
 #' # Reordering factor levels to a desired order.
@@ -71,11 +70,23 @@
 
 
 threeFACTORplot <- function(res, arrangement = c(1, 2, 3), bar.width = 0.5, fill = "Reds", 
-                            xlab = "none", ylab = "Relative Expression", errorbar = "se", 
+                            xlab = "none", ylab = "Relative Expression", errorbar, 
                             y.axis.adjust = 0.5, y.axis.by = 2, letter.position.adjust = 0.3, 
                             legend.title = "Legend Title", legend.position = c(0.4, 0.8), 
                             fontsize = 12, fontsizePvalue = 5, show.letters = TRUE, 
                             axis.text.x.angle = 0, axis.text.x.hjust = 0.5){
+
+  
+  if (!("data.frame" %in% class(res))) {
+    stop(deparse(substitute(res)), " is not a data frame")
+  }
+  
+  
+  
+  if (missing(errorbar)) {
+    stop("argument 'errorbar' is missing, with no default")
+  }
+  
   
   x <- res
   x <- x[, c(arrangement, 4:ncol(x))]
@@ -94,7 +105,7 @@ threeFACTORplot <- function(res, arrangement = c(1, 2, 3), bar.width = 0.5, fill
     if(errorbar == "se") {
   pp1 <- ggplot(x, aes(x[,1], y = RE, fill = x[,2])) +
     geom_bar(stat = "identity", position = "dodge", width =  bar.width, col = "black") +
-    geom_errorbar(aes(ymax = RE + se, ymin = RE),
+    geom_errorbar(aes(ymin = 2^(log2(RE) - se), ymax =  2^(log2(RE) + se)),
                   position = position_dodge(bar.width), width = 0.15, color = "black") +
     facet_grid( ~ x[,3])+
     ylab(ylab) +
@@ -116,10 +127,10 @@ threeFACTORplot <- function(res, arrangement = c(1, 2, 3), bar.width = 0.5, fill
   
   if (show.letters) {
     pp1 <- pp1 + 
-      geom_text(data = x, aes(label=letters, y = RE + se + letter.position.adjust), color = "black",
+      geom_text(data = x, aes(label=letters, y = 2^(log2(RE) + se) + letter.position.adjust), color = "black",
                 show.legend = FALSE, position = position_dodge(bar.width), size = fontsizePvalue)
   }
-  
+
   if(xlab == "none"){
     pp1 <- pp1 + 
       labs(x = NULL)
@@ -164,13 +175,6 @@ threeFACTORplot <- function(res, arrangement = c(1, 2, 3), bar.width = 0.5, fill
       xlab(xlab)
   }
   } 
-  
-  # if(errorbar == "se") {
-  #   out <- list(plot = pp1)
-  #   
-  # } else if(errorbar == "ci") {
-  #   out <- list(plot = pp1)
-  # }
   }
 
   
@@ -190,7 +194,7 @@ threeFACTORplot <- function(res, arrangement = c(1, 2, 3), bar.width = 0.5, fill
     if(errorbar == "se") {
     pp1 <- ggplot(x, aes(x[,1], y = FC, fill = x[,2])) +
       geom_bar(stat = "identity", position = "dodge", width =  bar.width, col = "black") +
-      geom_errorbar(aes(ymax = FC + se, ymin = FC),
+      geom_errorbar(aes(ymin = 2^(log2(FC) - se), ymax =  2^(log2(FC) + se)),
                     position = position_dodge(bar.width), width = 0.15, color = "black") +
       facet_grid( ~ x[,3])+
       ylab(ylab) +
@@ -212,7 +216,7 @@ threeFACTORplot <- function(res, arrangement = c(1, 2, 3), bar.width = 0.5, fill
     
     if (show.letters) {
       pp1 <- pp1 + 
-        geom_text(data = x, aes(label=letters, y = FC + se + letter.position.adjust), color = "black",
+        geom_text(data = x, aes(label=letters, y = 2^(log2(FC) + se) + letter.position.adjust), color = "black",
                   show.legend = FALSE, position = position_dodge(bar.width), size = fontsizePvalue)
     }
     
@@ -260,13 +264,6 @@ threeFACTORplot <- function(res, arrangement = c(1, 2, 3), bar.width = 0.5, fill
         xlab(xlab)
     }
     } 
-    
-    # if(errorbar == "se") {
-    #   out <- list(plot = pp1)
-    #   
-    # } else if(errorbar == "ci") {
-    #   out <- list(plot = pp1)
-    # }
   }
   
   

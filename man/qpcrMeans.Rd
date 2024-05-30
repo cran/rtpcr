@@ -7,21 +7,21 @@
 qpcrMeans(model, specs, p.adj = "none")
 }
 \arguments{
-\item{model}{an `lmer` fitted model object}
+\item{model}{an `lmer` fitted model object created by qpcrANOVAFC or qpcrREPEATED functions}
 
 \item{specs}{A character vector specifying the names of the predictors over which FC values are desired}
 
 \item{p.adj}{Method for adjusting p values}
 }
 \value{
-Table of FC values, significance and confidence limits.
+Table of FC values, significance and confidence interval.
 }
 \description{
-Fold change (\eqn{\Delta \Delta C_T} method) analysis using a model produced by the
+Fold change (\eqn{\Delta \Delta C_T} method) analysis using a model object produced by the
 \code{qpcrANOVAFC} or \code{qpcrREPEATED}.
 }
 \details{
-The \code{qpcrMeans} performs fold change (\eqn{\Delta \Delta C_T} method) analysis using a model produced by the
+The \code{qpcrMeans} function performs fold change (\eqn{\Delta \Delta C_T} method) analysis using a model produced by the
 \code{qpcrANOVAFC} or \code{qpcrREPEATED}. The values can be returned for any effects in the model including simple effects,
 interactions and slicing if an ANOVA model is used, but ANCOVA models returned by rtpcr package only include simple effects.
 }
@@ -30,7 +30,7 @@ interactions and slicing if an ANOVA model is used, but ANCOVA models returned b
 # Returning fold change values from a fitted model.
 # Firstly, result of `qpcrANOVAFC` or `qpcrREPEATED` is 
 # acquired which includes a model object:
-res <- qpcrANOVAFC(data_3factor, numberOfrefGenes = 1, mainFactor.column = 1)
+res <- qpcrANOVAFC(data_3factor, numberOfrefGenes = 1, mainFactor.column = 1, block = NULL)
 
 # Returning fold change values of Type levels from a fitted model:
 qpcrMeans(res$lm_ANOVA, specs = "Type")

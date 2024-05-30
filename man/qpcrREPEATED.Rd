@@ -8,10 +8,10 @@ qpcrREPEATED(
   x,
   numberOfrefGenes,
   factor,
-  block = NULL,
+  block,
   width = 0.5,
   fill = "#BFEFFF",
-  y.axis.adjust = 1,
+  y.axis.adjust = 2,
   y.axis.by = 1,
   ylab = "Fold Change",
   xlab = "none",
@@ -28,13 +28,13 @@ qpcrREPEATED(
 }
 \arguments{
 \item{x}{input data frame in which the first column is id, 
-followed by the factor(s) which include at least time factor. 
-The first level of time factor in data set is used as calibrator or reference level.
+followed by the factor column(s) which include at least time. 
+The first level of time in data frame is used as calibrator or reference level.
 Additional factor(s) may also be present. Other columns are efficiency and Ct values of target and reference genes.
-In the "id" column, a unique number is assigned to each individual from which samples have been takes over time, 
-for example in the \code{data_repeated_measure_1}, 
+ \strong{NOTE:} In the "id" column, a unique number is assigned to each individual from which samples have been taken over time, 
+for example see \code{data_repeated_measure_1}, 
 all the three number 1 indicate one individual which has been sampled over three different time courses.
-To prepare a data frame from a  repeated measure analysis, please refer to the vignette.}
+See \href{../doc/vignette.html}{\code{vignette}}, section "data structure and column arrangement" for details.}
 
 \item{numberOfrefGenes}{number of reference genes which is 1 or 2 (Up to two reference genes can be handled).
 as reference or calibrator which is the reference level or sample that all others are compared to. Examples are untreated 
@@ -82,29 +82,32 @@ A list with 5 elements:
   \item{Final_data}{Input data frame plus the weighted Delat Ct values (wDCt)}
   \item{lm}{lm of factorial analysis-tyle}
   \item{ANOVA_table}{ANOVA table}
-  \item{FC Table}{Table of FC values, significance, confidence interval and standard error for the selected factor levels.}
+  \item{FC Table}{Table of FC values, significance, confidence interval and standard error with the lower and upper limits for the selected factor levels.}
   \item{Bar plot of FC values}{Bar plot of the fold change values for the main factor levels.}
 }
 }
 \description{
-\code{qpcrREPEATED} function performs fold change (\eqn{\Delta \Delta C_T} method) analysis of observations repeatedly taken over different time courses, 
+\code{qpcrREPEATED} function performs fold change (\eqn{\Delta \Delta C_T} method) 
+analysis of observations repeatedly taken over different time courses. 
 Data may be obtained over time from a uni- or multi-factorial experiment. The bar plot of the fold changes (FC) 
 values along with the standard error (se) or confidence interval (ci) is also returned by the \code{qpcrREPEATED} function.
 }
 \details{
 The \code{qpcrREPEATED} function performs fold change (FC) analysis of observations repeatedly taken over time. 
-The intended factor (could be time or any other factor) is defined for the analysis by the \code{factor} argument, then the function performs FC analysis on its levels
-so that the first levels (as appears in the input data frame) is used as reference or calibrator. the function returns FC values along with confidence interval and standard error for the FC values.
+The intended factor (could be time or any other factor) is defined for the analysis by the \code{factor} argument, 
+then the function performs FC analysis on its levels
+so that the first levels (as appears in the input data frame) is used as reference or calibrator. 
+The function returns FC values along with confidence interval and standard error for the FC values.
 }
 \examples{
 
 qpcrREPEATED(data_repeated_measure_1,
             numberOfrefGenes = 1,
-            factor = "time")
+            factor = "time", block = NULL)
 
 qpcrREPEATED(data_repeated_measure_2,
              numberOfrefGenes = 1,
-             factor = "time")
+             factor = "time", block = NULL)
                                                        
                                                        
 }
