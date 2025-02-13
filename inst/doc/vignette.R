@@ -91,7 +91,7 @@ res$Post_hoc_Test
 
 ## ----eval= T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "A: bar plot representing Relative expression of a gene under three levels of a factor generated using `oneFACTORplot` function, B: Plot of the Fold change expression produced by the `qpcrANOVAFC` function from the same data used for 'A'. The first element in the `mainFactor.level.order` argument (here L1) is served as the Reference level, although the x-axis names have later been renamed by the `x.axis.labels.rename` argument. Error bars represent 95% confidence interval in A and standard error in B."----
 
-# Before plotting, the result needs to be extracted as below:
+# Before plotting, the statistical analysis should be done:
 out2 <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1, block = NULL)$Result
 
 f1 <- oneFACTORplot(out2,

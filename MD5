@@ -1,11 +1,12 @@
-f00cb3554029add843a433b4621dae44 *DESCRIPTION
+4e5ec44fe5564450f9c1061ad18aeb38 *COPYING
+8bc87568b3015efe573b64d78b5f8424 *DESCRIPTION
 dbb970a912401ba2e4e031a3343e7742 *NAMESPACE
 c8bbf57167629729b79028542c721e6a *R/efficiency.r
 50be6e06372be1d74bba4a291f883397 *R/meanTech.r
 4715aafe8a80ade883cd30bf31e26f92 *R/multiplot.r
 71dd64b3d90cdc10cc4f863648dca75a *R/oneFACTORplot.r
 c27e70d24d319a297dc397214ac1ba19 *R/package_data.r
-fafee0441b4a1b9b41cf5075044cc03e *R/qpcrANOVAFC.r
+146fdd4e8ddaa72c2280cf324d3195d0 *R/qpcrANOVAFC.r
 0a298eee7dd85ce99988c8cdca474ea3 *R/qpcrANOVARE.r
 a4bb8ea38d0bc74887822cfc4d2a642b *R/qpcrMeans.r
 10636d7412f6895d10d5e931f76232ab *R/qpcrREPEATED.r
@@ -26,9 +27,9 @@ b5d02a9f6b241f4acfeda2f44d9292c0 *data/data_2factor.rda
 3759750cddd2ce07017651c9c671adaf *data/data_repeated_measure_2.rda
 f32db75dcaa27fe49935fa41e9ae2ced *data/data_ttest.rda
 edf8f52334a9e8eacd3bbdda4a91bd96 *data/data_withTechRep.rda
-436e913d65c934911877a27adccf00f6 *inst/doc/vignette.R
-a516b18862939055268110fc2edd9ec9 *inst/doc/vignette.Rmd
-1baf1c17aa2a3e1e70ac9eb49ead4f3d *inst/doc/vignette.html
+ea923331ffe330bc157095c54e402bfe *inst/doc/vignette.R
+bbae2c347f7b2a725060435df2abb2d7 *inst/doc/vignette.Rmd
+9871f4cf89290962f654d7df597b3322 *inst/doc/vignette.html
 8c2592b22da6f3be61047ffb87310222 *inst/extdata/Lee_etal2020qPCR.csv
 fb34210ef0c348992683dc3ef7c4f5e6 *inst/extdata/Taylor_etal2019.csv
 edfcf820a08dc3c8b571b1598b3e002c *inst/extdata/data_1factor.csv
@@ -52,10 +53,11 @@ e51e7f583aa0be4a6833777bf90cd1d4 *man/data_repeated_measure_2.Rd
 9298b95ac298a39dd9e75e532a4e2b3c *man/data_ttest.Rd
 716d5a27a076fe6f7e12e6bf315c8c5e *man/data_withTechRep.Rd
 1fab5238ac5b80a6e1b97da14a8ce5a5 *man/efficiency.Rd
+59b8c772430f3652a60e50eb24afbaba *man/figures/logo.jpg
 feced09318ff615c1883173f1461c771 *man/meanTech.Rd
 2fe73eec9fc604ff293b57750e358aaf *man/multiplot.Rd
 56bd81397bf784fbb581d2c458bc9d76 *man/oneFACTORplot.Rd
-bab8f443da860345afe67d5adc585a43 *man/qpcrANOVAFC.Rd
+09a7c8fe96e0067fcbbbcde41d22674a *man/qpcrANOVAFC.Rd
 50446174db0c8c9026f0faed34c594a8 *man/qpcrANOVARE.Rd
 3e37ab365d587d44ea9a91915e30e19f *man/qpcrMeans.Rd
 bd5bda3d78e2434eb0fcae3bcb58ba7d *man/qpcrREPEATED.Rd
@@ -63,4 +65,4 @@ b558e6b1231486509911a973a671a4ab *man/qpcrTTEST.Rd
 ad79e09fdfd74f85628f844892292a4e *man/qpcrTTESTplot.Rd
 1f521d976a1b3689e9777f7b5f3830e6 *man/threeFACTORplot.Rd
 e99805d84d23dee2124cbe75bdb0e6ef *man/twoFACTORplot.Rd
-a516b18862939055268110fc2edd9ec9 *vignettes/vignette.Rmd
+bbae2c347f7b2a725060435df2abb2d7 *vignettes/vignette.Rmd
