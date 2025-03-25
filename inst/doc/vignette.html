@@ -3,72 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>rtpcr: a package for statistical analysis of qPCR data in R</title>
-<style type="text/css">
-/**
- * Prism.s theme ported from highlight.js's xcode style
- */
-pre code {
-  padding: 1em;
-}
-.token.comment {
-  color: #007400;
-}
-.token.punctuation {
-  color: #999;
-}
-.token.tag,
-.token.selector {
-  color: #aa0d91;
-}
-.token.boolean,
-.token.number,
-.token.constant,
-.token.symbol {
-  color: #1c00cf;
-}
-.token.property,
-.token.attr-name,
-.token.string,
-.token.char,
-.token.builtin {
-  color: #c41a16;
-}
-.token.inserted {
-  background-color: #ccffd8;
-}
-.token.deleted {
-  background-color: #ffebe9;
-}
-.token.operator,
-.token.entity,
-.token.url,
-.language-css .token.string,
-.style .token.string {
-  color: #9a6e3a;
-}
-.token.atrule,
-.token.attr-value,
-.token.keyword {
-  color: #836c28;
-}
-.token.function,
-.token.class-name {
-  color: #DD4A68;
-}
-.token.regex,
-.token.important,
-.token.variable {
-  color: #5c2699;
-}
-.token.important,
-.token.bold {
-  font-weight: bold;
-}
-.token.italic {
-  font-style: italic;
-}
-</style>
+<meta name="generator" content="litedown 0.6">
+<title>rtpcr: a package for statistical analysis of real-time PCR data in R</title>
 <style type="text/css">
 body {
   font-family: sans-serif;
@@ -76,88 +12,177 @@ body {
   margin: auto;
   padding: 1em;
   line-height: 1.5;
-  box-sizing: border-box;
 }
-body, .footnotes, code { font-size: .9em; }
+body, .abstract, code, .footnotes, footer, #refs, .caption { font-size: .9em; }
 li li { font-size: .95em; }
-*, *:before, *:after {
-  box-sizing: inherit;
-}
+ul:has(li > input[type="checkbox"]) { list-style: none; padding-left: 1em; }
+*, :before, :after { box-sizing: border-box; }
+a { color: steelblue; }
 pre, img { max-width: 100%; }
-pre, pre:hover {
-  white-space: pre-wrap;
-  word-break: break-all;
-}
-pre code {
-  display: block;
-  overflow-x: auto;
-}
+pre { white-space: pre-wrap; word-break: break-word; }
+pre code { display: block; padding: 1em; overflow-x: auto; }
 code { font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace; }
-:not(pre) > code, code[class] { background-color: #F8F8F8; }
-code.language-undefined, pre > code:not([class]) {
-  background-color: inherit;
-  border: 1px solid #eee;
+:not(pre, th) > code, code[class], div > .caption { background: #f8f8f8; }
+pre > code:is(:not([class]), .language-plain, .language-none, .plain), .box, .figure, .table { background: inherit; border: 1px solid #eee; }
+pre > code {
+  &.message { border-color: #9eeaf9; }
+  &.warning { background: #fff3cd; border-color: #fff3cd; }
+  &.error { background: #f8d7da; border-color: #f8d7da; }
 }
+.fenced-chunk { border-left: 1px solid #666; }
+.code-fence {
+  opacity: .4;
+  border: 1px dashed #666;
+  border-left: 2px solid;
+  &:hover { opacity: inherit; }
+}
+.box, .figure, .table, table { margin: 1em auto; }
+div > .caption { padding: 1px 1em; }
+.figure { p:has(img, svg), pre:has(svg) { text-align: center; } }
+.flex-col { display: flex; justify-content: space-between; }
 table {
-  margin: auto;
-  border-top: 1px solid #666;
+  &:only-child:not(.table > *) { margin: auto; }
+  th, td { padding: 5px; font-variant-numeric: tabular-nums; }
+  thead, tfoot, tr:nth-child(even) { background: whitesmoke; }
+  thead th { border-bottom: 1px solid #ddd; }
+  &:not(.datatable-table) {
+    border-top: 1px solid #666;
+    border-bottom: 1px solid #666;
+  }
 }
-table thead th { border-bottom: 1px solid #ddd; }
-th, td { padding: 5px; }
-thead, tfoot, tr:nth-child(even) { background: #eee; }
 blockquote {
   color: #666;
   margin: 0;
-  padding-left: 1em;
-  border-left: 0.5em solid #eee;
+  padding: 1px 1em;
+  border-left: .5em solid #eee;
 }
 hr, .footnotes::before { border: 1px dashed #ddd; }
 .frontmatter { text-align: center; }
-#TOC .numbered li { list-style: none; }
-#TOC .numbered { padding-left: 0; }
-#TOC .numbered ul { padding-left: 1em; }
-table, .body h2 { border-bottom: 1px solid #666; }
+#TOC {
+  a { text-decoration: none; }
+  ul { list-style: none; padding-left: 1em; }
+  & > ul { padding: 0; }
+  ul ul { border-left: 1px solid lightsteelblue; }
+}
+.body h2 { border-bottom: 1px solid #666; }
 .body .appendix, .appendix ~ h2 { border-bottom-style: dashed; }
-.footnote-ref a::before { content: "["; }
-.footnote-ref a::after { content: "]"; }
-section.footnotes::before {
-  content: "";
-  display: block;
-  max-width: 20em;
+.main-number::after { content: "."; }
+span[class^="ref-number-"] { font-weight: bold; }
+.ref-number-fig::after, .ref-number-tab::after { content: ":"; }
+.cross-ref-chp::before { content: "Chapter "; }
+.cross-ref-sec::before { content: "Section "; }
+.cross-ref-fig::before, .ref-number-fig::before { content: "Figure "; }
+.cross-ref-tab::before, .ref-number-tab::before { content: "Table "; }
+.cross-ref-eqn::before, .MathJax_ref:has(mjx-mtext > mjx-c + mjx-c)::before { content: "Equation "; }
+.abstract, #refs {
+  &::before { display: block; margin: 1em auto; font-weight: bold; }
+}
+.abstract::before { content: "Abstract"; text-align: center; }
+#refs::before { content: "Bibliography"; font-size: 1.5em; }
+.ref-paren-open::before { content: "("; }
+.ref-paren-close::after { content: ")"; }
+.ref-semicolon::after { content: "; "; }
+.ref-and::after { content: " and "; }
+.ref-et-al::after { content: " et al."; font-style: italic; }
+.footnote-ref a {
+  &::before { content: "["; }
+  &::after { content: "]"; }
+}
+section.footnotes {
+  margin-top: 2em;
+  &::before { content: ""; display: block; max-width: 20em; }
+}
+.fade {
+  background: repeating-linear-gradient(135deg, white, white 30px, #ddd 32px, #ddd 32px);
+  opacity: 0.6;
 }
 
 @media print {
-  body {
-    font-size: 12pt;
-    max-width: 100%;
-  }
-  tr, img { page-break-inside: avoid; }
+  body { max-width: 100%; }
+  tr, img { break-inside: avoid; }
 }
 @media only screen and (min-width: 992px) {
-  pre { white-space: pre; }
+  body:not(.pagesjs) pre:has(.line-numbers):not(:hover) { white-space: pre; }
 }
 </style>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.21/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xiee/utils@1.14.11/css/prism-xcode.min.css">
+<script src="https://cdn.jsdelivr.net/combine/npm/katex@0.16.21/dist/katex.min.js,npm/katex@0.16.21/dist/contrib/auto-render.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@xiee/utils@1.14.11/js/render-katex.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
 </head>
 <body>
 <div class="frontmatter">
-<div class="title"><h1>rtpcr: a package for statistical analysis of qPCR data in R</h1></div>
+<div class="title"><h1>rtpcr: a package for statistical analysis of real-time PCR data in R</h1></div>
 <div class="author"><h2>Ghader Mirzaghaderi</h2></div>
-<div class="date"><h3></h3></div>
 </div>
 <div class="body">
-<h1 id="overview">Overview</h1>
-<p>Quantitative real-time polymerase chain reaction (qRT-PCR or qPCR) is widely used in molecular biology researches. Various analysis methods are employed for the analysis of the qPCR data to measure the mRNA rates of a target gene under different experimental conditions.<br />
-‘rtpcr’ package was developed for amplification efficiency calculation, statistical analysis and bar plot representation of qPCR data in R. By accounting for up to two reference genes and amplification efficiency values, a general calculation methodology described by <a href="https://doi.org/10.1186/s12859-017-1949-5">Ganger et al. (2017)</a>
+<div id="TOC">
+<ul>
+<li><a href="#chp:overview">Overview</a></li>
+<li><a href="#chp:calculation-methods">Calculation methods</a></li>
+<li><a href="#chp:a-generalized-calculation-method">A generalized calculation method</a></li>
+<li><a href="#chp:installing-and-loading">Installing and loading</a></li>
+<li><a href="#chp:data-structure-and-column-arrangement">Data structure and column arrangement</a></li>
+<li><a href="#chp:functions-usage">functions usage</a></li>
+<li><a href="#chp:amplification-efficiency-data-analysis">Amplification efficiency data analysis</a>
+<ul>
+<li><a href="#sec:sample-data-of-amplification-efficiency">Sample data of amplification efficiency</a></li>
+<li><a href="#sec:calculating-amplification-efficiency">Calculating amplification efficiency</a></li>
+</ul>
+</li>
+<li><a href="#chp:expression-data-analysis">Expression data analysis</a>
+<ul>
+<li><a href="#sec:target-genes-in-two-conditions-t-test">Target genes in two conditions (t-test)</a>
+<ul>
+<li><a href="#sec:example-data">Example data</a></li>
+<li><a href="#sec:data-analysis-under-two-conditions">Data analysis under two conditions</a></li>
+<li><a href="#sec:generating-plot">Generating plot</a></li>
+</ul>
+</li>
+<li><a href="#sec:uni-or-multi-factorial-experiments-fold-change-fc-analysis">Uni- or multi-factorial experiments: Fold Change (FC) analysis</a></li>
+<li><a href="#sec:uni-or-multi-factorial-experiments-relative-expression-re-analysis">Uni- or multi-factorial experiments: Relative Expression (RE) analysis</a>
+<ul>
+<li><a href="#sec:output-table-of-the-analysis">Output table of the analysis</a></li>
+<li><a href="#sec:barplot-with-the-1-alpha-confidence-interval-as-error-bars">Barplot with the (1-alpha)% confidence interval as error bars</a></li>
+<li><a href="#sec:a-three-factorial-experiment-example">A three-factorial experiment example</a></li>
+</ul>
+</li>
+<li><a href="#sec:repeated-measure-data-in-qpcr">Repeated measure data in qpcr</a></li>
+<li><a href="#sec:fold-change-analysis-using-a-model">Fold change analysis using a model</a></li>
+</ul>
+</li>
+<li><a href="#chp:an-example-of-showing-point-on-the-plot">An example of showing point on the plot</a></li>
+<li><a href="#chp:checking-normality-of-residuals">Checking normality of residuals</a></li>
+<li><a href="#chp:mean-of-technical-replicates">Mean of technical replicates</a></li>
+<li><a href="#chp:combining-fc-results-of-different-genes">Combining FC results of different genes</a></li>
+<li><a href="#chp:how-to-edit-ouptput-graphs">How to edit ouptput graphs?</a></li>
+<li><a href="#chp:citation">Citation</a></li>
+<li><a href="#chp:contact">Contact</a></li>
+<li><a href="#chp:references">References</a></li>
+</ul>
+</div>
+<h1 id="chp:overview">Overview</h1>
+<p>Real-time polymerase chain reaction (real-time PCR) is widely used in biological studies. Various analysis methods are employed on the real-time PCR data to measure the mRNA levels under different experimental conditions.
+‘rtpcr’ package was developed for amplification efficiency calculation, statistical analysis and bar plot representation of real-time PCR data in R. By accounting for up to two reference genes and amplification efficiency values, a general calculation methodology described by <a href="https://doi.org/10.1186/s12859-017-1949-5">Ganger et al. (2017)</a>
 and <a href="https://doi.org/10.1016/j.tibtech.2018.12.002">Taylor et al. (2019)</a>, matching both <a href="https://doi.org/10.1006/meth.2001.1262">Livak and Schmittgen (2001)</a> and <a href="https://doi.org/10.1093/nar/30.9.e36">Pfaffl et al. (2002) </a> methods  was used. Based on the experimental conditions, the functions of the ‘rtpcr’ package use t-test (for experiments with a two-level factor), analysis of variance, analysis of covariance (ANCOVA) or analysis of repeated measure data to calculate the fold change (FC, \({\Delta\Delta C_t}\) method) or relative expression (RE, \({\Delta C_t}\) method). The functions further provide standard errors and confidence interval for means, apply statistical mean comparisons and present significance. To facilitate function application, different data sets were used as examples and the outputs were explained. An outstanding feature of ‘rtpcr’ package is providing publication-ready bar plots with various controlling arguments for experiments with up to three different factors which are further editable by ggplot2 functions.</p>
-<h1 id="calculation-methods">Calculation methods</h1>
-<p>The basic method for expression estimation of a gene between conditions relies on the calculation of fold differences by applying the PCR amplification efficiency (E) and the threshold cycle (syn. crossing point or Ct). Among the various approaches developed for data analysis in qPCR, the Livak approach, also known as the \(2^{-\Delta\Delta C_t}\) method, stands out for its simplicity and widespread use where the fold change (FC) exoression \((2^{-\Delta\Delta C_t})\) in Treatment (Tr) compared to Control (Co) condition is calculated according to equation:</p>
-<p>$$\begin{align*} \text{Fold change} &amp; = 2^{-\Delta\Delta C_t} \\ &amp; = \frac{2^{-(C_{t_{\text{target}}}-C_{t_{\text{ref}}})_{Tr}}} {2^{-(C_{t_{\text{target}}}-C_{t_{\text{ref}}})_{Co}}} \\  &amp; =2^{-[(C_{t_{\text{target}}}-C_{t_{\text{ref}}})_{\text{Tr}}- {(C_{t_{\text{target}}}-C_{t_{\text{ref}}})}_{\text{Co}}]} \\  &amp; = 2^{-[{(\Delta C_t)_{Tr} - (\Delta C_t)_{Co}}]} \end{align*}$$</p>
+<h1 id="chp:calculation-methods">Calculation methods</h1>
+<p>The basic method for expression estimation of a gene between conditions relies on the calculation of fold differences by applying the PCR amplification efficiency (E) and the threshold cycle (syn. crossing point or Ct). Among the various approaches developed for data analysis in real-time PCR, the Livak approach, also known as the \(2^{-\Delta\Delta C_t}\) method, stands out for its simplicity and widespread use where the fold change (FC) exoression \((2^{-\Delta\Delta C_t})\) in Treatment (Tr) compared to Control (Co) condition is calculated according to equation:</p>
+<p>$$\begin{align*}
+\text{Fold change} &amp; = 2^{-\Delta\Delta C_t} \\
+&amp; = \frac{2^{-(C_{t_{\text{target}}}-C_{t_{\text{ref}}})_{Tr}}}
+{2^{-(C_{t_{\text{target}}}-C_{t_{\text{ref}}})_{Co}}} \\ 
+&amp; =2^{-[(C_{t_{\text{target}}}-C_{t_{\text{ref}}})_{\text{Tr}}-
+{(C_{t_{\text{target}}}-C_{t_{\text{ref}}})}_{\text{Co}}]} \\ 
+&amp; = 2^{-[{(\Delta C_t)_{Tr} - (\Delta C_t)_{Co}}]}
+\end{align*}$$</p>
 <p>Here, \(\Delta C_t\) is the difference between target Ct and reference Ct values for a given sample. Livak method assumes that both the target and reference genes are amplified with efficiencies close to 100%, allowing for the relative quantification of gene expression levels.</p>
 <p>On the other hand, the Pfaffl method offers a more flexible approach by accounting for differences in amplification efficiencies between the target and reference genes. This method adjusts the calculated expression ratio by incorporating the specific amplification efficiencies, thus providing a more accurate representation of the relative gene expression levels.</p>
-<p>$$\text{Fold change} = \frac{E^{-(C_{t_{\text{Tr}}}-C_{t_{\text{Co}}})_{target}}} {E^{-(C_{t_{\text{Tr}}}-C_{t_{\text{Co}}})_{ref}}}$$</p>
-<h1 id="a-generalized-calculation-method">A generalized calculation method</h1>
-<p>The <code>rtpcr</code> package functions are mainly based on the calculation of efficiency-weighted \(\Delta C_t\) \((w\Delta C_t)\) values from target and reference gene Ct (equation 3). \(w\Delta C_t\)  values are weighted for the amplification efficiencies as described by Ganger et al. (2017). I used log2 instead of log10:</p>
+<p>$$\text{Fold change} = \frac{E^{-(C_{t_{\text{Tr}}}-C_{t_{\text{Co}}})_{target}}}
+{E^{-(C_{t_{\text{Tr}}}-C_{t_{\text{Co}}})_{ref}}}$$</p>
+<h1 id="chp:a-generalized-calculation-method">A generalized calculation method</h1>
+<p>The <code>rtpcr</code> package was developed for the R environment in the major operating systems. The package functions are mainly based on the calculation of efficiency-weighted \(\Delta C_t\) \((w\Delta C_t)\) values from target and reference gene Ct (equation 3). \(w\Delta C_t\)  values are weighted for the amplification efficiencies as described by Ganger et al. (2017) except that log2 is used instead of log10:</p>
 <p>$$w\Delta Ct =\log_{2}(E_{target}).Ct_{target}-\log_{2}(E_{ref}).Ct_{ref}$$</p>
 <p>The relative expression of the target gene normalized to that of reference gene(s) within the same sample or condition is called relative expression (RE). From the mean \(w\Delta C_t\) values over biological replicates, RE of a target gene can be calculated for each condition according to the equation</p>
 <p>$$\text{Relative Expression} = 2^{-\overline{w\Delta Ct}}$$
@@ -165,7 +190,7 @@ Relative expression is only calibrated for the reference gene(s) and not for a c
 <p>$$\text{Fold Change due to Treatment}=2^{-(\overline{w\Delta Ct}_{\text{Tr}}-{\overline{w\Delta Ct}_{\text{Co}}})}$$</p>
 <p><code>qpcrTTEST</code> and <code>qpcrTTESTplot</code> functions calculate FC for multi-genes-two conditional cases, <code>qpcrANOVAFC</code> represents FC for single-gene-factorial (single- or multi-factor) experiments, and <code>qpcrREPEATED</code> calculates FC for the repeated measure data. If \(w \Delta C_t\) values is calculated from the E values, the calculations match the formula of Pfaffl while if 2 (complete efficiency) be used instead, the result match the \(2^{-\Delta\Delta C_t}\) method. In any case we called these as Fold Change in the outputs of <code>rtpcr</code>. Under factorial experiments where the calculation of the expression of the target gene relative to the reference gene (called Relative Expression) in each condition is desired, <code>qpcrANOVARE</code>, <code>oneFACTORplot</code>, <code>twoFACTORplot</code> and <code>threeFACTORplot</code> functions were developed for ANOVA analysis, and representing the plots from single, double or triple factor experiments, respectively. The last three functions generate <code>ggplot2</code>-derived graphs based on the output of the <code>qpcrANOVARE</code> function. If available, the blocking factor can also be handled by <code>qpcrANOVARE</code>, <code>qpcrANOVAFC</code> and <code>qpcrREPEATED</code> functions. Standard error of the FC and RE means is calculated according to <a href="https://doi.org/10.1016/j.tibtech.2018.12.002">Taylor et al. (2019)</a> in <code>rtpcr</code> package.
 Here, a brief methodology is presented but details about the \(w\Delta C_t\)  calculations and statistical analysis are available in <a href="https://doi.org/10.1186/s12859-017-1949-5">Ganger et al. (2017)</a>. Importantly, because both the RE or FC gene expression values follow a lognormal distribution, a normal distribution is expected for the \(w \Delta C_t\) values making it possible to apply t-test or analysis of variance to them. Following analysis, \(w\Delta C_t\) values are statistically compared and standard deviations and confidence interval are calculated, but the transformation \(y = 2^{-x}\) is applied in the final step in order to report the results.</p>
-<h1 id="installing-and-loading">Installing and loading</h1>
+<h1 id="chp:installing-and-loading">Installing and loading</h1>
 <p>The <code>rtpcr</code> package can be installed and loaded using:</p>
 <pre><code class="language-r">install.packages(&quot;rtpcr&quot;)
 library(rtpcr)
@@ -179,7 +204,7 @@ devtools::install_github(&quot;mirzaghaderi/rtpcr&quot;)
 
 devtools::install_github(&quot;mirzaghaderi/rtpcr&quot;, build_vignettes = TRUE)
 </code></pre>
-<h1 id="data-structure-and-column-arrangement">Data structure and column arrangement</h1>
+<h1 id="chp:data-structure-and-column-arrangement">Data structure and column arrangement</h1>
 <p>To use the functions, input data should be prepared in the right format with appropriate column arrangement. The correct column arrangement is shown in Table 1 and Table 2. For <code>qpcrANOVAFC</code> or <code>qpcrANOVARE</code> analysis, ensure that each line in the data set belongs to a separate individual or biological replicate reflecting a non-repeated measure experiment.</p>
 <p><em>Table 1. Data structure and column arrangement required for ‘rtpcr’ package.  rep: technical replicate; targetE and refE: amplification efficiency columns for target and reference genes, respectively. targetCt and refCt: target gene and reference gene Ct columns, respectively. factors (up to three factors is allowed): experimental factors.</em></p>
 <table>
@@ -283,7 +308,7 @@ devtools::install_github(&quot;mirzaghaderi/rtpcr&quot;, build_vignettes = TRUE)
 </table>
 <p>To see list of data in the <code>rtpcr</code> package run <code>data(package = &quot;rtpcr&quot;)</code>.
 Example data sets can be presented by running the name of each data set. A description of the columns names in  each data set is called by “?” followed by the names of the data set, for example <code>?data_1factor</code></p>
-<h1 id="functions-usage">functions usage</h1>
+<h1 id="chp:functions-usage">functions usage</h1>
 <p>To simplify <code>rtpcr</code> usage, examples for using the functions are presented below.</p>
 <p><em>Table 3. Functions and examples for using them.</em></p>
 <table>
@@ -353,8 +378,8 @@ Example data sets can be presented by running the name of each data set. A descr
 </tbody>
 </table>
 <p><em>see package help for more arguments including the number of reference genes, levels arrangement, blocking, and arguments for adjusting the bar plots.</em></p>
-<h1 id="amplification-efficiency-data-analysis">Amplification efficiency data analysis</h1>
-<h2 id="sample-data-of-amplification-efficiency">Sample data of amplification efficiency</h2>
+<h1 id="chp:amplification-efficiency-data-analysis">Amplification efficiency data analysis</h1>
+<h2 id="sec:sample-data-of-amplification-efficiency">Sample data of amplification efficiency</h2>
 <p>To calculate the amplification efficiencies of a target and a reference gene, a data frame should be prepared with 3 columns of dilutions, target gene Ct values, and reference gene Ct values, respectively,  as shown below.</p>
 <pre><code class="language-r">data_efficiency
 </code></pre>
@@ -381,7 +406,7 @@ Example data sets can be presented by running the name of each data set. A descr
 ## 20      0.01 32.45329   31.29 29.48433
 ## 21      0.01 32.27515   31.15 29.26234
 </code></pre>
-<h2 id="calculating-amplification-efficiency">Calculating amplification efficiency</h2>
+<h2 id="sec:calculating-amplification-efficiency">Calculating amplification efficiency</h2>
 <p>Amplification efficiency in PCR can be either defined as percentage (from 0 to 1) or as time of PCR product increase per cycle (from 1 to 2).  in the <code>rtpcr</code> package, the amplification efficiency (E) has been referred to times of PCR product increase (1 to 2). A complete efficiency is equal to 2.  If dilutions and Ct values are available for a number of genes, the <code>efficiency</code> function calculates the amplification efficiency of genes and presents the related standard curves along with the Slope, Efficiency, and R2 statistics. The function also does pairwise comparisons of the slopes for the genes. For this, a regression line is fitted forst using the \(\Delta C_t\) values of each pair of genes.</p>
 <pre><code class="language-r">efficiency(data_efficiency)
 </code></pre>
@@ -416,9 +441,9 @@ Example data sets can be presented by running the name of each data set. A descr
 <p class="caption">Standard curve and the amplification efficiency analysis of genes. Required iput data include dilutions and Ct value columns for different genes.</p>
 </div>
 <p>Note: It is advised that the amplification efficiency be calculated for each cDNA sample because the amplification efficiency not only depends on the PCR mic and primer characteristics, but also varies among different cDNA samples.</p>
-<h1 id="expression-data-analysis">Expression data analysis</h1>
-<h2 id="target-genes-in-two-conditions-t-test">Target genes in two conditions (t-test)</h2>
-<h3 id="example-data">Example data</h3>
+<h1 id="chp:expression-data-analysis">Expression data analysis</h1>
+<h2 id="sec:target-genes-in-two-conditions-t-test">Target genes in two conditions (t-test)</h2>
+<h3 id="sec:example-data">Example data</h3>
 <p>When a target gene is assessed under two different conditions (for example Control and treatment), it is possible to calculate the average fold change expression \(({\Delta \Delta C_t}\) method) of the target gene in treatment relative to control conditions. For this, the data should be prepared according to the following data set consisting of 4 columns belonging to condition levels, E (efficiency), genes and Ct values, respectively. Each Ct value is the mean of technical replicates. Complete amplification efficiencies of 2 have been assumed here for all wells but the calculated efficiencies can be used instead.</p>
 <pre><code class="language-r">data_ttest
 </code></pre>
@@ -448,7 +473,7 @@ Example data sets can be presented by running the name of each data set. A descr
 ## 23 treatment     ref 2 29.14
 ## 24 treatment     ref 2 28.63
 </code></pre>
-<h3 id="data-analysis-under-two-conditions">Data analysis under two conditions</h3>
+<h3 id="sec:data-analysis-under-two-conditions">Data analysis under two conditions</h3>
 <p>Here, the above data set was used for the Fold Change expression analysis of the target genes using the <code>qpcrTTEST</code> function. This function performs a t-test-based analysis of any number of genes that have been evaluated under control and treatment conditions. The output is a table of target gene names, fold changes confidence limits, and the t.test derived p-values. The <code>qpcrTTEST</code> function includes the <code>var.equal</code> argument. When set to <code>FALSE</code>, <code>t.test</code> is performed under the unequal variances hypothesis. Furthermore, the samples in qPCR may be unpaired or paired so the analysis can be done for unpaired or paired conditions. Paired samples refer to a situation where the measurements are made on the same set of subjects or individuals. This could occur if the data is acquired from the same set of individuals before and after a treatment. In such cases, the paired t-test is used for statistical comparisons by setting the t-test <code>paired</code> argument to <code>TRUE</code>.</p>
 <pre><code class="language-r">qpcrTTEST(data_ttest, 
           numberOfrefGenes = 1,
@@ -482,7 +507,7 @@ Example data sets can be presented by running the name of each data set. A descr
 ## 2 C2H2-01 4.0185 2.4598 6.5649 0.0014 0.2193   3.4518   4.6782
 ## 3 C2H2-12 1.6472 0.9595 2.8279 0.0624 0.2113   1.4228   1.9070
 </code></pre>
-<h3 id="generating-plot">Generating plot</h3>
+<h3 id="sec:generating-plot">Generating plot</h3>
 <p>The <code>qpcrTTESTplot</code> function generates a bar plot of fold changes (FC) and confidence intervals for the target genes. the <code>qpcrTTESTplot</code> function accepts any number of genes and any replicates. The <code>qpcrTTESTplot</code> function automatically puts appropriate signs of **, * on top of the plot columns based on the output p-values.</p>
 <pre><code class="language-r"># Producing the plot
 t1 &lt;- qpcrTTESTplot(data_ttest,
@@ -517,7 +542,7 @@ grid.text(&quot;B&quot;, x = 0.52, y = 1, just = c(&quot;right&quot;, &quot;top&
 <img src="data:image/png;base64,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" alt="Average Fold changes of three target genes relative to the control condition computed by unpaired t-tests via `qpcrTTESTplot` function. Confidence interval (ci) and standard error (se) has been used as error bar in 'A' and 'B', respectively."  />
 <p class="caption">Average Fold changes of three target genes relative to the control condition computed by unpaired t-tests via `qpcrTTESTplot` function. Confidence interval (ci) and standard error (se) has been used as error bar in 'A' and 'B', respectively.</p>
 </div>
-<h2 id="uni-or-multi-factorial-experiments-fold-change-fc-analysis">Uni- or multi-factorial experiments: Fold Change (FC) analysis</h2>
+<h2 id="sec:uni-or-multi-factorial-experiments-fold-change-fc-analysis">Uni- or multi-factorial experiments: Fold Change (FC) analysis</h2>
 <p>In the rtpcr package, the fold change analysis of a target gene is applied based on analysis of variance; ANOVA (or analysis of covariance; ANCOVA) using the <code>qpcrANOVAFC</code> function. the default argument is <code>anova</code> but can be changes to <code>ancova</code> as well. the ancova analysis is suitable when the levels of a factor are also affected by an uncontrolled quantitative covariate. For example, suppose that wDCt of a target gene in a plant is affected by temperature. The gene may also be affected by drought. since we already know that temperature affects the target gene, we are interesting now if the gene expression is also altered by the drought levels. We can design an experiment to understand the gene behavior at both temperature and drought levels at the same time. The drought is another factor (the covariate) that may affect the expression of our gene under the levels of the first factor i.e. temperature. The data of such an experiment can be analyzed by both ANCOVA or factorial ANOVA using <code>qpcrANOVAFC</code> function. The function also works for one factor experiment as well. Bar plot of fold changes (FC values) along with the 95% confidence interval is also returned by the <code>qpcrANOVAFC</code> function. There is also a function called <code>oneFACTORplot</code> which returns FC values and related plot for a one-factor-experiment with more than two levels.</p>
 <pre><code class="language-r"># See sample data
 data_2factor
@@ -579,10 +604,10 @@ data_2factor
 ## Fold Change plot of the main factor levels
 </code></pre>
 <div class="figure" style="text-align: center">
-<img src="data:image/png;base64,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" alt="Statistical table and figure of the Fold change expression of a gene in three different levels of Drough stress relative to the D0 as reference or calibrator level produced by the `qpcrANOVAFC` function. The other factor i.e. Genotype has been concidered as covariate."  />
+<img src="data:image/png;base64,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" alt="Statistical table and figure of the Fold change expression of a gene in three different levels of Drough stress relative to the D0 as reference or calibrator level produced by the `qpcrANOVAFC` function. The other factor i.e. Genotype has been concidered as covariate."  />
 <p class="caption">Statistical table and figure of the Fold change expression of a gene in three different levels of Drough stress relative to the D0 as reference or calibrator level produced by the `qpcrANOVAFC` function. The other factor i.e. Genotype has been concidered as covariate.</p>
 </div>
-<h2 id="uni-or-multi-factorial-experiments-relative-expression-re-analysis">Uni- or multi-factorial experiments: Relative Expression (RE) analysis</h2>
+<h2 id="sec:uni-or-multi-factorial-experiments-relative-expression-re-analysis">Uni- or multi-factorial experiments: Relative Expression (RE) analysis</h2>
 <p>the <code>qpcrANOVARE</code> function performs Relative Expression (RE) analysis for uni- or multi-factorial experiments in which all factor level combinations are used as treatments. The input data set should be prepared as shown in table 1. Factor columns should be presented first followed by blocking factor (if available), biological replicates and efficiency and Ct values of target and reference gene(s). The example data set below (<code>data_3factor</code>) represents amplification efficiency and Ct values for target and reference genes under three grouping factors (two different cultivars, three drought levels, and the presence or absence of bacteria). Here, the efficiency value of 2 has been used for all wells, but the calculated efficiencies can be used instead.</p>
 <pre><code class="language-r"># See a sample dataset
 data_3factor
@@ -625,7 +650,7 @@ data_3factor
 ## 35    S    H A2         2   2 28.53      2   30.65
 ## 36    S    H A2         3   2 28.28      2   30.74
 </code></pre>
-<h3 id="output-table-of-the-analysis">Output table of the analysis</h3>
+<h3 id="sec:output-table-of-the-analysis">Output table of the analysis</h3>
 <p>The <code>qpcrANOVARE</code> function produces the main analysis output including mean wDCt, LCL, UCL, grouping letters, and standard deviations for relative expression values. The standard deviation for each treatment is derived from the biological replicates of back-transformed wDCt data.</p>
 <pre><code class="language-r"># If the data include technical replicates, means of technical replicates
 # should be calculated first using meanTech function.
@@ -667,7 +692,7 @@ res &lt;- qpcrANOVARE(data_2factor,
 </code></pre>
 <pre><code>## NULL
 </code></pre>
-<pre><code class="language-r"># Before plotting, the statistical analysis should be done:
+<pre><code class="language-r"># Before plotting, the result needs to be extracted as below:
 out2 &lt;- qpcrANOVARE(data_1factor, numberOfrefGenes = 1, block = NULL)$Result
 </code></pre>
 <pre><code>## Analysis of Variance Table
@@ -750,7 +775,7 @@ grid.text(&quot;B&quot;, x = 0.52, y = 1, just = c(&quot;right&quot;, &quot;top&
 <img src="data:image/png;base64,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" alt="A: bar plot representing Relative expression of a gene under three levels of a factor generated using `oneFACTORplot` function, B: Plot of the Fold change expression produced by the `qpcrANOVAFC` function from the same data used for 'A'. The first element in the `mainFactor.level.order` argument (here L1) is served as the Reference level, although the x-axis names have later been renamed by the `x.axis.labels.rename` argument. Error bars represent 95% confidence interval in A and standard error in B."  />
 <p class="caption">A: bar plot representing Relative expression of a gene under three levels of a factor generated using `oneFACTORplot` function, B: Plot of the Fold change expression produced by the `qpcrANOVAFC` function from the same data used for 'A'. The first element in the `mainFactor.level.order` argument (here L1) is served as the Reference level, although the x-axis names have later been renamed by the `x.axis.labels.rename` argument. Error bars represent 95% confidence interval in A and standard error in B.</p>
 </div>
-<h3 id="barplot-with-the-1-alpha-confidence-interval-as-error-bars">Barplot with the (1-alpha)% confidence interval as error bars</h3>
+<h3 id="sec:barplot-with-the-1-alpha-confidence-interval-as-error-bars">Barplot with the (1-alpha)% confidence interval as error bars</h3>
 <pre><code class="language-r"># Before plotting, the result needs to be extracted as below:
 res &lt;- qpcrANOVARE(data_2factor, numberOfrefGenes = 1, block = NULL)$Result
 </code></pre>
@@ -827,7 +852,7 @@ grid.text(&quot;B&quot;, x = 0.52, y = 1, just = c(&quot;right&quot;, &quot;top&
 <img src="data:image/png;base64,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" alt="Relative expression of a target gene under two different factors of genotype (with two levels) and drought (with three levels). Error bars represent standard error. Means (columns) lacking letters in common have significant difference at alpha = 0.05 as resulted from a `LSD.test`."  />
 <p class="caption">Relative expression of a target gene under two different factors of genotype (with two levels) and drought (with three levels). Error bars represent standard error. Means (columns) lacking letters in common have significant difference at alpha = 0.05 as resulted from a `LSD.test`.</p>
 </div>
-<h3 id="a-three-factorial-experiment-example">A three-factorial experiment example</h3>
+<h3 id="sec:a-three-factorial-experiment-example">A three-factorial experiment example</h3>
 <pre><code class="language-r"># Before plotting, the result needs to be extracted as below:
 res &lt;- qpcrANOVARE(data_3factor, numberOfrefGenes = 1, block = NULL)$Result
 </code></pre>
@@ -910,7 +935,7 @@ grid.text(&quot;B&quot;, x = 0.52, y = 1, just = c(&quot;right&quot;, &quot;top&
 <img src="data:image/png;base64,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" alt="A and B) Relative expression (RE) of a target gene from a three-factorial experiment data produced by  `threeFACTORplot`  function. Error bars represent standard error (A), although can be set to confidence interval (B). Means (columns) lacking letters in common have significant differences at alpha = 0.05 as resulted from an ‘LSD.test’."  />
 <p class="caption">A and B) Relative expression (RE) of a target gene from a three-factorial experiment data produced by  `threeFACTORplot`  function. Error bars represent standard error (A), although can be set to confidence interval (B). Means (columns) lacking letters in common have significant differences at alpha = 0.05 as resulted from an ‘LSD.test’.</p>
 </div>
-<h2 id="repeated-measure-data-in-qpcr">Repeated measure data in qpcr</h2>
+<h2 id="sec:repeated-measure-data-in-qpcr">Repeated measure data in qpcr</h2>
 <p>Fold change (FC) analysis of observations repeatedly taken over time <code>qpcrREPEATED</code> function, for Repeated measure analysis of uni- or multi-factorial experiment data. The bar plot of the fold changes (FC) values along with the standard error (se) or confidence interval (ci) is also returned by the <code>qpcrREPEATED</code> function.</p>
 <pre><code class="language-r">a &lt;- qpcrREPEATED(data_repeated_measure_1,
                   numberOfrefGenes = 1,
@@ -1069,7 +1094,7 @@ grid.text(&quot;B&quot;, x = 0.52, y = 1, just = c(&quot;right&quot;, &quot;top&
 ## attr(,&quot;class&quot;)
 ## [1] &quot;XX&quot;
 </code></pre>
-<h2 id="fold-change-analysis-using-a-model">Fold change analysis using a model</h2>
+<h2 id="sec:fold-change-analysis-using-a-model">Fold change analysis using a model</h2>
 <p>The <code>qpcrMeans</code> performs fold change \({\Delta \Delta C_t}\) mwthid analysis using a model produced by the
 <code>qpcrANOVAFC</code> or <code>qpcrREPEATED.</code> The values can be returned for any effects in the model including simple effects,
 interactions and slicing if an ANOVA model is used, but ANCOVA models returned by rtpcr package only include simple effects.</p>
@@ -1112,7 +1137,7 @@ res &lt;- qpcrANOVAFC(data_3factor, numberOfrefGenes = 1, mainFactor.column = 1,
 ## 
 ## Fold Change plot of the main factor levels
 </code></pre>
-<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-15" /></p>
+<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-15" /></p>
 <pre><code class="language-r"># Returning fold change values of Conc levels from a fitted model:
 qpcrMeans(res$lm_ANOVA, specs = &quot;Conc&quot;)
 </code></pre>
@@ -1185,7 +1210,7 @@ twoFACTORplot(res2, x.axis.factor = contrast, ylab = &quot;Fold Change&quot;,
               group.factor = Type, errorbar = &quot;ci&quot;)
 </code></pre>
 <p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-15" /></p>
-<h1 id="an-example-of-showing-point-on-the-plot">An example of showing point on the plot</h1>
+<h1 id="chp:an-example-of-showing-point-on-the-plot">An example of showing point on the plot</h1>
 <pre><code class="language-r">library(ggplot2)
 b &lt;- qpcrANOVARE(data_3factor, numberOfrefGenes = 1, block = NULL)$Result
 </code></pre>
@@ -1275,7 +1300,7 @@ ggplot(b, aes(x = Type, y = RE, fill = factor(Conc))) +
 <img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-16"  />
 <p class="caption">plot of chunk unnamed-chunk-16</p>
 </div>
-<h1 id="checking-normality-of-residuals">Checking normality of residuals</h1>
+<h1 id="chp:checking-normality-of-residuals">Checking normality of residuals</h1>
 <p>If the residuals from a <code>t.test</code> or an <code>lm</code> or and <code>lmer</code> object are not normally distributed, the significance results might be violated. In such cases, one could use non-parametric tests such as the Mann-Whitney test (also known as the Wilcoxon rank-sum test), <code>wilcox.test()</code>, which is an alternative to <code>t.test</code>, or the <code>kruskal.test()</code> test which alternative to one-way analysis of variance, to test the difference between medians of the populations using independent samples. However, the <code>t.test</code> function (along with the <code>qpcrTTEST</code> function described above) includes the <code>var.equal</code> argument. When set to <code>FALSE</code>, perform <code>t.test</code> under the unequal variances hypothesis. Residuals for <code>lm</code> (from <code>qpcrANOVARE</code> and <code>qpcrANOVAFC</code> functions) and <code>lmer</code> (from <code>qpcrREPEATED</code> function) objects can be extracted and plotted as follow:</p>
 <pre><code class="language-r">residuals &lt;- qpcrANOVARE(data_1factor, numberOfrefGenes = 1, block = NULL)$lmCRD$residuals
 </code></pre>
@@ -1365,7 +1390,7 @@ qqline(residuals(a$lm), col = &quot;red&quot;)
 <img src="data:image/png;base64,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" alt="QQ-plot for the normality assessment of the residuals derived from `t.test` or `lm` functions."  />
 <p class="caption">QQ-plot for the normality assessment of the residuals derived from `t.test` or `lm` functions.</p>
 </div>
-<h1 id="mean-of-technical-replicates">Mean of technical replicates</h1>
+<h1 id="chp:mean-of-technical-replicates">Mean of technical replicates</h1>
 <p>Calculating the mean of technical replicates and getting an output table appropriate for subsequent ANOVA analysis can be done using the <code>meanTech</code> function. For this, the input data set should follow the column arrangement of the following example data. Grouping columns must be specified under the <code>groups</code> argument of the <code>meanTech</code> function.</p>
 <pre><code class="language-r"># See example input data frame:
 data_withTechRep
@@ -1401,7 +1426,7 @@ meanTech(data_withTechRep, groups = 1:4)
 ## 5   Line1    Heat   Treat       2       2 34.00667    2 31.77900
 ## 6   Line1    Heat   Treat       3       2 30.68500    2 30.95233
 </code></pre>
-<h1 id="combining-fc-results-of-different-genes">Combining FC results of different genes</h1>
+<h1 id="chp:combining-fc-results-of-different-genes">Combining FC results of different genes</h1>
 <p><code>qpcrANOVAFC</code> and <code>twoFACTORplot</code> functions give FC results for one gene each time. you can combine FC tables of different genes and present their bar plot by <code>twoFACTORplot</code> function. An example has been shown bellow for two genes, however it works for any number of genes.</p>
 <pre><code class="language-r">a &lt;- qpcrREPEATED(data_repeated_measure_1,
              numberOfrefGenes = 1,
@@ -1482,7 +1507,7 @@ c
 <img src="data:image/png;base64,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" alt="Fold change expression of two different genes. FC tables of any number of genes can be combined and used as input data frame for `twoFACTORplot` function."  />
 <p class="caption">Fold change expression of two different genes. FC tables of any number of genes can be combined and used as input data frame for `twoFACTORplot` function.</p>
 </div>
-<h1 id="how-to-edit-ouptput-graphs">How to edit ouptput graphs?</h1>
+<h1 id="chp:how-to-edit-ouptput-graphs">How to edit ouptput graphs?</h1>
 <p>the rtpcr graphical functions create a list containing the ggplot object so for editing or adding new layers to the graph output, you need to extract the ggplot object first:</p>
 <pre><code class="language-r">b &lt;- qpcrANOVAFC(data_2factor, 
             numberOfrefGenes = 1,
@@ -1500,12 +1525,12 @@ library(ggplot2)
 p2 &lt;- b$FC_Plot_of_the_main_factor_levels
 p2 + theme_set(theme_classic(base_size = 20))
 </code></pre>
-<h1 id="citation">Citation</h1>
+<h1 id="chp:citation">Citation</h1>
 <pre><code class="language-r">citation(&quot;rtpcr&quot;)
 </code></pre>
-<h1 id="contact">Contact</h1>
+<h1 id="chp:contact">Contact</h1>
 <p>Email: gh.mirzaghaderi at uok.ac.ir</p>
-<h1 id="references">References</h1>
+<h1 id="chp:references">References</h1>
 <p>Livak, Kenneth J, and Thomas D Schmittgen. 2001. Analysis of Relative Gene Expression Data Using Real-Time Quantitative PCR and the Double Delta CT Method. Methods 25 (4). <a href="https://doi.org/10.1006/meth.2001.1262">doi.org/10.1006/meth.2001.1262</a>.</p>
 <p>Ganger, MT, Dietz GD, Ewing SJ. 2017. A common base method for analysis of qPCR data and the application of simple blocking in qPCR experiments. BMC bioinformatics 18, 1-11. <a href="https://doi.org/10.1186/s12859-017-1949-5">doi.org/10.1186/s12859-017-1949-5</a>.</p>
 <p>Pfaffl MW, Horgan GW, Dempfle L. 2002. Relative expression software tool (REST©) for group-wise comparison and statistical analysis of relative expression results in real-time PCR. Nucleic acids research 30, e36-e36. <a href="https://doi.org/10.1093/nar/30.9.e36">doi.org/10.1093/nar/30.9.e36</a>.</p>
@@ -1513,8 +1538,5 @@ p2 + theme_set(theme_classic(base_size = 20))
 <p>Yuan, JS, Ann Reed, Feng Chen, and Neal Stewart. 2006. Statistical Analysis of Real-Time PCR Data. BMC Bioinformatics 7 (85). <a href="https://doi.org/10.1186/1471-2105-7-85">doi.org/10.1186/1471-2105-7-85</a>.</p>
 <p>.</p>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/combine/npm/katex/dist/katex.min.js,npm/katex/dist/contrib/auto-render.min.js,npm/@xiee/utils/js/render-katex.js" defer></script>
 </body>
 </html>

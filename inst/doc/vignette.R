@@ -12,14 +12,14 @@ library(ggplot2)
 library(grid)
 
 ## ----eval= F, include= T, message=FALSE, warning = FALSE----------------------
-#  
-#  # install `rtpcr` from github (under development)
-#  
-#  devtools::install_github("mirzaghaderi/rtpcr")
-#  
-#  # I strongly recommend to install the package with the vignette as it contains information about how to use the 'rtpcr' package. Through the following code, Vignette is installed as well.
-#  
-#  devtools::install_github("mirzaghaderi/rtpcr", build_vignettes = TRUE)
+# 
+# # install `rtpcr` from github (under development)
+# 
+# devtools::install_github("mirzaghaderi/rtpcr")
+# 
+# # I strongly recommend to install the package with the vignette as it contains information about how to use the 'rtpcr' package. Through the following code, Vignette is installed as well.
+# 
+# devtools::install_github("mirzaghaderi/rtpcr", build_vignettes = TRUE)
 
 ## ----eval= T------------------------------------------------------------------
 data_efficiency
@@ -91,7 +91,7 @@ res$Post_hoc_Test
 
 ## ----eval= T, fig.height = 4, fig.width = 9, fig.align = 'center', fig.cap = "A: bar plot representing Relative expression of a gene under three levels of a factor generated using `oneFACTORplot` function, B: Plot of the Fold change expression produced by the `qpcrANOVAFC` function from the same data used for 'A'. The first element in the `mainFactor.level.order` argument (here L1) is served as the Reference level, although the x-axis names have later been renamed by the `x.axis.labels.rename` argument. Error bars represent 95% confidence interval in A and standard error in B."----
 
-# Before plotting, the statistical analysis should be done:
+# Before plotting, the result needs to be extracted as below:
 out2 <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1, block = NULL)$Result
 
 f1 <- oneFACTORplot(out2,
@@ -337,24 +337,24 @@ twoFACTORplot(c, x.axis.factor = contrast,
               axis.text.x.hjust = 1, legend.position = c(0.2, 0.8))
 
 ## ----eval= F, include = T, fig.height = 4, fig.width = 5----------------------
-#  
-#  b <- qpcrANOVAFC(data_2factor,
-#              numberOfrefGenes = 1,
-#              mainFactor.column = 1,
-#              block = NULL,
-#              mainFactor.level.order = c("S", "R"),
-#              fill = c("#CDC673", "#EEDD82"),
-#              analysisType = "ancova",
-#              fontsizePvalue = 7,
-#              y.axis.adjust = 0.1, width = 0.35)
-#  
-#  
-#  
-#  library(ggplot2)
-#  p2 <- b$FC_Plot_of_the_main_factor_levels
-#  p2 + theme_set(theme_classic(base_size = 20))
-#  
+# 
+# b <- qpcrANOVAFC(data_2factor,
+#             numberOfrefGenes = 1,
+#             mainFactor.column = 1,
+#             block = NULL,
+#             mainFactor.level.order = c("S", "R"),
+#             fill = c("#CDC673", "#EEDD82"),
+#             analysisType = "ancova",
+#             fontsizePvalue = 7,
+#             y.axis.adjust = 0.1, width = 0.35)
+# 
+# 
+# 
+# library(ggplot2)
+# p2 <- b$FC_Plot_of_the_main_factor_levels
+# p2 + theme_set(theme_classic(base_size = 20))
+# 
 
 ## ----eval= F------------------------------------------------------------------
-#  citation("rtpcr")
+# citation("rtpcr")
 
