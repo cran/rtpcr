@@ -34,7 +34,8 @@ data_ttest
 qpcrTTEST(data_ttest, 
           numberOfrefGenes = 1,
           paired = F, 
-          var.equal = T)
+          var.equal = T,
+          p.adj = "none")
 
 ## ----eval= T, fig.height=3, fig.width=8, fig.align='center', fig.cap = "Average Fold changes of three target genes relative to the control condition computed by unpaired t-tests via `qpcrTTESTplot` function. Confidence interval (ci) and standard error (se) has been used as error bar in 'A' and 'B', respectively.", warning = F, message = F----
 
@@ -42,7 +43,8 @@ qpcrTTEST(data_ttest,
 t1 <- qpcrTTESTplot(data_ttest,
               numberOfrefGenes = 1,
               fontsizePvalue = 4,
-              errorbar = "ci")
+              errorbar = "ci",
+              p.adj = "none")
 
 # Producing the plot: specifying gene order
 t2 <- qpcrTTESTplot(data_ttest,

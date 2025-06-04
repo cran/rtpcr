@@ -4,7 +4,7 @@
 \alias{qpcrTTEST}
 \title{Fold change (\eqn{\Delta \Delta C_T} method) analysis of target genes using t-test}
 \usage{
-qpcrTTEST(x, numberOfrefGenes, paired = FALSE, var.equal = TRUE)
+qpcrTTEST(x, numberOfrefGenes, paired = FALSE, var.equal = TRUE, p.adj = "BH")
 }
 \arguments{
 \item{x}{a data frame of 4 columns including Conditions, E (efficiency), Gene and Ct values (see examples below). Biological replicates needs to be equal for all Genes. Each Ct value is the mean of technical replicates. Complete amplification efficiencies of 2 is assumed here for all wells but the calculated efficienies can be used instead. See \href{../doc/vignette.html}{\code{vignette}} for details about "data structure and column arrangement".}
@@ -14,6 +14,8 @@ qpcrTTEST(x, numberOfrefGenes, paired = FALSE, var.equal = TRUE)
 \item{paired}{a logical indicating whether you want a paired t-test.}
 
 \item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
+
+\item{p.adj}{Method ("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none") for adjusting p values.}
 }
 \value{
 A list of two elements:
@@ -55,7 +57,8 @@ qpcrTTEST(data_ttest,
 
 qpcrTTEST(Taylor_etal2019, 
           numberOfrefGenes = 2, 
-          var.equal = TRUE)
+          var.equal = TRUE,
+          p.adj = "BH")
  
 
 

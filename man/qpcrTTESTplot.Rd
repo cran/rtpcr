@@ -10,6 +10,7 @@ qpcrTTESTplot(
   numberOfrefGenes,
   paired = FALSE,
   var.equal = TRUE,
+  p.adj = "BH",
   width = 0.5,
   fill = "skyblue",
   y.axis.adjust = 0,
@@ -39,6 +40,8 @@ normal condition. See \href{../doc/vignette.html}{\code{vignette}} for details.}
 \item{paired}{a logical indicating whether you want a paired t-test.}
 
 \item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
+
+\item{p.adj}{Method ("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none") for adjusting p values.}
 
 \item{width}{a positive number determining bar width.}
 
@@ -91,7 +94,8 @@ data_ttest
 
 qpcrTTESTplot(data_ttest, 
               numberOfrefGenes = 1,
-              errorbar = "ci")
+              errorbar = "ci",
+              p.adj = "BH")
 
 
 # Producing the plot

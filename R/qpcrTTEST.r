@@ -22,6 +22,7 @@
 #' @param paired a logical indicating whether you want a paired t-test.
 #' @param var.equal a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
 #' @param numberOfrefGenes number of reference genes. Up to two reference genes can be handled.
+#' @param p.adj Method ("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none") for adjusting p values.  
 #' @return A list of two elements:
 #' \describe{
 #'   \item{Row_data}{The row data including Genes and weighed delta Ct (wDCt) values.}
@@ -58,7 +59,8 @@
 #'
 #' qpcrTTEST(Taylor_etal2019, 
 #'           numberOfrefGenes = 2, 
-#'           var.equal = TRUE)
+#'           var.equal = TRUE,
+#'           p.adj = "BH")
 #'  
 #'
 #'
@@ -66,7 +68,7 @@
 
 
 
-qpcrTTEST <- function(x,numberOfrefGenes, paired = FALSE, var.equal = TRUE) {
+qpcrTTEST <- function(x,numberOfrefGenes, paired = FALSE, var.equal = TRUE, p.adj = "BH") {
   
   colnames(x)[1] <- "Condition"
   colnames(x)[2] <- "Gene"
@@ -141,7 +143,10 @@ qpcrTTEST <- function(x,numberOfrefGenes, paired = FALSE, var.equal = TRUE) {
     res$dif <- NULL
     res <- data.frame(res, 
                       Lower.se = round(2^(log2(res$FC) - res$se), 4), 
-                      Upper.se = round(2^(log2(res$FC) + res$se), 4))
+                      Upper.se = round(2^(log2(res$FC) + res$se), 4),
+                      p.adj = stats::p.adjust(res$pvalue, method = p.adj))
+    
+    
     
     Raw_df <- melt(subset, value.name = "wDCt")[-1]
     res <- list(Raw_data = subset_df, Result = res)

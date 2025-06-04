@@ -31,6 +31,7 @@
 #' @param order a vector determining genes order on the output graph.
 #' @param paired  a logical indicating whether you want a paired t-test.
 #' @param var.equal a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
+#' @param p.adj Method ("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none") for adjusting p values.  
 #' @param width a positive number determining bar width.
 #' @param fill  specify the fill color for the columns of the bar plot.
 #' @param y.axis.adjust  a negative or positive value for reducing or increasing the length of the y axis.
@@ -52,7 +53,8 @@
 #'
 #' qpcrTTESTplot(data_ttest, 
 #'               numberOfrefGenes = 1,
-#'               errorbar = "ci")
+#'               errorbar = "ci",
+#'               p.adj = "BH")
 #'
 #'
 #' # Producing the plot
@@ -74,7 +76,7 @@
 
 
 qpcrTTESTplot <- function(x, order = "none", numberOfrefGenes, paired = FALSE,
-                          var.equal = TRUE, width = 0.5, fill = "skyblue", y.axis.adjust = 0,
+                          var.equal = TRUE, p.adj = "BH", width = 0.5, fill = "skyblue", y.axis.adjust = 0,
                           y.axis.by = 2, letter.position.adjust = 0.3, ylab = "Average Fold Change",
                           xlab = "none", fontsize = 12, fontsizePvalue = 7, axis.text.x.angle = 0,
                           axis.text.x.hjust = 0.5, errorbar = "se"){
@@ -106,9 +108,9 @@ qpcrTTESTplot <- function(x, order = "none", numberOfrefGenes, paired = FALSE,
 
   
   if(numberOfrefGenes == 1) {
-    TTESTRES <- qpcrTTEST(x, numberOfrefGenes = 1, paired = paired, var.equal = var.equal)
+    TTESTRES <- qpcrTTEST(x, numberOfrefGenes = 1, paired = paired, var.equal = var.equal, p.adj = p.adj)
   } else {
-    TTESTRES <- qpcrTTEST(x, numberOfrefGenes = 2, paired = paired, var.equal = var.equal)
+    TTESTRES <- qpcrTTEST(x, numberOfrefGenes = 2, paired = paired, var.equal = var.equal, p.adj = p.adj)
   }
   
   
@@ -135,7 +137,7 @@ qpcrTTESTplot <- function(x, order = "none", numberOfrefGenes, paired = FALSE,
   Fold_Change <- df2$FC
   Lower.Er <- df2$LCL
   Upper.Er <- df2$UCL
-  pvalue <- as.numeric(df2$pvalue)
+  pvalue <- as.numeric(df2$p.adj)
   label <- convert_to_character(pvalue)
   se <- df2$se
 

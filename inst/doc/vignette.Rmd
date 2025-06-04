@@ -165,7 +165,7 @@ To simplify `rtpcr` usage, examples for using the functions are presented below.
  | qpcrANOVAFC          | FC and bar plot of the target gene (one or multi-factorial experiments) | qpcrANOVAFC(data_1factor, numberOfrefGenes = 1, mainFactor.column = 1, mainFactor.level.order = c("L1", "L2", "L3") |
  |  oneFACTORplot       | Bar plot of the relative gene expression from a one-factor experiment | out <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1)\$Result;  oneFACTORplot(out, errorbar = "se") |
  |  qpcrANOVARE         | Analysis of Variance of the qpcr data  | qpcrANOVARE(data_3factor, numberOfrefGenes = 1) |
- | qpcrTTEST            | Computing the fold change and related statistics | qpcrTTEST(data_ttest,  numberOfrefGenes = 1, paired = FALSE, var.equal = TRUE) |
+ | qpcrTTEST            | Computing the fold change and related statistics | qpcrTTEST(data_ttest,  numberOfrefGenes = 1, paired = FALSE, var.equal = TRUE, p.adj = "none") |
  | qpcrTTESTplot        | Bar plot of the average fold change of the target genes	 | qpcrTTESTplot(data_ttest,  numberOfrefGenes = 1, order = c("C2H2-01", "C2H2-12", "C2H2-26")) |
  |  threeFACTORplot     | Bar plot of the relative gene expression from a three-factor experiment | res <- qpcrANOVARE(data_3factor,  numberOfrefGenes = 1)\$Result; threeFACTORplot(res, 
  arrangement = c(3, 1, 2), errorbar = "se") |
@@ -224,7 +224,8 @@ Here, the above data set was used for the Fold Change expression analysis of the
 qpcrTTEST(data_ttest, 
           numberOfrefGenes = 1,
           paired = F, 
-          var.equal = T)
+          var.equal = T,
+          p.adj = "none")
 ```
 
 
@@ -238,7 +239,8 @@ The `qpcrTTESTplot` function generates a bar plot of fold changes (FC) and confi
 t1 <- qpcrTTESTplot(data_ttest,
               numberOfrefGenes = 1,
               fontsizePvalue = 4,
-              errorbar = "ci")
+              errorbar = "ci",
+              p.adj = "none")
 
 # Producing the plot: specifying gene order
 t2 <- qpcrTTESTplot(data_ttest,
