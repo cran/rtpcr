@@ -10,10 +10,10 @@ A data frame with 18 observations and 7 variables:
   \item{id}{experimental factor}
   \item{treatment}{treatment}
   \item{time}{time course levels}
-  \item{Eg}{Amplification efficiency of target gene}
-  \item{Ctg}{Ct of target gene}
-  \item{Eref}{Amplification efficiency of reference gene}
-  \item{Ctref}{Ct of reference gene}
+  \item{E_target}{Amplification efficiency of target gene}
+  \item{Ct_target}{Ct of target gene}
+  \item{E_ref}{Amplification efficiency of reference gene}
+  \item{Ct_ref}{Ct of reference gene}
 }
 }
 \source{

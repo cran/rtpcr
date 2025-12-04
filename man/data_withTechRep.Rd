@@ -12,10 +12,10 @@ A data frame with 18 observations and 9 variables:
   \item{factor3}{experimental factor}
   \item{biolrep}{biological replicate}
   \item{techrep}{technical replicates}
-  \item{Etarget}{Amplification efficiency of target gene}
-  \item{targetCt}{Ct of target gene}
-  \item{Eref}{Amplification efficiency of reference gene}
-  \item{refCt}{Ct of reference gene}
+  \item{E_target}{Amplification efficiency of target gene}
+  \item{Ct_target}{Ct of target gene}
+  \item{E_ref}{Amplification efficiency of reference gene}
+  \item{Ct_ref}{Ct of reference gene}
 }
 }
 \source{

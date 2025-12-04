@@ -7,12 +7,12 @@
 \format{
 A data frame with 9 observations and 6 variables:
 \describe{
-  \item{SA}{First experimental factor}
+  \item{SA}{An experimental factor here called SA}
   \item{Rep}{Biological replicates}
-  \item{EPO}{Mean amplification efficiency of PO gene}
-  \item{POCt}{Ct values of PO gene. Each is the mean of technical replicates}
-  \item{EGAPDH}{Mean amplification efficiency of GAPDH gene}
-  \item{GAPDHCt}{Ct values of GAPDH gene. Each is the mean of technical replicates}
+  \item{E_PO}{Mean amplification efficiency of PO gene}
+  \item{Ct_PO}{Ct values of PO gene. Each is the mean of technical replicates}
+  \item{E_GAPDH}{Mean amplification efficiency of GAPDH gene}
+  \item{Ct_GAPDH}{Ct values of GAPDH gene. Each is the mean of technical replicates}
 }
 }
 \source{

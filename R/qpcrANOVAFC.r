@@ -98,7 +98,7 @@
 #'
 #'
 #' qpcrANOVAFC(data_1factor, numberOfrefGenes = 1, mainFactor.column = 1, block = NULL, 
-#' fill = c("#CDC673", "#EEDD82"), fontsizePvalue = 5, y.axis.adjust = 0.1)
+#' fill = c("aliceblue", "skyblue"), fontsizePvalue = 5, y.axis.adjust = 0.1)
 #' 
 #'
 #' qpcrANOVAFC(data_2factor, numberOfrefGenes = 1, mainFactor.column = 2, block = NULL, 
@@ -114,7 +114,7 @@
 #' 
 #' qpcrANOVAFC(data_2factorBlock,  numberOfrefGenes = 1, mainFactor.column = 1, 
 #' mainFactor.level.order = c("S", "R"), block = "block", 
-#' fill = c("#CDC673", "#EEDD82"), analysisType = "ancova",
+#' fill = c("aliceblue", "skyblue"), analysisType = "ancova",
 #' fontsizePvalue = 7, y.axis.adjust = 0.1, width = 0.35)
 #' 
 #' 
@@ -126,7 +126,7 @@
 #'
 #' addline_format <- function(x,...){gsub('\\s','\n',x)}
 #' qpcrANOVAFC(data_1factor, numberOfrefGenes = 1, mainFactor.column = 1,
-#' block = NULL, fill = c("skyblue","#79CDCD"), y.axis.by = 1, 
+#' block = NULL, fill = c("azure1","azure3"), y.axis.by = 1, 
 #' letter.position.adjust = 0, y.axis.adjust = 1, ylab = "Fold Change", 
 #' fontsize = 12, x.axis.labels.rename = addline_format(c("Control", 
 #'                                          "Treatment_1 vs Control", 

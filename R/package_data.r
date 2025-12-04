@@ -21,12 +21,12 @@
 #'
 #' @format A data frame with 9 observations and 6 variables:
 #' \describe{
-#'   \item{SA}{First experimental factor}
+#'   \item{SA}{An experimental factor here called SA}
 #'   \item{Rep}{Biological replicates}
-#'   \item{EPO}{Mean amplification efficiency of PO gene}
-#'   \item{POCt}{Ct values of PO gene. Each is the mean of technical replicates}
-#'   \item{EGAPDH}{Mean amplification efficiency of GAPDH gene}
-#'   \item{GAPDHCt}{Ct values of GAPDH gene. Each is the mean of technical replicates}
+#'   \item{E_PO}{Mean amplification efficiency of PO gene}
+#'   \item{Ct_PO}{Ct values of PO gene. Each is the mean of technical replicates}
+#'   \item{E_GAPDH}{Mean amplification efficiency of GAPDH gene}
+#'   \item{Ct_GAPDH}{Ct values of GAPDH gene. Each is the mean of technical replicates}
 #' }
 #'
 #' @source Not applicable
@@ -42,10 +42,10 @@
 #'   \item{Genotype}{First experimental factor}
 #'   \item{Drought}{Second experimental factor}
 #'   \item{Rep}{Biological replicates}
-#'   \item{EPO}{Mean amplification efficiency of PO gene}
-#'   \item{POCt}{Ct values of PO gene. Each is the mean of technical replicates}
-#'   \item{EGAPDH}{Mean amplification efficiency of GAPDH gene}
-#'   \item{GAPDHCt}{Ct values of GAPDH gene. Each is the mean of technical replicates}
+#'   \item{E_PO}{Mean amplification efficiency of PO gene}
+#'   \item{Ct_PO}{Ct values of PO gene. Each is the mean of technical replicates}
+#'   \item{E_GAPDH}{Mean amplification efficiency of GAPDH gene}
+#'   \item{Ct_GAPDH}{Ct values of GAPDH gene. Each is the mean of technical replicates}
 #' } 
 #'
 #' @source Not applicable
@@ -62,10 +62,10 @@
 #'   \item{factor2}{Second experimental factor}
 #'   \item{block}{Second experimental factor}
 #'   \item{Rep}{Biological replicates}
-#'   \item{EPO}{Mean amplification efficiency of PO gene}
-#'   \item{POCt}{Ct values of PO gene. Each is the mean of technical replicates}
-#'   \item{EGAPDH}{Mean amplification efficiency of GAPDH gene}
-#'   \item{GAPDHCt}{Ct values of GAPDH gene. Each is the mean of technical replicates}
+#'   \item{E_PO}{Mean amplification efficiency of PO gene}
+#'   \item{Ct_PO}{Ct values of PO gene. Each is the mean of technical replicates}
+#'   \item{E_GAPDH}{Mean amplification efficiency of GAPDH gene}
+#'   \item{Ct_GAPDH}{Ct values of GAPDH gene. Each is the mean of technical replicates}
 #' }
 #'
 #' @source Not applicable
@@ -82,10 +82,10 @@
 #'   \item{Conc}{Second experimental factor}
 #'   \item{SA}{Third experimental factor}
 #'   \item{Replicate}{Biological replicates}
-#'   \item{EPO}{Mean amplification efficiency of PO gene}
-#'   \item{POCt}{Ct values of PO gene. Each is the mean of technical replicates}
-#'   \item{EGAPDH}{Mean amplification efficiency of GAPDH gene}
-#'   \item{GAPDHCt}{Ct values of GAPDH gene. Each is the mean of technical replicates}
+#'   \item{E_PO}{Mean amplification efficiency of PO gene}
+#'   \item{Ct_PO}{Ct values of PO gene. Each is the mean of technical replicates}
+#'   \item{E_GAPDH}{Mean amplification efficiency of GAPDH gene}
+#'   \item{Ct_GAPDH}{Ct values of GAPDH gene. Each is the mean of technical replicates}
 #' }
 #'
 #' @source Not applicable
@@ -136,10 +136,10 @@
 #'   \item{factor3}{experimental factor}
 #'   \item{biolrep}{biological replicate}
 #'   \item{techrep}{technical replicates}
-#'   \item{Etarget}{Amplification efficiency of target gene}
-#'   \item{targetCt}{Ct of target gene}
-#'   \item{Eref}{Amplification efficiency of reference gene}
-#'   \item{refCt}{Ct of reference gene}
+#'   \item{E_target}{Amplification efficiency of target gene}
+#'   \item{Ct_target}{Ct of target gene}
+#'   \item{E_ref}{Amplification efficiency of reference gene}
+#'   \item{Ct_ref}{Ct of reference gene}
 #' } 
 #'
 #' @source Not applicable
@@ -157,10 +157,10 @@
 #'   \item{DS}{DS}
 #'   \item{biolRep}{biological replicate}
 #'   \item{techRep}{technical replicates}
-#'   \item{APOE_efficiency}{Amplification efficiency of APOE gene}
-#'   \item{APOE_Ct}{Ct of APOE gene}
-#'   \item{GAPDH_efficiency}{Amplification efficiency of GAPDH gene}
-#'   \item{GAPDH_Ct}{Ct of GAPDH gene}
+#'   \item{E_APOE}{Amplification efficiency of APOE gene}
+#'   \item{Ct_APOE}{Ct of APOE gene}
+#'   \item{E_GAPDH}{Amplification efficiency of GAPDH gene}
+#'   \item{Ct_GAPDH}{Ct of GAPDH gene}
 #' }
 #'
 #' @source Lee et al, (2020) <doi:10.12688/f1000research.23580.2>
@@ -179,10 +179,10 @@
 #'   \item{id}{experimental factor}
 #'   \item{treatment}{treatment}
 #'   \item{time}{time course levels}
-#'   \item{Eg}{Amplification efficiency of target gene}
-#'   \item{Ctg}{Ct of target gene}
-#'   \item{Eref}{Amplification efficiency of reference gene}
-#'   \item{Ctref}{Ct of reference gene}
+#'   \item{E_target}{Amplification efficiency of target gene}
+#'   \item{Ct_target}{Ct of target gene}
+#'   \item{E_ref}{Amplification efficiency of reference gene}
+#'   \item{Ct_ref}{Ct of reference gene}
 #' }
 #' 
 #' @source NA
@@ -200,10 +200,10 @@
 #' \describe{
 #'   \item{id}{experimental factor}
 #'   \item{time}{time course levels}
-#'   \item{Eg}{Amplification efficiency of target gene}
-#'   \item{Ctg}{Ct of target gene}
-#'   \item{Eref}{Amplification efficiency of reference gene}
-#'   \item{Ctref}{Ct of reference gene}
+#'   \item{E_target}{Amplification efficiency of target gene}
+#'   \item{Ct_target}{Ct of target gene}
+#'   \item{E_ref}{Amplification efficiency of reference gene}
+#'   \item{Ct_ref}{Ct of reference gene}
 #' }
 #' 
 #' @source NA

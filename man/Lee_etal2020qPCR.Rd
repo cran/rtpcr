@@ -11,10 +11,10 @@ A data frame with 72 observations and 8 variables:
   \item{DS}{DS}
   \item{biolRep}{biological replicate}
   \item{techRep}{technical replicates}
-  \item{APOE_efficiency}{Amplification efficiency of APOE gene}
-  \item{APOE_Ct}{Ct of APOE gene}
-  \item{GAPDH_efficiency}{Amplification efficiency of GAPDH gene}
-  \item{GAPDH_Ct}{Ct of GAPDH gene}
+  \item{E_APOE}{Amplification efficiency of APOE gene}
+  \item{Ct_APOE}{Ct of APOE gene}
+  \item{E_GAPDH}{Amplification efficiency of GAPDH gene}
+  \item{Ct_GAPDH}{Ct of GAPDH gene}
 }
 }
 \source{
