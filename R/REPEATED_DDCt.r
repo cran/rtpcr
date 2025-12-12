@@ -1,18 +1,18 @@
 #' @title Fold change (\eqn{\Delta \Delta C_T} method) analysis of repeated measure qPCR data
 #' 
-#' @description \code{qpcrREPEATED} function performs fold change (\eqn{\Delta \Delta C_T} method) 
+#' @description \code{REPEATED_DDCt} function performs fold change (\eqn{\Delta \Delta C_T} method) 
 #' analysis of observations repeatedly taken over different time courses. 
 #' Data may be obtained over time from a uni- or multi-factorial experiment. The bar plot of the fold changes (FC) 
-#' values along with the standard error (se) or confidence interval (ci) is also returned by the \code{qpcrREPEATED} function. 
+#' values along with the standard error (se) or confidence interval (ci) is also returned by the \code{REPEATED_DDCt} function. 
 #' 
-#' @details The \code{qpcrREPEATED} function performs fold change (FC) analysis of observations repeatedly taken over time. 
+#' @details The \code{REPEATED_DDCt} function performs fold change (FC) analysis of observations repeatedly taken over time. 
 #' The intended factor (could be time or any other factor) is defined for the analysis by the \code{factor} argument, 
 #' then the function performs FC analysis on its levels
 #' so that the first levels (as appears in the input data frame) is used as reference or calibrator. 
 #' The function returns FC values along with confidence interval and standard error for the FC values.
 #' 
 #' @author Ghader Mirzaghaderi
-#' @export qpcrREPEATED
+#' @export REPEATED_DDCt
 #' @import tidyr
 #' @import dplyr
 #' @import reshape2
@@ -32,23 +32,12 @@
 #' of time 0. The FC value of the reference or calibrator level is 1 because it is not changed compared to itself.
 #' If NULL, the first level of the main factor column is used as calibrator.
 #' @param factor the factor for which the FC values is analysed. The first level of the specified factor in the input data frame is used as calibrator.
-#' @param width a positive number determining bar width in the output bar plot. 
-#' @param fill  specify the fill color for the columns in the bar plot. If a vector of two colors is specified, the reference level is differentialy colored.
-#' @param y.axis.adjust  a negative or positive value for reducing or increasing the length of the y axis.
-#' @param letter.position.adjust adjust the distance between the signs and the error bars.
-#' @param y.axis.by determines y axis step length
-#' @param xlab  the title of the x axis
-#' @param ylab  the title of the y axis
-#' @param fontsize font size of the plot
-#' @param fontsizePvalue font size of the pvalue labels
-#' @param axis.text.x.angle angle of x axis text
-#' @param axis.text.x.hjust horizontal justification of x axis text
 #' @param x.axis.labels.rename a vector replacing the x axis labels in the bar plot
 #' @param block column name of the block if there is a blocking factor (for correct column arrangement see example data.). 
 #' Block effect is usually considered as random and its interaction with any main effect is not considered.
 #' @param p.adj Method for adjusting p values
-#' @param errorbar Type of error bar, can be \code{se} or \code{ci}.
 #' @param plot  if \code{FALSE}, prevents the plot.
+#' @param plotType  Plot based on "RE" (relative expression) or "log2FC" (log2 fold change).
 #' @return A list with 5 elements:
 #' \describe{
 #'   \item{Final_data}{Input data frame plus the weighted Delat Ct values (wDCt)}
@@ -62,11 +51,11 @@
 #' 
 #' @examples
 #' 
-#' qpcrREPEATED(data_repeated_measure_1,
+#' REPEATED_DDCt(data_repeated_measure_1,
 #'             numberOfrefGenes = 1,
 #'             factor = "time", block = NULL)
 #'
-#' qpcrREPEATED(data_repeated_measure_2,
+#' REPEATED_DDCt(data_repeated_measure_2,
 #'              numberOfrefGenes = 1,
 #'              factor = "time", block = NULL)
 #'                                                        
@@ -74,11 +63,14 @@
 
 
 
-qpcrREPEATED <- function(x, numberOfrefGenes, factor, block,
-                         width = 0.5, fill = "#BFEFFF", y.axis.adjust = 2, y.axis.by = 1,
-                         ylab = "Fold Change", xlab = "none", fontsize = 12, fontsizePvalue = 7,
-                         axis.text.x.angle = 0, axis.text.x.hjust = 0.5, x.axis.labels.rename = "none",
-                         letter.position.adjust = 0, p.adj = "none", errorbar = "se", plot = TRUE){
+REPEATED_DDCt <- function(x, 
+                          numberOfrefGenes,
+                          factor, 
+                          block,
+                          x.axis.labels.rename = "none",
+                          p.adj = "none",
+                          plot = TRUE,
+                          plotType = "RE"){
   
   
   if (missing(numberOfrefGenes)) {
@@ -212,7 +204,8 @@ qpcrREPEATED <- function(x, numberOfrefGenes, factor, block,
   sig <- .convert_to_character(pp$p.value)
   contrast <- pp$contrast
   post_hoc_test <- data.frame(contrast, 
-                              FC = 1/(2^-(pp$estimate)),
+                              RE = 1/(2^-(pp$estimate)),
+                              log2FC = log2(1/(2^-(pp$estimate))),
                               pvalue = pp$p.value,
                               sig = sig,
                               LCL = 1/(2^-pp$lower.CL),
@@ -225,7 +218,8 @@ qpcrREPEATED <- function(x, numberOfrefGenes, factor, block,
  
   
   reference <- data.frame(contrast = as.character(referencelevel),
-                          FC = 1,
+                          RE = 1,
+                          log2FC = 0,
                           pvalue = 1, 
                           sig = " ",
                           LCL = 0,
@@ -259,76 +253,46 @@ qpcrREPEATED <- function(x, numberOfrefGenes, factor, block,
   se <- tableC$se
   
   
-  
-  
-  
-  
-  
-  
-  
-  pfc2 <- ggplot(tableC, aes(contrast, FCp, fill = contrast)) +
-    geom_col(col = "black", width = width)
-  
-  
-  
-  if(errorbar == "ci") {
-    pfc2 <- pfc2 +
-      geom_errorbar(aes(contrast, ymin = LCL, ymax =  UCL), width=0.1) +
-      geom_text(aes(label = significance, x = contrast,
-                    y = UCL + letter.position.adjust),
-                vjust = -0.5, size = fontsizePvalue)
-  } else if(errorbar == "se") {
-    pfc2 <- pfc2 +
-      geom_errorbar(aes(contrast, ymin = 2^(log2(FCp) - se), ymax =  2^(log2(FCp) + se)), width=0.1) +
-      geom_text(aes(label = significance, x = contrast,
-                    y = 2^(log2(FCp) + se) + letter.position.adjust),
-                vjust = -0.5, size = fontsizePvalue)
-  }
-  
-  
-  pfc2 <- pfc2 +
-    ylab(ylab) +
-    theme_bw()+
-    theme(axis.text.x = element_text(size = fontsize, color = "black", angle = axis.text.x.angle, hjust = axis.text.x.hjust),
-          axis.text.y = element_text(size = fontsize, color = "black", angle = 0, hjust = 0.5),
-          axis.title  = element_text(size = fontsize)) +
-    scale_y_continuous(breaks=seq(0, max(FCp) + max(se)  + y.axis.adjust, by = y.axis.by),
-                       limits = c(0, max(FCp) + max(se) + y.axis.adjust), expand = c(0, 0)) +
-    theme(legend.text = element_text(colour = "black", size = fontsize),
-          legend.background = element_rect(fill = "transparent"))
-  
-  
-  if(length(fill) == 2) {
-    pfc2 <- pfc2 +
-      scale_fill_manual(values = c(fill[1], rep(fill[2], nrow(tableC)-1)))
-  } 
-  if (length(fill) == 1) {
-    pfc2 <- pfc2 +
-      scale_fill_manual(values = rep(fill, nrow(tableC)))
-  }
-  
-  pfc2 <- pfc2 + guides(fill = "none") 
-  
-  
-  if(xlab == "none"){
-    pfc2 <- pfc2 + 
-      labs(x = NULL)
-  }else{
-    pfc2 <- pfc2 +
-      xlab(xlab)
-  }
-  
-  
-  
   tableC <- data.frame(tableC, 
-                       Lower.se = round(2^(log2(tableC$FC) - tableC$se), 4), 
-                       Upper.se = round(2^(log2(tableC$FC) + tableC$se), 4))
+                       Lower.se.RE = round(2^(log2(tableC$RE) - tableC$se), 4), 
+                       Upper.se.RE = round(2^(log2(tableC$RE) + tableC$se), 4))  
+  ##################################################
+  a <- data.frame(tableC, d = 0)
   
+  for (i in 1:length(tableC$RE)) {
+    if (tableC$RE[i] < 1) {
+      a$Lower.se[i] <- (tableC$Upper.se.RE[i]*log2(tableC$RE[i]))/tableC$RE[i]
+      a$Upper.se[i] <- (tableC$Lower.se.RE[i]*log2(tableC$RE[i]))/tableC$RE[i]
+      a$d[i] <- (tableC$Upper.se.RE[i]*log2(tableC$RE[i]))/tableC$RE[i] - 0.2
+    } else {
+      a$Lower.se[i] <- (tableC$Lower.se.RE[i]*log2(tableC$RE[i]))/tableC$RE[i]
+      a$Upper.se[i] <- (tableC$Upper.se.RE[i]*log2(tableC$RE[i]))/tableC$RE[i]
+      a$d[i] <- (tableC$Upper.se.RE[i]*log2(tableC$RE[i]))/tableC$RE[i] + 0.2
+    }
+  }
+  pfc1 <- ggplot(a, aes(contrast,RE)) + 
+    geom_col() +
+    geom_errorbar(aes(ymin = tableC$Lower.se.RE, ymax=tableC$Upper.se.RE), width=0.1) +
+    geom_text(aes(label = sig, x = contrast,
+                  y = tableC$Upper.se.RE + 0.2)) +
+    ylab("Relative Expression (DDCt)")
+  pfc2 <- ggplot(a, aes(contrast,log2FC)) +
+    geom_col() +
+    geom_errorbar(aes(ymin = Upper.se, ymax=Lower.se), width=0.1) +
+    geom_text(aes(label = sig, x = contrast,
+                  y = d)) +
+    ylab("log2FC")
+  
+  tableC <- data.frame(tableC, Lower.se.log2FC = a$Lower.se, Upper.se.log2FC = a$Upper.se)
+  ##################################################    
+  
+
   outlist2 <- structure(list(Final_data = x,
                              lm = lm,
                              ANOVA_table = ANOVA,
                              FC_statistics_of_the_main_factor  = tableC,
-                             FC_Plot = pfc2), class = "XX")
+                             RE_Plot_of_the_main_factor_levels = pfc1,
+                             log2FC_Plot_of_the_main_factor_levels = pfc2), class = "XX")
   
   print.XX <- function(outlist2){
     print(outlist2$ANOVA_table)
@@ -336,8 +300,13 @@ qpcrREPEATED <- function(x, numberOfrefGenes, factor, block,
     print(outlist2$FC_statistics_of_the_main_factor)
     
     if (plot == TRUE){
-    cat("\n", sep = '',"Fold Change plot of the main factor levels", "\n")
-    print(outlist2$FC_Plot)
+      if(plotType == "RE"){
+        cat("\n", sep = '', "Expression plot of main factor levels", "\n")
+        print(outlist2$RE_Plot_of_the_main_factor_levels)
+      }else{
+        cat("\n", sep = '', "Expression plot of main factor levels", "\n")
+        print(outlist2$log2FC_Plot_of_the_main_factor_levels)
+      }
     }
     
     invisible(outlist2)

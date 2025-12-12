@@ -1,11 +1,12 @@
-#' @title Fold change (\eqn{\Delta \Delta C_T} method) analysis of target genes using t-test
+#' @title Expression (\eqn{\Delta \Delta C_T} method) analysis of target genes using t-test
 #' 
 #' @description t.test based analysis of the fold change expression for any number of target genes.
 #' 
-#' @details The \code{qpcrTTEST} function applies a t.test based analysis to calculate 
+#' @details The \code{TTEST_DDCt} function applies a t.test based analysis to calculate 
 #' fold change (\eqn{\Delta \Delta C_T} method) expression and returns related statistics for any number of 
-#' target genes that have been evaluated under control and treatment conditions. Sampling may be paired or 
-#' unpaired. One or two reference genes can be used. Unpaired and paired samples are commonly analyzed 
+#' target genes that have been evaluated under control and treatment conditions. This function also returns the 
+#' expression bar plot based on fold change or log2 fold change. Sampling may be paired or unpaired. 
+#' One or two reference genes can be used. Unpaired and paired samples are commonly analyzed 
 #' using unpaired and paired t-test, respectively.  \strong{NOTE:} Paired samples in quantitative PCR refer to two sample 
 #' data that are collected from one set of individuals 
 #' at two different conditions, for example before and after a treatment or at two different time points. While 
@@ -13,7 +14,7 @@
 #' condition.  Paired samples allow to compare gene expression changes within the same individual, reducing 
 #' inter-individual variability. 
 #' @author Ghader Mirzaghaderi
-#' @export qpcrTTEST
+#' @export TTEST_DDCt
 #' @import tidyr
 #' @import dplyr
 #' @import reshape2
@@ -23,9 +24,10 @@
 #' @param var.equal a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.
 #' @param numberOfrefGenes number of reference genes. Up to two reference genes can be handled.
 #' @param p.adj Method ("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none") for adjusting p values.  
+#' @param order a vector determining genes order on the output graph.
+#' @param plotType  Plot based on "RE" (relative expression) or "log2FC" (log2 fold change).
 #' @return A list of two elements:
 #' \describe{
-#'   \item{Row_data}{The row data including Genes and weighed delta Ct (wDCt) values.}
 #'   \item{Result}{Output table including the Fold Change values, lower and upper confidence interval, pvalue and standard error with the lower and upper limits.}
 #' }
 #' For more information about the test procedure and its arguments,
@@ -50,14 +52,14 @@
 #' data_ttest
 #'
 #' # Getting t.test results
-#' qpcrTTEST(data_ttest,
+#' TTEST_DDCt(data_ttest,
 #'    paired = FALSE,
 #'    var.equal = TRUE,
 #'    numberOfrefGenes = 1)
 #'
 #'
 #'
-#' qpcrTTEST(Taylor_etal2019, 
+#' TTEST_DDCt(Taylor_etal2019, 
 #'           numberOfrefGenes = 2, 
 #'           var.equal = TRUE,
 #'           p.adj = "BH")
@@ -68,14 +70,20 @@
 
 
 
-qpcrTTEST <- function(x,numberOfrefGenes, paired = FALSE, var.equal = TRUE, p.adj = "BH") {
+TTEST_DDCt <- function(x,
+                       numberOfrefGenes, 
+                       paired = FALSE, 
+                       var.equal = TRUE, 
+                       p.adj = "BH",
+                       order = "none", 
+                       plotType = "RE") {
   
   colnames(x)[1] <- "Condition"
   colnames(x)[2] <- "Gene"
   colnames(x)[3] <- "E"
   colnames(x)[4] <- "Ct"
   
-  
+  default.order <- unique(x[,2])[-length(unique(x[,2]))] 
   
   
   r <- nrow(x)/(2 * length(unique(x$Gene)))
@@ -88,9 +96,10 @@ qpcrTTEST <- function(x,numberOfrefGenes, paired = FALSE, var.equal = TRUE, p.ad
     
     x <- data.frame(x, wCt = log2(x$E) * x$Ct)
     
+    if (numberOfrefGenes > 2) stop("Only up to 2 reference genes can be handled!")
     if(numberOfrefGenes == 1) {
       x <- x
-    } else {
+    } else if (numberOfrefGenes == 2) {
       a <- (((2 * r) * (length(unique(x$Gene)) - 2)) + 1)
       b <- ((length(unique(x$Gene)) - 1) * 2 * r)
       mwCT <- (x$wCt[a:b] + x$wCt[(a+(2*r)):(b+(2*r))])/2
@@ -100,16 +109,12 @@ qpcrTTEST <- function(x,numberOfrefGenes, paired = FALSE, var.equal = TRUE, p.ad
     
     
     
-    
-    
-    
-    
     GENE <- x$Gene
     
     
     levels_to_compare <- unique(GENE)[-length(unique(GENE))]
     res <- matrix(nrow = length(levels_to_compare), ncol = 7)
-    colnames(res) <- c("Gene", "dif", "FC", "LCL", "UCL", "pvalue", "se")
+    colnames(res) <- c("Gene", "dif", "RE", "LCL", "UCL", "pvalue", "se")
     subset_df <- data.frame(group = character(), Gene = character(), wDCt = numeric())
     for (i in 1:length(levels_to_compare)) {
       subset_df <- rbind(subset_df, 
@@ -138,18 +143,95 @@ qpcrTTEST <- function(x,numberOfrefGenes, paired = FALSE, var.equal = TRUE, p.ad
       
     }
     res <- as.data.frame(res)
-    res$FC <- as.numeric(res$FC)
+    res$RE <- as.numeric(res$RE)
     res$se <- as.numeric(res$se)
     res$dif <- NULL
     res <- data.frame(res, 
-                      Lower.se = round(2^(log2(res$FC) - res$se), 4), 
-                      Upper.se = round(2^(log2(res$FC) + res$se), 4),
+                      log2FC = log2(res$RE),
+                      Lower.se.RE = round(2^(log2(res$RE) - res$se), 4), 
+                      Upper.se.RE = round(2^(log2(res$RE) + res$se), 4),
                       p.adj = stats::p.adjust(res$pvalue, method = p.adj))
     
-    
+
+a <- data.frame(res, d = 0, Lower.se.log2FC = 0, Upper.se.log2FC = 0)
+res$Lower.se
+    for (i in 1:length(res$RE)) {
+      if (res$RE[i] < 1) {
+        a$Lower.se.log2FC[i] <- (res$Upper.se.RE[i]*log2(res$RE[i]))/res$RE[i]
+        a$Upper.se.log2FC[i] <- (res$Lower.se.RE[i]*log2(res$RE[i]))/res$RE[i]
+        a$d[i] <- (res$Upper.se.RE[i]*log2(res$RE[i]))/res$RE[i] - 0.2
+      } else {
+        a$Lower.se.log2FC[i] <- (res$Lower.se.RE[i]*log2(res$RE[i]))/res$RE[i]
+        a$Upper.se.log2FC[i] <- (res$Upper.se.RE[i]*log2(res$RE[i]))/res$RE[i]
+        a$d[i] <- (res$Upper.se.RE[i]*log2(res$RE[i]))/res$RE[i] + 0.2
+      }
+    }
+
+res <- data.frame(res, 
+                  Lower.se.log2FC = a$Lower.se.log2FC,
+                  Upper.se.log2FC = a$Upper.se.log2FC)
+
+
+######################
+# Getting barplot:
+
+df2 <- res
+
+# Convert the column to a factor with specified levels
+if(any(order == "none")){
+  df2$Gene <- factor(df2$Gene, levels = default.order)
+} else {
+  df2$Gene <- factor(df2$Gene, levels = order)
+}
+
+
+# Order the data frame based on the specified column
+df2 <- df2[order(df2$Gene), ]
+
+Gene <- df2$Gene
+Gene <- factor(Gene, levels = Gene)
+Fold_Change <- df2$RE
+Lower.Er <- df2$LCL
+Upper.Er <- df2$UCL
+pvalue <- as.numeric(df2$p.adj)
+label <- .convert_to_character(pvalue)
+se <- df2$se
+Upper.se.log2FC <- df2$Upper.se.log2FC
+Lower.se.log2FC <- df2$Lower.se.log2FC
+
+
+df2 <- data.frame(df2, d = 0)
+for (i in 1:length(df2$RE)) {
+  if (df2$RE[i] < 1) {
+    df2$d[i] <- (df2$Upper.se.RE[i]*log2(df2$RE[i]))/df2$RE[i] - 0.2
+  } else {
+    df2$d[i] <- (df2$Upper.se.RE[i]*log2(df2$RE[i]))/df2$RE[i] + 0.2
+  }
+}
+
+
+
+if(plotType == "RE"){
+  p <- ggplot(df2, aes(Gene, as.numeric(Fold_Change))) + 
+    geom_col() +
+    geom_errorbar(aes(ymin = Lower.se.RE, ymax=Upper.se.RE), width=0.1) +
+    geom_text(aes(label = label, x = Gene,
+                  y = Upper.se.RE + 0.2)) +
+    ylab("Relative expression (DDCt)")
+}
+if(plotType == "log2FC"){
+  p <- ggplot(df2, aes(Gene, as.numeric(log2FC))) +
+    geom_col() +
+    geom_errorbar(aes(ymin = Upper.se.log2FC, ymax=Lower.se.log2FC), width=0.1) +
+    geom_text(aes(label = label, x = Gene,
+                  y = d)) +
+    ylab("log2FC")
+}
+######################
+
     
     Raw_df <- melt(subset, value.name = "wDCt")[-1]
-    res <- list(Raw_data = subset_df, Result = res)
+    res <- list(Result = res, plot = p)
     return(res)
   }
 }

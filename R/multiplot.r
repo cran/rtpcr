@@ -9,31 +9,27 @@
 #' @return A  multiple-plots plate
 #' @examples
 #' 
-#' p1 <- qpcrTTESTplot(data_ttest, 
-#'                     numberOfrefGenes = 1,
-#'                     ylab = "Average Fold Change (FC)",
-#'                     width = 0.3)
+#' a <- TTEST_DDCt(data_ttest, 
+#'         numberOfrefGenes = 1)
+#' p1 <- a$plot
 #' 
-#' 
-#' out2 <- qpcrANOVARE(data_1factor, numberOfrefGenes = 1, block = NULL)$Result
-#' p2 <- oneFACTORplot(out2,
-#'                     width = 0.4,
-#'                     fill = "skyblue",
-#'                     y.axis.adjust = 0.5,
-#'                     y.axis.by = 1,
-#'                     errorbar = "ci",
-#'                     show.letters = TRUE,
-#'                     letter.position.adjust = 0.1,
-#'                     ylab = "Relative Expression (RE)",
-#'                     xlab = "Factor Levels",
-#'                     fontsize = 12)
+#' out2 <- ANOVA_DCt(data_1factor, numberOfrefGenes = 1, block = NULL)$Result
+#' p2 <- plotOneFactor(out2,
+#'         x_col= 1,
+#'         y_col= 2,
+#'         Lower.se_col = 7,
+#'         Upper.se_col = 8,
+#'         letters_col = 11,
+#'         show.groupingLetters = TRUE)
 #'                     
 #' multiplot(p1, p2, cols=2)
 #' 
 #' multiplot(p1, p2, cols=1)
 #'
 #'
-#'
+
+
+
 multiplot <- function(..., cols=1) {
   
   # Make a list from the ... arguments

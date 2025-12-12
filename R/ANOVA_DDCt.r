@@ -1,18 +1,16 @@
-#' @title Fold change (\eqn{\Delta \Delta C_T} method) analysis using ANOVA and ANCOVA
+#' @title Relative expression (\eqn{\Delta \Delta Ct} method) analysis using ANOVA and ANCOVA
 #' 
-#' @description Fold change (\eqn{\Delta \Delta C_T} method) analysis of qPCR data can be done using 
-#' ANOVA (analysis of variance) and ANCOVA (analysis of covariance) by the 
-#' \code{qpcrANOVAFC} function, for uni- or multi-factorial experiment data. The bar plot of the fold changes (FC) 
+#' @description Relative expression analysis using \eqn{\Delta \Delta Ct} method can be done by 
+#' ANOVA (analysis of variance) and ANCOVA (analysis of covariance) through the \code{ANOVA_DDCt} function, for uni- or multi-factorial experiment data. The bar plot of the relative expression (RE) 
 #' values along with the standard error (se) and confidence interval (ci) is returned by 
-#' the \code{qpcrANOVAFC} function. 
+#' the \code{ANOVA_DDCt} function. 
 #' 
-#' @details Fold change (\eqn{\Delta \Delta C_T} method) analysis of qPCR data can be done using 
-#' ANOVA (analysis of variance) and ANCOVA (analysis of covariance) by the 
-#' \code{qpcrANOVAFC} function, for uni- or multi-factorial experiment data. 
-#' If there are more than one factor, FC value calculations for 
+#' @details ANOVA (analysis of variance) and ANCOVA (analysis of covariance) analysis of relative expression 
+#' using \eqn{\Delta \Delta Ct} method can be done using \code{ANOVA_DDCt} function, for uni- or multi-factorial experiment data. 
+#' If there are more than one factor, RE value calculations for 
 #' the `mainFactor.column` and the statistical analysis is performed based on a full model factorial 
 #' experiment by default. However, if `ancova` is defined for the `analysisType` argument,
-#' FC values are calculated for the levels of the `mainFactor.column` and the other factors are 
+#' RE values are calculated for the levels of the `mainFactor.column` and the other factors are 
 #' used as covariate(s) in the analysis of variance, but we should consider ANCOVA table:
 #' if the interaction between the main factor and covariate is significant, ANCOVA is not appropriate in this case. 
 #' ANCOVA is basically used when a factor is affected by uncontrolled quantitative covariate(s). 
@@ -22,12 +20,12 @@
 #' experiment to understand the gene behavior at both temperature and drought levels at the same time. 
 #' The drought is another factor (the covariate) that may affect the expression of our gene under the 
 #' levels of the first factor i.e. temperature. The data of such an experiment can be analyzed by ANCOVA 
-#' or using ANOVA based on a factorial experiment using \code{qpcrANOVAFC}. \code{qpcrANOVAFC} function performs FC 
-#' analysis even there is only one factor (without covariate or factor  variable). Bar plot of fold changes 
-#' (FC) values along with the standard errors are also returned by the \code{qpcrANOVAFC} function.
+#' or using ANOVA based on a factorial experiment using \code{ANOVA_DDCt}. \code{ANOVA_DDCt} function performs RE 
+#' analysis even there is only one factor (without covariate or factor  variable). Bar plot of relative expression 
+#' (RE) values along with the standard errors are also returned by the \code{ANOVA_DDCt} function.
 #'  
 #' @author Ghader Mirzaghaderi
-#' @export qpcrANOVAFC
+#' @export ANOVA_DDCt
 #' @import tidyr
 #' @import dplyr
 #' @import reshape2
@@ -41,26 +39,14 @@
 #' 
 #' @param numberOfrefGenes number of reference genes which is 1 or 2 (up to two reference genes can be handled).
 #' @param analysisType should be one of "ancova" or "anova". Default is "anova".
-#' @param mainFactor.column the factor for which fold change expression is calculated for its levels. 
+#' @param mainFactor.column the factor for which relative expression is calculated for its levels. 
 #' If \code{ancova} is selected as \code{analysisType}, the remaining factors (if any) are considered as covariate(s).
 #' @param mainFactor.level.order  NULL (default) or a vector of main factor level names. If \code{NULL}, 
 #' the first level of the \code{mainFactor.column} is used 
 #' as calibrator. If a vector of main factor levels (in any order) is specified, the first level in the vector is 
 #' used as calibrator. Calibrator is the reference level or sample that all others are compared to. Examples are untreated 
-#' of time 0. The FC value of the reference or calibrator level is 1 because it is not changed compared to itself.
+#' of time 0. The RE value of the reference or calibrator level is 1 because it is not changed compared to itself.
 #' 
-#' @param width a positive number determining bar width. 
-#' @param fill  specify the fill color for the columns in the bar plot. If a vector of two colors is specified, 
-#' the reference level is differentialy colored.
-#' @param y.axis.adjust  a negative or positive value for reducing or increasing the length of the y axis.
-#' @param letter.position.adjust adjust the distance between the signs and the error bars.
-#' @param y.axis.by determines y axis step length
-#' @param xlab  the title of the x axis
-#' @param ylab  the title of the y axis
-#' @param fontsize font size of the plot
-#' @param fontsizePvalue font size of the pvalue labels
-#' @param axis.text.x.angle angle of x axis text
-#' @param axis.text.x.hjust horizontal justification of x axis text
 #' @param x.axis.labels.rename a vector replacing the x axis labels in the bar plot
 #' @param block column name of the block if there is a blocking factor (for correct column arrangement see 
 #' example data.). When a qPCR experiment is done in multiple qPCR plates, variation resulting from the 
@@ -69,8 +55,8 @@
 #' on a plate. Block effect is usually considered as random and its interaction with any main effect 
 #' is not considered.
 #' @param p.adj Method for adjusting p values
-#' @param errorbar Type of error bar, can be \code{se} or \code{ci}.
 #' @param plot  if \code{FALSE}, prevents the plot.
+#' @param plotType  Plot based on "RE" (relative expression) or "log2FC" (log2 fold change).
 #' @return A list with 7 elements:
 #' \describe{
 #'   \item{Final_data}{Input data frame plus the weighted Delat Ct values (wDCt)}
@@ -78,8 +64,8 @@
 #'   \item{lm_ANCOVA}{lm of ANCOVA analysis-type}
 #'   \item{ANOVA_table}{ANOVA table}
 #'   \item{ANCOVA_table}{ANCOVA table}
-#'   \item{FC Table}{Table of FC values, significance and confidence interval and standard error with the lower and upper limits for the main factor levels.}
-#'   \item{Bar plot of FC values}{Bar plot of the fold change values for the main factor levels.}
+#'   \item{RE Table}{Table of RE (relative expression) values, log2FC (log2 fold change) values, significance and confidence interval and standard error with the lower and upper limits for the main factor levels.}
+#'   \item{Bar plot of RE values}{Bar plot of the relative expression values for the main factor levels.}
 #' }
 #' 
 #' @references Livak, Kenneth J, and Thomas D Schmittgen. 2001. Analysis of
@@ -97,68 +83,68 @@
 #' @examples
 #'
 #'
-#' qpcrANOVAFC(data_1factor, numberOfrefGenes = 1, mainFactor.column = 1, block = NULL, 
-#' fill = c("aliceblue", "skyblue"), fontsizePvalue = 5, y.axis.adjust = 0.1)
+#' ANOVA_DDCt(data_1factor, numberOfrefGenes = 1, mainFactor.column = 1, block = NULL)
 #' 
 #'
-#' qpcrANOVAFC(data_2factor, numberOfrefGenes = 1, mainFactor.column = 2, block = NULL, 
-#' analysisType = "ancova", fontsizePvalue = 5, y.axis.adjust = 1)
+#' ANOVA_DDCt(data_2factor, 
+#' numberOfrefGenes = 1, 
+#' mainFactor.column = 2, block = NULL, 
+#' analysisType = "ancova")
 #'
 #'
 #' # Data from Lee et al., 2020, Here, the data set contains technical 
 #' # replicates so we get mean of technical replicates first:
 #' df <- meanTech(Lee_etal2020qPCR, groups = 1:3)
-#' qpcrANOVAFC(df, numberOfrefGenes = 1, analysisType = "ancova", block = NULL, 
-#' mainFactor.column = 2, fill = c("skyblue", "#BFEFFF"), y.axis.adjust = 0.05)
+#' ANOVA_DDCt(df, numberOfrefGenes = 1, analysisType = "ancova", block = NULL, 
+#' mainFactor.column = 2, plotType = "log2FC")
 #' 
 #' 
-#' qpcrANOVAFC(data_2factorBlock,  numberOfrefGenes = 1, mainFactor.column = 1, 
-#' mainFactor.level.order = c("S", "R"), block = "block", 
-#' fill = c("aliceblue", "skyblue"), analysisType = "ancova",
-#' fontsizePvalue = 7, y.axis.adjust = 0.1, width = 0.35)
+#' ANOVA_DDCt(data_2factorBlock,  
+#'     numberOfrefGenes = 1, 
+#'     mainFactor.column = 1, 
+#'     mainFactor.level.order = c("S", "R"), 
+#'     block = "block", 
+#'     analysisType = "ancova")
+#'
 #' 
 #' 
 #' df <- meanTech(Lee_etal2020qPCR, groups = 1:3) 
 #' df2 <- df[df$factor1 == "DSWHi",][-1]
-#' qpcrANOVAFC(df2, mainFactor.column = 1, fontsizePvalue = 5, y.axis.adjust = 2,
-#' block = NULL, numberOfrefGenes = 1, analysisType = "anova")
+#' ANOVA_DDCt(df2,
+#' mainFactor.column = 1,
+#' block = NULL, 
+#' numberOfrefGenes = 1, 
+#' analysisType = "anova")
 #' 
 #'
 #' addline_format <- function(x,...){gsub('\\s','\n',x)}
-#' qpcrANOVAFC(data_1factor, numberOfrefGenes = 1, mainFactor.column = 1,
-#' block = NULL, fill = c("azure1","azure3"), y.axis.by = 1, 
-#' letter.position.adjust = 0, y.axis.adjust = 1, ylab = "Fold Change", 
-#' fontsize = 12, x.axis.labels.rename = addline_format(c("Control", 
-#'                                          "Treatment_1 vs Control", 
-#'                                          "Treatment_2 vs Control")))
+#' ANOVA_DDCt(data_1factor, numberOfrefGenes = 1, 
+#' mainFactor.column = 1,
+#' block = NULL, 
+#' x.axis.labels.rename = addline_format(c("Control", 
+#'                                         "Treatment_1 vs Control", 
+#'                                         "Treatment_2 vs Control")))
 #'                                                        
 #'                                                        
 
-qpcrANOVAFC <- function(
-x, 
-numberOfrefGenes, 
-mainFactor.column, 
-analysisType = "anova",
-mainFactor.level.order = NULL, 
-block, 
-width = 0.5, 
-fill = "#BFEFFF", 
-y.axis.adjust = 2, 
-y.axis.by = 1, 
-letter.position.adjust = 0.1, 
-ylab = "Fold Change", 
-xlab = "none", 
-fontsize = 12, 
-fontsizePvalue = 7, 
-axis.text.x.angle = 0, 
-axis.text.x.hjust = 0.5, 
-x.axis.labels.rename = "none",
-p.adj = "none",  
-errorbar = "se", 
-plot = TRUE
+
+
+ANOVA_DDCt <- function(
+    x, 
+    numberOfrefGenes = 1, 
+    mainFactor.column = 1, 
+    analysisType = "anova",
+    mainFactor.level.order = NULL, 
+    block = NULL, 
+    x.axis.labels.rename = "none",
+    p.adj = "none",  
+    plot = TRUE,
+    plotType = "RE"
 )
 {
-
+  
+  
+  
   if (missing(numberOfrefGenes)) {
     stop("argument 'numberOfrefGenes' is missing, with no default")
   }
@@ -248,7 +234,7 @@ plot = TRUE
     }
   }
   
-
+  
   
   # converting columns 1 to time as factor
   
@@ -305,8 +291,8 @@ plot = TRUE
   
   
   
-
- 
+  
+  
   
   
   pp1 <- emmeans(lm, colnames(x)[1], data = x, adjust = p.adj, mode = "satterthwaite")
@@ -314,9 +300,9 @@ plot = TRUE
   pp3 <- pp2[1:length(mainFactor.level.order)-1,]
   ci <- as.data.frame(stats::confint(graphics::pairs(pp1)), adjust = p.adj)[1:length(unique(x[,1]))-1,]
   pp <- cbind(pp3, lower.CL = ci$lower.CL, upper.CL = ci$upper.CL)
-
   
-
+  
+  
   bwDCt <- x$wDCt   
   se <- summarise(
     group_by(data.frame(factor = x[,1], bwDCt = bwDCt), x[,1]),
@@ -326,7 +312,8 @@ plot = TRUE
   sig <- .convert_to_character(pp$p.value)
   contrast <- pp$contrast
   post_hoc_test <- data.frame(contrast, 
-                              FC = 1/(2^-(pp$estimate)),
+                              RE = 1/(2^-(pp$estimate)),
+                              log2FC = log2(1/(2^-(pp$estimate))),
                               pvalue = pp$p.value,
                               sig = sig,
                               LCL = 1/(2^-pp$lower.CL),
@@ -334,7 +321,8 @@ plot = TRUE
                               se = se$se[-1])
   
   reference <- data.frame(contrast = mainFactor.level.order[1],
-                          FC = 1,
+                          RE = 1,
+                          log2FC = 0,
                           pvalue = 1, 
                           sig = " ",
                           LCL = 0,
@@ -364,69 +352,44 @@ plot = TRUE
   contrast <- tableC$contrast
   LCL <- tableC$LCL
   UCL <- tableC$UCL
-  FCp <- as.numeric(tableC$FC)
+  REp <- as.numeric(tableC$RE)
+  FCp <- as.numeric(tableC$log2FC)
   significance <- tableC$sig
   se <- tableC$se
   
-  
+  tableC <- data.frame(tableC, 
+                       Lower.se.RE = round(2^(log2(tableC$RE) - tableC$se), 4), 
+                       Upper.se.RE = round(2^(log2(tableC$RE) + tableC$se), 4))  
+  ##################################################
+  a <- data.frame(tableC, d = 0)
 
-  
-  pfc2 <- ggplot(tableC, aes(contrast, FCp, fill = contrast)) +
-    geom_col(col = "black", width = width)
-  
-  
-  
-  if(errorbar == "ci") {
-    pfc2 <- pfc2 +
-      geom_errorbar(aes(contrast, ymin = LCL, ymax =  UCL), width=0.1) +
-      geom_text(aes(label = significance, x = contrast,
-                           y = UCL + letter.position.adjust),
-                       vjust = -0.5, size = fontsizePvalue)
-  } else if(errorbar == "se") {
-    pfc2 <- pfc2 +
-      geom_errorbar(aes(contrast, ymin = 2^(log2(FCp) - se), ymax =  2^(log2(FCp) + se)), width=0.1) +
-      geom_text(aes(label = significance, x = contrast,
-                           y = 2^(log2(FCp) + se) + letter.position.adjust),
-                       vjust = -0.5, size = fontsizePvalue)
+  for (i in 1:length(tableC$RE)) {
+    if (tableC$RE[i] < 1) {
+      a$Lower.se[i] <- (tableC$Upper.se.RE[i]*log2(tableC$RE[i]))/tableC$RE[i]
+      a$Upper.se[i] <- (tableC$Lower.se.RE[i]*log2(tableC$RE[i]))/tableC$RE[i]
+      a$d[i] <- (tableC$Upper.se.RE[i]*log2(tableC$RE[i]))/tableC$RE[i] - 0.2
+    } else {
+      a$Lower.se[i] <- (tableC$Lower.se.RE[i]*log2(tableC$RE[i]))/tableC$RE[i]
+      a$Upper.se[i] <- (tableC$Upper.se.RE[i]*log2(tableC$RE[i]))/tableC$RE[i]
+      a$d[i] <- (tableC$Upper.se.RE[i]*log2(tableC$RE[i]))/tableC$RE[i] + 0.2
     }
-    
-    
-  pfc2 <- pfc2 +
-    ylab(ylab) +
-    theme_bw()+
-    theme(axis.text.x = element_text(size = fontsize, color = "black", angle = axis.text.x.angle, hjust = axis.text.x.hjust),
-          axis.text.y = element_text(size = fontsize, color = "black", angle = 0, hjust = 0.5),
-          axis.title  = element_text(size = fontsize)) +
-    scale_y_continuous(breaks=seq(0, max(FCp) + max(se)  + y.axis.adjust, by = y.axis.by),
-                       limits = c(0, max(FCp) + max(se) + y.axis.adjust), expand = c(0, 0)) +
-    theme(legend.text = element_text(colour = "black", size = fontsize),
-          legend.background = element_rect(fill = "transparent"))
-  
-  
-  if(length(fill) == 2) {
-    pfc2 <- pfc2 +
-             scale_fill_manual(values = c(fill[1], rep(fill[2], nrow(tableC)-1)))
-  } 
-  if (length(fill) == 1) {
-    pfc2 <- pfc2 +
-      scale_fill_manual(values = rep(fill, nrow(tableC)))
   }
-  
-  pfc2 <- pfc2 + guides(fill = "none") 
-  
-  
-  if(xlab == "none"){
-    pfc2 <- pfc2 + 
-      labs(x = NULL)
-  }else{
-    pfc2 <- pfc2 +
-    xlab(xlab)
-  }
-  
-  
-  
+  pfc1 <- ggplot(a, aes(contrast,RE)) + 
+    geom_col() +
+    geom_errorbar(aes(ymin = tableC$Lower.se.RE, ymax=tableC$Upper.se.RE), width=0.1) +
+    geom_text(aes(label = sig, x = contrast,
+                  y = tableC$Upper.se.RE + 0.2)) +
+    ylab("Relative Expression (DDCt)")
+  pfc2 <- ggplot(a, aes(contrast,log2FC)) +
+    geom_col() +
+    geom_errorbar(aes(ymin = Upper.se, ymax=Lower.se), width=0.1) +
+    geom_text(aes(label = sig, x = contrast,
+                  y = d)) +
+    ylab("log2FC")
 
-
+  tableC <- data.frame(tableC, Lower.se.log2FC = a$Lower.se, Upper.se.log2FC = a$Upper.se)
+  ##################################################  
+  
   if (is.null(block)) {
     lm_ANOVA <- lmf
     lm_ANCOVA <- lmc
@@ -436,34 +399,34 @@ plot = TRUE
   }
   
   
-  
-  tableC <- data.frame(tableC, 
-                       Lower.se = round(2^(log2(tableC$FC) - tableC$se), 4), 
-                       Upper.se = round(2^(log2(tableC$FC) + tableC$se), 4))
-  
   outlist2 <- structure(list(Final_data = x,
-                   lm_ANOVA = lm_ANOVA,
-                   lm_ANCOVA = lm_ANCOVA,
-                   ANOVA_table = ANOVA,
-                   ANCOVA_table = ANCOVA,
-                   Fold_Change  = tableC,
-                   FC_Plot_of_the_main_factor_levels = pfc2), class = "XX")
+                             lm_ANOVA = lm_ANOVA,
+                             lm_ANCOVA = lm_ANCOVA,
+                             ANOVA_table = ANOVA,
+                             ANCOVA_table = ANCOVA,
+                             Fold_Change  = tableC,
+                             RE_Plot_of_the_main_factor_levels = pfc1,
+                             log2FC_Plot_of_the_main_factor_levels = pfc2), class = "XX")
   
   print.XX <- function(outlist2){
     cat("ANOVA table", "\n")
     print(outlist2$ANOVA_table)
     cat("\n", sep = '', "ANCOVA table", "\n")
     print(outlist2$ANCOVA_table)
-    cat("\n", sep = '', "Fold Change table", "\n")
+    cat("\n", sep = '', "Expression table", "\n")
     print(outlist2$Fold_Change)
     
-    if (plot == TRUE){
-      cat("\n", sep = '', "Fold Change plot of the main factor levels", "\n")
-    print(outlist2$FC_Plot_of_the_main_factor_levels)
-    }
     
+    if (plot == TRUE){
+      if(plotType == "RE"){
+        cat("\n", sep = '', "Expression plot of main factor levels", "\n")
+        print(outlist2$RE_Plot_of_the_main_factor_levels)
+      }else{
+        cat("\n", sep = '', "Expression plot of main factor levels", "\n")
+        print(outlist2$log2FC_Plot_of_the_main_factor_levels)
+      }
+    }
     invisible(outlist2)
   }
   print.XX(outlist2)
 }
-
