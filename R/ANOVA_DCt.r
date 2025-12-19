@@ -1,15 +1,25 @@
-#' @title Relative expression (\eqn{\Delta Ct} method) analysis using ANOVA 
-#' 
-#' @description Analysis of variance of relative expression (\eqn{\Delta Ct} method) values for 
-#' all factor level combinations in which the expression level of a 
-#' reference gene is used as normalizer. 
-#' 
-#' @details The \code{ANOVA_DCt} function performs analysis of variance (ANOVA) of relative 
-#' expression (RE) values for all factor level combinations using the expression 
-#' level of reference gene(s) as a normalizer.
-#' 
+#' @title Relative expression analysis using the \eqn{\Delta C_T} method with ANOVA
+#'
+#' @description
+#' The \code{ANOVA_DCt} function performs analysis of variance (ANOVA) on
+#' relative expression values calculated using the \eqn{\Delta C_T} method.
+#' Expression levels are normalized using one or more reference genes and
+#' analyzed across all combinations of experimental factor levels.
+#'
+#' @details
+#' Relative expression (RE) values are calculated using the \eqn{\Delta C_T}
+#' method, where Ct values of target genes are normalized to reference gene(s).
+#' The resulting weighted Delta Ct (wDCt) values are then analyzed using ANOVA.
+#'
+#' The function supports uni- and multi-factorial experimental designs.
+#' Blocking factors (e.g. qPCR plates) can optionally be included to account
+#' for technical variation. Each row of the input data represents an independent
+#' biological individual, corresponding to a non-repeated-measures experiment.
+#'
 #' @author Ghader Mirzaghaderi
-#' @export ANOVA_DCt
+#'
+#' @export
+#'
 #' @import dplyr
 #' @import tidyr
 #' @import reshape2
@@ -17,51 +27,78 @@
 #' @import multcomp
 #' @import emmeans
 #' @import multcompView
-#' @param x a data.frame structured as described in the vignette consisting of condition columns, target gene efficiency (E), target Gene Ct, reference 
-#' gene efficiency and reference gene Ct values, respectively. Each Ct in the data frame is the mean of 
-#' technical replicates. Complete amplification efficiencies of 2 was assumed in the example data for 
-#' all wells but the calculated efficienies can be used instead.  \strong{NOTE:} Each line belongs to a separate 
-#' individual reflecting a non-repeated measure experiment). See \href{../doc/vignette.html}{\code{vignette}}, 
-#' section "data structure and column arrangement" for details.
-#' 
-#' @param numberOfrefGenes number of reference genes (1 or 2). Up to two reference genes can be handled.
-#' @param block A string or NULL. If provided, this should be the name of the column in \code{x} that 
-#' indicates the blocking factor. When qPCR is performed on different plates, variations between plates can introduce noise 
-#' that obscures the true biological differences in gene expression. By using a blocking factor, 
-#' each treatment and control group can be replicated across different plates, ensuring that 
-#' at least one replicate of each condition is present on every plate. 
-#' @param alpha significance level for cld (default 0.05)
-#' @param adjust p-value adjustment method passed to emmeans/cld
-#' @return A list with 4 elements:
+#'
+#' @param x
+#' A data frame structured as described in the package vignette, containing
+#' experimental condition columns, amplification efficiency (E) and Ct values
+#' for target and reference genes. Each Ct value should represent the mean of
+#' technical replicates.
+#'
+#' \strong{NOTE:} Each row corresponds to a separate biological individual,
+#' reflecting a non-repeated-measures experimental design.
+#'
+#' @param numberOfrefGenes
+#' Integer specifying the number of reference genes used for normalization
+#' (must be \eqn{\ge 1}).
+#'
+#' @param block
+#' Character string or \code{NULL}. If provided, this specifies the column name
+#' in \code{x} corresponding to a blocking factor (e.g. qPCR plate).
+#' Blocking is used to reduce technical variation arising from experimental
+#' conditions such as plate-to-plate differences.
+#'
+#' @param alpha
+#' Significance level used for compact letter display (CLD);
+#' default is \code{0.05}.
+#'
+#' @param adjust
+#' P-value adjustment method passed to \code{emmeans} and \code{cld}.
+#'
+#' @return
+#' A list containing the following components:
 #' \describe{
-#'   \item{Final_data}{The row data plus weighed delta Ct (wDCt) values.}
-#'   \item{lm}{The output of linear model analysis including ANOVA tables}
-#'   \item{ANOVA}{ANOVA table based on CRD}
-#'   \item{Result}{The result table including treatments and factors, RE (Relative Expression), LCL, UCL, 
-#'   letter display for pair-wise comparisons and standard error with the lower and upper limits.}
+#'   \item{Final_data}{Input data frame augmented with weighted Delta Ct (wDCt) values.}
+#'   \item{lm}{Fitted linear model object, including ANOVA results.}
+#'   \item{ANOVA}{ANOVA table based on a completely randomized design (CRD).}
+#'   \item{Result}{Result table containing treatment and factor levels, relative
+#'   expression (RE), log2 fold change (log2FC), confidence limits (LCL, UCL),
+#'   compact letter display for pairwise comparisons, and standard errors with
+#'   corresponding lower and upper limits.}
 #' }
 #'
-#' @references Livak, Kenneth J, and Thomas D Schmittgen. 2001. Analysis of
-#' Relative Gene Expression Data Using Real-Time Quantitative PCR and the
-#' Double Delta CT Method. Methods 25 (4). doi:10.1006/meth.2001.1262.
+#' @references
+#' Livak, K. J. and Schmittgen, T. D. (2001).
+#' Analysis of Relative Gene Expression Data Using Real-Time Quantitative PCR
+#' and the Double Delta CT Method.
+#' \emph{Methods}, 25(4), 402–408.
+#' doi:10.1006/meth.2001.1262
 #'
-#' Ganger, MT, Dietz GD, and Ewing SJ. 2017. A common base method for analysis of qPCR data
-#' and the application of simple blocking in qPCR experiments. BMC bioinformatics 18, 1-11.
+#' Ganger, M. T., Dietz, G. D., and Ewing, S. J. (2017).
+#' A common base method for analysis of qPCR data and the application of simple
+#' blocking in qPCR experiments.
+#' \emph{BMC Bioinformatics}, 18, 1–11.
 #'
-#' Yuan, Joshua S, Ann Reed, Feng Chen, and Neal Stewart. 2006.
-#' Statistical Analysis of Real-Time PCR Data. BMC Bioinformatics 7 (85). doi:10.1186/1471-2105-7-85.
+#' Yuan, J. S., Reed, A., Chen, F., and Stewart, N. (2006).
+#' Statistical Analysis of Real-Time PCR Data.
+#' \emph{BMC Bioinformatics}, 7, 85.
 #'
 #' @examples
+#' # If the data include technical replicates, calculate means first:
+#' # df <- meanTech(data_3factor, groups = 1:3)
 #'
-#' # If the data include technical replicates, means of technical replicates
-#' # should be calculated first using meanTech function.
-#' # Applying ANOVA
-#' ANOVA_DCt(data_3factor, numberOfrefGenes = 1, block = NULL)
+#' # One-factor or multi-factor ANOVA without blocking
+#' ANOVA_DCt(
+#'   data_3factor,
+#'   numberOfrefGenes = 1,
+#'   block = NULL
+#' )
 #'
-#'
-#' ANOVA_DCt(data_2factorBlock, block = "Block", numberOfrefGenes = 1)
-#'
-#'
+#' # ANOVA with blocking factor
+#' ANOVA_DCt(
+#'   data_2factorBlock,
+#'   numberOfrefGenes = 1,
+#'   block = "Block"
+#' )
 
 
 ANOVA_DCt <- function(x,
@@ -70,100 +107,38 @@ ANOVA_DCt <- function(x,
                       alpha = 0.05,
                       adjust = "none") {
   
-  ## ---- basic argument checks ----
-  if (missing(numberOfrefGenes)) {
-    stop("argument 'numberOfrefGenes' is missing, with no default")
+  ## basic argument checks
+  if (!is.data.frame(x)) {
+    stop("`x` must be a data.frame")
   }
   if (missing(block)) {
     stop("argument 'block' is missing, with no default. Requires NULL or a blocking factor column.")
   }
-  
-  ## ---- rename columns and compute wDCt ----
-  if (is.null(block)) {
-    
-    if (numberOfrefGenes == 1) {
-      factors <- colnames(x)[1:(ncol(x) - 5)]
-      colnames(x)[ncol(x) - 4] <- "rep"
-      colnames(x)[ncol(x) - 3] <- "Etarget"
-      colnames(x)[ncol(x) - 2] <- "Cttarget"
-      colnames(x)[ncol(x) - 1] <- "Eref"
-      colnames(x)[ncol(x)] <- "Ctref"
-      
-      x <- data.frame(x, wDCt = (log2(x$Etarget) * x$Cttarget) - (log2(x$Eref) * x$Ctref))
-      
-    } else if (numberOfrefGenes == 2) {
-      factors <- colnames(x)[1:(ncol(x) - 7)]
-      colnames(x)[ncol(x) - 6] <- "rep"
-      colnames(x)[ncol(x) - 5] <- "Etarget"
-      colnames(x)[ncol(x) - 4] <- "Cttarget"
-      colnames(x)[ncol(x) - 3] <- "Eref"
-      colnames(x)[ncol(x) - 2] <- "Ctref"
-      colnames(x)[ncol(x) - 1] <- "Eref2"
-      colnames(x)[ncol(x)] <- "Ctref2"
-      
-      x <- data.frame(x, wDCt = (log2(x$Etarget) * x$Cttarget) -
-                        ((log2(x$Eref) * x$Ctref) + (log2(x$Eref2) * x$Ctref2)) / 2)
-    }
-    
-  } else { # with block
-    
-    if (numberOfrefGenes == 1) {
-      factors <- colnames(x)[1:(ncol(x) - 6)]
-      colnames(x)[ncol(x) - 5] <- "block"
-      colnames(x)[ncol(x) - 4] <- "rep"
-      colnames(x)[ncol(x) - 3] <- "Etarget"
-      colnames(x)[ncol(x) - 2] <- "Cttarget"
-      colnames(x)[ncol(x) - 1] <- "Eref"
-      colnames(x)[ncol(x)] <- "Ctref"
-      
-      x <- data.frame(x, wDCt = (log2(x$Etarget) * x$Cttarget) - (log2(x$Eref) * x$Ctref))
-      
-    } else if (numberOfrefGenes == 2) {
-      factors <- colnames(x)[1:(ncol(x) - 8)]
-      colnames(x)[ncol(x) - 7] <- "block"
-      colnames(x)[ncol(x) - 6] <- "rep"
-      colnames(x)[ncol(x) - 5] <- "Etarget"
-      colnames(x)[ncol(x) - 4] <- "Cttarget"
-      colnames(x)[ncol(x) - 3] <- "Eref"
-      colnames(x)[ncol(x) - 2] <- "Ctref"
-      colnames(x)[ncol(x) - 1] <- "Eref2"
-      colnames(x)[ncol(x)] <- "Ctref2"
-      
-      x <- data.frame(x, wDCt = (log2(x$Etarget) * x$Cttarget) -
-                        ((log2(x$Eref) * x$Ctref) + (log2(x$Eref2) * x$Ctref2)) / 2)
-    }
+    if (!is.numeric(numberOfrefGenes) || length(numberOfrefGenes) != 1) {
+    stop("`numberOfrefGenes` must be a single numeric value")
   }
   
-  ## ---- build treatment factor T and fit lm ----
-  if (numberOfrefGenes == 1) {
+  
+  x <- .compute_wDCt(x, numberOfrefGenes, block)
+  # get names of factor columns
+  factors <- names(x)[vapply(x, is.factor, logical(1))]
+  
+  
+  ##build treatment factor T and fit lm
     if (is.null(block)) {
-      x$T <- do.call(paste, c(x[1:(ncol(x) - 6)], sep = ":"))
+      x$T <- do.call(paste, c(x[1:length(factors)], sep = ":"))
       x$T <- as.factor(x$T)
       lm_fit <- stats::lm(wDCt ~ T, data = x)
       anovaCRD <- stats::anova(lm_fit)
     } else {
-      x$T <- do.call(paste, c(x[1:(ncol(x) - 7)], sep = ":"))
+      x$T <- do.call(paste, c(x[1:length(factors)], sep = ":"))
       x$T <- as.factor(x$T)
       lm_fit <- stats::lm(wDCt ~ block + T, data = x)
       anovaCRD <- stats::anova(lm_fit)
     }
-  } else if (numberOfrefGenes == 2) {
-    if (is.null(block)) {
-      x$T <- do.call(paste, c(x[1:(ncol(x) - 8)], sep = ":"))
-      x$T <- as.factor(x$T)
-      lm_fit <- stats::lm(wDCt ~ T, data = x)
-      anovaCRD <- stats::anova(lm_fit)
-    } else {
-      x$T <- do.call(paste, c(x[1:(ncol(x) - 9)], sep = ":"))
-      x$T <- as.factor(x$T)
-      lm_fit <- stats::lm(wDCt ~ block + T, data = x)
-      anovaCRD <- stats::anova(lm_fit)
-    }
-  } else {
-    stop("numberOfrefGenes must be 1 or 2")
-  }
+
   
-  ## ---- emmeans / multiple comparisons ----
+  ## emmeans / multiple comparisons
   emg <- emmeans::emmeans(lm_fit, pairwise ~ T, mode = "satterthwaite")
   # use cld() on the emmeans object (the first element)
   meanPairs <- multcomp::cld(emg[[1]], adjust = adjust, alpha = alpha, reversed = FALSE, Letters = letters)
@@ -174,7 +149,7 @@ ANOVA_DCt <- function(x,
   lcl <- meanPairs$lower.CL
   letters_grp <- meanPairs$.group
   
-  ## ---- compute group-wise means and SE (base R, robust) ----
+  # compute group-wise means and SE (base R, robust)
   bwDCt <- x$wDCt
   means_by_T <- tapply(bwDCt, x$T, function(z) mean(z, na.rm = TRUE))
   sds_by_T   <- tapply(bwDCt, x$T, function(z) stats::sd(z, na.rm = TRUE))
@@ -189,14 +164,14 @@ ANOVA_DCt <- function(x,
   # match se to the order used by emmeans/cld (ROWS)
   se_matched <- se_df$se[match(ROWS, se_df$T)]
   
-  ## ---- build Results table ----
+  # build Results table
   Results <- data.frame(row.names = ROWS,
-                        RE = round(2^(-diffs), 4),
-                        log2FC = log2(round(2^(-diffs), 4)),
-                        LCL = round(2^(-lcl), 4),
-                        UCL = round(2^(-ucl), 4),
-                        se = round(se_matched, 4),
-                        letters = trimws(letters_grp), 
+                        RE = 2^(-diffs),
+                        log2FC = log2(2^(-diffs)),
+                        LCL = 2^(-lcl),
+                        UCL = 2^(-ucl),
+                        se = se_matched,
+                        sig = trimws(letters_grp), 
                         stringsAsFactors = FALSE)
   
   # preserve rownames as a column for splitting
@@ -217,11 +192,11 @@ ANOVA_DCt <- function(x,
   Results_combined <- cbind(parts_df, Results)
   rownames(Results_combined) <- NULL
   
-  ## ---- compute Lower/Upper SE for RE and attach to Results ----
-  Results_combined$Lower.se.RE <- round(2^(log2(Results_combined$RE) - Results_combined$se), 4)
-  Results_combined$Upper.se.RE <- round(2^(log2(Results_combined$RE) + Results_combined$se), 4)
+  # compute Lower/Upper SE for RE and attach to Results
+  Results_combined$Lower.se.RE <- 2^(log2(Results_combined$RE) - Results_combined$se)
+  Results_combined$Upper.se.RE <- 2^(log2(Results_combined$RE) + Results_combined$se)
   
-  ## ---- compute log2FC SE bounds (vectorized) ----
+  # compute log2FC SE bounds (vectorized)
   # initialize
   Results_combined$Lower.se.log2FC <- 0
   Results_combined$Upper.se.log2FC <- 0
@@ -242,11 +217,9 @@ ANOVA_DCt <- function(x,
   Results_combined$Upper.se.log2FC[idx_ge1] <- (Results_combined$Upper.se.RE[idx_ge1] *
                                                   log2(Results_combined$RE[idx_ge1])) / Results_combined$RE[idx_ge1]
   
-  ## ---- reorder columns: put lower/upper SEs before letters ----
-  # find current column positions
-  # We'll place Lower.se.RE, Upper.se.RE, Lower.se.log2FC, Upper.se.log2FC before 'letters'
+  # reorder columns: put lower/upper SEs before letters
   cols <- colnames(Results_combined)
-  letters_pos <- match("letters", cols)
+  letters_pos <- match("sig", cols)
   new_order <- c(cols[1:(letters_pos - 1)],
                  "Lower.se.RE", "Upper.se.RE", "Lower.se.log2FC", "Upper.se.log2FC",
                  cols[letters_pos:length(cols)])
@@ -255,9 +228,12 @@ ANOVA_DCt <- function(x,
   Results_final <- Results_combined[, new_order, drop = FALSE]
   Results_final$RowNames <- NULL
   
-  ## ---- prepare output ----
+  # prepare output
   # remove the temporary column T from original data for output (you created x$T earlier)
   xx <- x[, setdiff(names(x), "T"), drop = FALSE]
+  
+  Results_final <- Results_final %>%
+    mutate_if(is.numeric, ~ round(., 4))
   
   outlist2 <- structure(list(Final_data = xx,
                              lmCRD = lm_fit,

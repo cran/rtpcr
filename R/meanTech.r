@@ -1,28 +1,46 @@
-#' @title Calculating mean of technical replicates
-#' @description Calculating arithmetic mean of technical replicates for subsequent ANOVA analysis
-#' @details The meanTech calculates mean of technical replicates. Arithmetic mean of technical replicates can be calculated in order to 
-#' simplify the statistical comparison between sample groups.
-#' @author Ghader Mirzaghaderi
-#' @export meanTech
+#' @title Calculate mean of technical replicates
+#'
+#' @description
+#' Computes the arithmetic mean of technical replicates for each sample or group.
+#' This is often performed before ANOVA or other statistical analyses to simplify
+#' comparisons between experimental groups.
+#'
+#' @details
+#' The \code{meanTech} function calculates the mean of technical replicates
+#' based on one or more grouping columns. This reduces the dataset to a single
+#' representative value per group, facilitating downstream analysis such as
+#' fold change calculation or ANOVA.
+#'
+#' @author
+#' Ghader Mirzaghaderi
+#'
+#' @export
+#'
 #' @import tidyr
 #' @import dplyr
 #' @import reshape2
-#' @param x  A raw data frame including technical replicates.
-#' @param groups grouping columns based on which the mean technical replicates are calculated.
-#' @return A data frame with the mean of technical replicates.
+#'
+#' @param x
+#' A raw data frame containing technical replicates.
+#'
+#' @param groups
+#' An integer vector or character vector specifying the column(s) to group
+#' by before calculating the mean of technical replicates.
+#'
+#' @return
+#' A data frame with the mean of technical replicates for each group.
 #'
 #' @examples
 #'
-#' # See example input data frame:
+#' # Example input data frame with technical replicates
 #' data_withTechRep
 #'
-#' # Calculating mean of technical replicates
+#' # Calculate mean of technical replicates using first four columns as groups
 #' meanTech(data_withTechRep, groups = 1:4)
-#' 
-#' # Calculating mean of technical replicates
+#'
+#' # Another example using different dataset and grouping columns
 #' meanTech(Lee_etal2020qPCR, groups = 1:3)
-#'
-#'
+
 
 meanTech <- function(x, groups){
 

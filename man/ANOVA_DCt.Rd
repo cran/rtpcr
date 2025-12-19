@@ -2,72 +2,93 @@
 % Please edit documentation in R/ANOVA_DCt.r
 \name{ANOVA_DCt}
 \alias{ANOVA_DCt}
-\title{Relative expression (\eqn{\Delta Ct} method) analysis using ANOVA}
+\title{Relative expression analysis using the \eqn{\Delta C_T} method with ANOVA}
 \usage{
 ANOVA_DCt(x, numberOfrefGenes, block, alpha = 0.05, adjust = "none")
 }
 \arguments{
-\item{x}{a data.frame structured as described in the vignette consisting of condition columns, target gene efficiency (E), target Gene Ct, reference 
-gene efficiency and reference gene Ct values, respectively. Each Ct in the data frame is the mean of 
-technical replicates. Complete amplification efficiencies of 2 was assumed in the example data for 
-all wells but the calculated efficienies can be used instead.  \strong{NOTE:} Each line belongs to a separate 
-individual reflecting a non-repeated measure experiment). See \href{../doc/vignette.html}{\code{vignette}}, 
-section "data structure and column arrangement" for details.}
+\item{x}{A data frame structured as described in the package vignette, containing
+experimental condition columns, amplification efficiency (E) and Ct values
+for target and reference genes. Each Ct value should represent the mean of
+technical replicates.
 
-\item{numberOfrefGenes}{number of reference genes (1 or 2). Up to two reference genes can be handled.}
+\strong{NOTE:} Each row corresponds to a separate biological individual,
+reflecting a non-repeated-measures experimental design.}
 
-\item{block}{A string or NULL. If provided, this should be the name of the column in \code{x} that 
-indicates the blocking factor. When qPCR is performed on different plates, variations between plates can introduce noise 
-that obscures the true biological differences in gene expression. By using a blocking factor, 
-each treatment and control group can be replicated across different plates, ensuring that 
-at least one replicate of each condition is present on every plate.}
+\item{numberOfrefGenes}{Integer specifying the number of reference genes used for normalization
+(must be \eqn{\ge 1}).}
 
-\item{alpha}{significance level for cld (default 0.05)}
+\item{block}{Character string or \code{NULL}. If provided, this specifies the column name
+in \code{x} corresponding to a blocking factor (e.g. qPCR plate).
+Blocking is used to reduce technical variation arising from experimental
+conditions such as plate-to-plate differences.}
 
-\item{adjust}{p-value adjustment method passed to emmeans/cld}
+\item{alpha}{Significance level used for compact letter display (CLD);
+default is \code{0.05}.}
+
+\item{adjust}{P-value adjustment method passed to \code{emmeans} and \code{cld}.}
 }
 \value{
-A list with 4 elements:
+A list containing the following components:
 \describe{
-  \item{Final_data}{The row data plus weighed delta Ct (wDCt) values.}
-  \item{lm}{The output of linear model analysis including ANOVA tables}
-  \item{ANOVA}{ANOVA table based on CRD}
-  \item{Result}{The result table including treatments and factors, RE (Relative Expression), LCL, UCL, 
-  letter display for pair-wise comparisons and standard error with the lower and upper limits.}
+  \item{Final_data}{Input data frame augmented with weighted Delta Ct (wDCt) values.}
+  \item{lm}{Fitted linear model object, including ANOVA results.}
+  \item{ANOVA}{ANOVA table based on a completely randomized design (CRD).}
+  \item{Result}{Result table containing treatment and factor levels, relative
+  expression (RE), log2 fold change (log2FC), confidence limits (LCL, UCL),
+  compact letter display for pairwise comparisons, and standard errors with
+  corresponding lower and upper limits.}
 }
 }
 \description{
-Analysis of variance of relative expression (\eqn{\Delta Ct} method) values for 
-all factor level combinations in which the expression level of a 
-reference gene is used as normalizer.
+The \code{ANOVA_DCt} function performs analysis of variance (ANOVA) on
+relative expression values calculated using the \eqn{\Delta C_T} method.
+Expression levels are normalized using one or more reference genes and
+analyzed across all combinations of experimental factor levels.
 }
 \details{
-The \code{ANOVA_DCt} function performs analysis of variance (ANOVA) of relative 
-expression (RE) values for all factor level combinations using the expression 
-level of reference gene(s) as a normalizer.
+Relative expression (RE) values are calculated using the \eqn{\Delta C_T}
+method, where Ct values of target genes are normalized to reference gene(s).
+The resulting weighted Delta Ct (wDCt) values are then analyzed using ANOVA.
+
+The function supports uni- and multi-factorial experimental designs.
+Blocking factors (e.g. qPCR plates) can optionally be included to account
+for technical variation. Each row of the input data represents an independent
+biological individual, corresponding to a non-repeated-measures experiment.
 }
 \examples{
+# If the data include technical replicates, calculate means first:
+# df <- meanTech(data_3factor, groups = 1:3)
 
-# If the data include technical replicates, means of technical replicates
-# should be calculated first using meanTech function.
-# Applying ANOVA
-ANOVA_DCt(data_3factor, numberOfrefGenes = 1, block = NULL)
+# One-factor or multi-factor ANOVA without blocking
+ANOVA_DCt(
+  data_3factor,
+  numberOfrefGenes = 1,
+  block = NULL
+)
 
-
-ANOVA_DCt(data_2factorBlock, block = "Block", numberOfrefGenes = 1)
-
-
+# ANOVA with blocking factor
+ANOVA_DCt(
+  data_2factorBlock,
+  numberOfrefGenes = 1,
+  block = "Block"
+)
 }
 \references{
-Livak, Kenneth J, and Thomas D Schmittgen. 2001. Analysis of
-Relative Gene Expression Data Using Real-Time Quantitative PCR and the
-Double Delta CT Method. Methods 25 (4). doi:10.1006/meth.2001.1262.
+Livak, K. J. and Schmittgen, T. D. (2001).
+Analysis of Relative Gene Expression Data Using Real-Time Quantitative PCR
+and the Double Delta CT Method.
+\emph{Methods}, 25(4), 402–408.
+doi:10.1006/meth.2001.1262
 
-Ganger, MT, Dietz GD, and Ewing SJ. 2017. A common base method for analysis of qPCR data
-and the application of simple blocking in qPCR experiments. BMC bioinformatics 18, 1-11.
+Ganger, M. T., Dietz, G. D., and Ewing, S. J. (2017).
+A common base method for analysis of qPCR data and the application of simple
+blocking in qPCR experiments.
+\emph{BMC Bioinformatics}, 18, 1–11.
 
-Yuan, Joshua S, Ann Reed, Feng Chen, and Neal Stewart. 2006.
-Statistical Analysis of Real-Time PCR Data. BMC Bioinformatics 7 (85). doi:10.1186/1471-2105-7-85.
+Yuan, J. S., Reed, A., Chen, F., and Stewart, N. (2006).
+Statistical Analysis of Real-Time PCR Data.
+\emph{BMC Bioinformatics}, 7, 85.
 }
 \author{
 Ghader Mirzaghaderi

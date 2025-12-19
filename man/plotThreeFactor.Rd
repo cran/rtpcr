@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotThreeFactor.r
 \name{plotThreeFactor}
 \alias{plotThreeFactor}
-\title{Bar plot of gene expression from an expression table of a three-factorial experiment data}
+\title{Bar plot of gene expression for three-factor experiments}
 \usage{
 plotThreeFactor(
   data,
@@ -13,59 +13,110 @@ plotThreeFactor(
   Lower.se_col,
   Upper.se_col,
   letters_col = NULL,
-  show.groupingLetters = TRUE
+  letters_d = 0.2,
+  dodge_width = 0.9,
+  col_width = 0.8,
+  err_width = 0.15,
+  fill_colors = NULL,
+  alpha = 1,
+  base_size = 12,
+  legend_position = "right",
+  ...
 )
 }
 \arguments{
-\item{data}{A data.frame such as the expression result of \code{ANOVA_DDCt(x)} or \code{ANOVA_DCt(x)}, etc. functions.}
+\item{data}{A data frame containing expression results, typically obtained from
+\code{ANOVA_DDCt()} or \code{ANOVA_DCt()}.}
 
-\item{x_col}{column number of the x-axis factor.}
+\item{x_col}{Integer specifying the column number used for the x-axis factor.}
 
-\item{y_col}{column number of the y-axis factor.}
+\item{y_col}{Integer specifying the column number used for the bar height
+(relative expression or fold change).}
 
-\item{group_col}{column number of the grouping factor.}
+\item{group_col}{Integer specifying the column number used for grouping bars
+(fill aesthetic).}
 
-\item{facet_col}{column number of the faceting factor.}
+\item{facet_col}{Integer specifying the column number used for faceting the plot.}
 
-\item{Lower.se_col}{The column number of the data.frame used for the lower error bar.}
+\item{Lower.se_col}{Integer specifying the column number used for the lower limit
+of the error bar.}
 
-\item{Upper.se_col}{The column number of the data.frame used for the upper error bar.}
+\item{Upper.se_col}{Integer specifying the column number used for the upper limit
+of the error bar.}
 
-\item{letters_col}{The column number of the data.frame used as the result of statistical comparing and grouping.}
+\item{letters_col}{Integer specifying the column number containing grouping letters
+from statistical comparisons.}
 
-\item{show.groupingLetters}{a logical variable. If TRUE, mean grouping letters (the results of statistical comparison) are added to the bars.}
+\item{letters_d}{Numeric specifying the distance between sig letters and error bar.}
+
+\item{dodge_width}{Numeric. Width of the dodge position adjustment for grouped bars.}
+
+\item{col_width}{Numeric. Width of bars (default 0.8)}
+
+\item{err_width}{Numeric. Width of error bars (default 0.15)}
+
+\item{fill_colors}{Optional vector of fill colors}
+
+\item{alpha}{Numeric. Transparency of bars (default 1)}
+
+\item{base_size}{Numeric. Base font size (default 12)}
+
+\item{legend_position}{Character or numeric vector. Position of legend (default "right")}
+
+\item{...}{Additional ggplot2 layer arguments (e.g., fill, alpha, color)}
 }
 \value{
-Bar plot of the average fold change for target genes along with the standard error or 95\% confidence interval as error bars.
+A ggplot object
 }
 \description{
-Bar plot of the relative expression (\eqn{\Delta C_T} method) of a gene along with the confidence interval and significance
+Creates a bar plot of relative gene expression (fold change) values
+from a three-factor experiment, including error bars and statistical
+significance annotations.
 }
 \details{
-The \code{plotThreeFactor} function generates the bar plot of the average fold change for target genes along with the significance, standard error (se) and the 95\% confidence interval (ci).
+The \code{plotThreeFactor} function generates a bar plot of average
+fold change (relative expression) values for target genes using the
+output expression tables produced by functions such as
+\code{ANOVA_DDCt()} or \code{ANOVA_DCt()}.
+One factor is mapped to the x-axis, one to bar grouping (fill),
+and one to faceting. Error bars represent standard error (SE)
+or 95\% confidence intervals, and optional grouping letters from
+post hoc statistical comparisons can be displayed.
 }
 \examples{
 
+# Perform analysis first
+res <- ANOVA_DCt(
+  data_3factor,
+  numberOfrefGenes = 1,
+  block = NULL
+)
 
+data <- res$Result
 
-res <- ANOVA_DCt(data_3factor, 
-      numberOfrefGenes = 1, 
-      block = NULL)
-      
-data <- res$Results
+# Generate three-factor bar plot
+p <- plotThreeFactor(
+  data,
+  x_col = 3,        # x-axis factor
+  y_col = 5,        # bar height
+  group_col = 1,    # grouping (fill)
+  facet_col = 2,    # faceting factor
+  Lower.se_col = 11,
+  Upper.se_col = 12,
+  letters_col = 13,
+  letters_d = 0.3,
+  col_width = 0.7, 
+  dodge_width = 0.7,# controls spacing
+  fill_colors = c("blue", "brown"),
+  base_size = 16, 
+  alpha = 1,
+  legend_position = c(0.1, 0.2)
+)
 
-plotThreeFactor(data, 
-                3,   # x-axis factor
-                5,   # bar height
-                1,   # fill groups
-                2,   # facet grid
-                11,   # lower SE column
-                12,   # upper SE column
-                letters_col = 13,
-                show.groupingLetters = TRUE)
-
-
-
+library(ggplot2)
+p + theme(
+  panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5)
+)
 }
 \author{
 Ghader Mirzaghaderi

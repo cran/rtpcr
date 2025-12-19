@@ -2,12 +2,13 @@
 % Please edit documentation in R/REPEATED_DDCt.r
 \name{REPEATED_DDCt}
 \alias{REPEATED_DDCt}
-\title{Fold change (\eqn{\Delta \Delta C_T} method) analysis of repeated measure qPCR data}
+\title{Fold change (\eqn{\Delta\Delta C_T}) analysis of repeated-measure qPCR data}
 \usage{
 REPEATED_DDCt(
   x,
   numberOfrefGenes,
   factor,
+  calibratorLevel,
   block,
   x.axis.labels.rename = "none",
   p.adj = "none",
@@ -16,67 +17,76 @@ REPEATED_DDCt(
 )
 }
 \arguments{
-\item{x}{input data frame in which the first column is id, 
-followed by the factor column(s) which include at least time. 
-The first level of time in data frame is used as calibrator or reference level.
-Additional factor(s) may also be present. Other columns are efficiency and Ct values of target and reference genes.
- \strong{NOTE:} In the "id" column, a unique number is assigned to each individual from which samples have been taken over time, 
-for example see \code{data_repeated_measure_1}, 
-all the three number 1 indicate one individual which has been sampled over three different time courses.
-See \href{../doc/vignette.html}{\code{vignette}}, section "data structure and column arrangement" for details.}
+\item{x}{A data frame in which the first column is the individual identifier (\code{id}),
+followed by one or more factor columns (including \code{time}).
+Expression-related columns (time, target gene, reference gene(s)) must appear
+at the end of the data frame in the required order.}
 
-\item{numberOfrefGenes}{number of reference genes which is 1 or 2 (Up to two reference genes can be handled).
-as reference or calibrator which is the reference level or sample that all others are compared to. Examples are untreated 
-of time 0. The FC value of the reference or calibrator level is 1 because it is not changed compared to itself.
-If NULL, the first level of the main factor column is used as calibrator.}
+\item{numberOfrefGenes}{Integer specifying the number of reference genes (must be \eqn{\ge 1}).}
 
-\item{factor}{the factor for which the FC values is analysed. The first level of the specified factor in the input data frame is used as calibrator.}
+\item{factor}{Character string specifying the factor for which fold changes are analysed
+(commonly \code{"time"}).}
 
-\item{block}{column name of the block if there is a blocking factor (for correct column arrangement see example data.). 
-Block effect is usually considered as random and its interaction with any main effect is not considered.}
+\item{calibratorLevel}{A level of \code{factor} to be used as the calibrator (reference level).}
 
-\item{x.axis.labels.rename}{a vector replacing the x axis labels in the bar plot}
+\item{block}{Optional blocking factor column name. If supplied, block effects are treated
+as random effects.}
 
-\item{p.adj}{Method for adjusting p values}
+\item{x.axis.labels.rename}{Optional character vector used to replace x-axis labels in the bar plot.}
 
-\item{plot}{if \code{FALSE}, prevents the plot.}
+\item{p.adj}{Method for p-value adjustment (passed to \code{emmeans}).}
 
-\item{plotType}{Plot based on "RE" (relative expression) or "log2FC" (log2 fold change).}
+\item{plot}{Logical; if \code{FALSE}, plots are not produced.}
+
+\item{plotType}{Either \code{"RE"} (relative expression) or \code{"log2FC"} (log2 fold change).}
 }
 \value{
-A list with 5 elements:
+A list with the following components:
 \describe{
-  \item{Final_data}{Input data frame plus the weighted Delat Ct values (wDCt)}
-  \item{lm}{lm of factorial analysis-tyle}
-  \item{ANOVA_table}{ANOVA table}
-  \item{FC Table}{Table of FC values, significance, confidence interval and standard error with the lower and upper limits for the selected factor levels.}
-  \item{Bar plot of FC values}{Bar plot of the fold change values for the main factor levels.}
+  \item{Final_data}{Input data frame augmented with weighted \eqn{\Delta C_T} values.}
+  \item{lm}{Fitted linear mixed-effects model object.}
+  \item{ANOVA_table}{ANOVA table for fixed effects.}
+  \item{Relative_Expression_table}{Table containing RE values, log2FC, p-values,
+  significance codes, confidence intervals, and standard errors.}
+  \item{RE_Plot}{Bar plot of relative expression values (if requested).}
+  \item{log2FC_Plot}{Bar plot of log2 fold change values (if requested).}
 }
 }
 \description{
-\code{REPEATED_DDCt} function performs fold change (\eqn{\Delta \Delta C_T} method) 
-analysis of observations repeatedly taken over different time courses. 
-Data may be obtained over time from a uni- or multi-factorial experiment. The bar plot of the fold changes (FC) 
-values along with the standard error (se) or confidence interval (ci) is also returned by the \code{REPEATED_DDCt} function.
+The \code{REPEATED_DDCt} function performs fold change (FC) analysis using the
+\eqn{\Delta\Delta C_T} method for qPCR data obtained from repeated measurements
+over time. Data may originate from uni- or multi-factorial experimental designs.
+
+In addition to numerical results, bar plots of relative expression (RE) or log2
+fold change values with associated uncertainty are optionally produced.
 }
 \details{
-The \code{REPEATED_DDCt} function performs fold change (FC) analysis of observations repeatedly taken over time. 
-The intended factor (could be time or any other factor) is defined for the analysis by the \code{factor} argument, 
-then the function performs FC analysis on its levels
-so that the first levels (as appears in the input data frame) is used as reference or calibrator. 
-The function returns FC values along with confidence interval and standard error for the FC values.
+The analysis is carried out using a linear mixed-effects model in which repeated
+measurements are accounted for by a random effect of individual (\code{id}).
+The factor of interest (e.g. time or treatment) is specified via the
+\code{factor} argument. The first level of this factor (or the level specified
+by \code{calibratorLevel}) is used as the calibrator.
+
+The function supports one or more reference genes. When multiple reference genes
+are supplied, their contributions are averaged when computing weighted
+\eqn{\Delta C_T} values.
 }
 \examples{
+REPEATED_DDCt(
+  data_repeated_measure_1,
+  numberOfrefGenes = 1,
+  factor = "time",
+  calibratorLevel = "1",
+  block = NULL
+)
 
-REPEATED_DDCt(data_repeated_measure_1,
-            numberOfrefGenes = 1,
-            factor = "time", block = NULL)
-
-REPEATED_DDCt(data_repeated_measure_2,
-             numberOfrefGenes = 1,
-             factor = "time", block = NULL)
-                                                       
-                                                       
+REPEATED_DDCt(
+  data_repeated_measure_2,
+  numberOfrefGenes = 1,
+  factor = "time",
+  calibratorLevel = "1",
+  block = NULL
+)
 }
 \author{
 Ghader Mirzaghaderi

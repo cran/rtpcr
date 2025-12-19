@@ -1,190 +1,250 @@
-#' @title Fold change (\eqn{\Delta \Delta C_T} method) analysis of repeated measure qPCR data
-#' 
-#' @description \code{REPEATED_DDCt} function performs fold change (\eqn{\Delta \Delta C_T} method) 
-#' analysis of observations repeatedly taken over different time courses. 
-#' Data may be obtained over time from a uni- or multi-factorial experiment. The bar plot of the fold changes (FC) 
-#' values along with the standard error (se) or confidence interval (ci) is also returned by the \code{REPEATED_DDCt} function. 
-#' 
-#' @details The \code{REPEATED_DDCt} function performs fold change (FC) analysis of observations repeatedly taken over time. 
-#' The intended factor (could be time or any other factor) is defined for the analysis by the \code{factor} argument, 
-#' then the function performs FC analysis on its levels
-#' so that the first levels (as appears in the input data frame) is used as reference or calibrator. 
-#' The function returns FC values along with confidence interval and standard error for the FC values.
-#' 
+#' @title Fold change (\eqn{\Delta\Delta C_T}) analysis of repeated-measure qPCR data
+#'
+#' @description
+#' The \code{REPEATED_DDCt} function performs fold change (FC) analysis using the
+#' \eqn{\Delta\Delta C_T} method for qPCR data obtained from repeated measurements
+#' over time. Data may originate from uni- or multi-factorial experimental designs.
+#'
+#' In addition to numerical results, bar plots of relative expression (RE) or log2
+#' fold change values with associated uncertainty are optionally produced.
+#'
+#' @details
+#' The analysis is carried out using a linear mixed-effects model in which repeated
+#' measurements are accounted for by a random effect of individual (\code{id}).
+#' The factor of interest (e.g. time or treatment) is specified via the
+#' \code{factor} argument. The first level of this factor (or the level specified
+#' by \code{calibratorLevel}) is used as the calibrator.
+#'
+#' The function supports one or more reference genes. When multiple reference genes
+#' are supplied, their contributions are averaged when computing weighted
+#' \eqn{\Delta C_T} values.
+#'
 #' @author Ghader Mirzaghaderi
-#' @export REPEATED_DDCt
+#'
+#' @export
+#'
 #' @import tidyr
 #' @import dplyr
 #' @import reshape2
 #' @import ggplot2
 #' @import emmeans
 #' @import lmerTest
-#' @param x input data frame in which the first column is id, 
-#' followed by the factor column(s) which include at least time. 
-#' The first level of time in data frame is used as calibrator or reference level.
-#' Additional factor(s) may also be present. Other columns are efficiency and Ct values of target and reference genes.
-#'  \strong{NOTE:} In the "id" column, a unique number is assigned to each individual from which samples have been taken over time, 
-#' for example see \code{data_repeated_measure_1}, 
-#' all the three number 1 indicate one individual which has been sampled over three different time courses.
-#' See \href{../doc/vignette.html}{\code{vignette}}, section "data structure and column arrangement" for details.
-#' @param numberOfrefGenes number of reference genes which is 1 or 2 (Up to two reference genes can be handled).
-#' as reference or calibrator which is the reference level or sample that all others are compared to. Examples are untreated 
-#' of time 0. The FC value of the reference or calibrator level is 1 because it is not changed compared to itself.
-#' If NULL, the first level of the main factor column is used as calibrator.
-#' @param factor the factor for which the FC values is analysed. The first level of the specified factor in the input data frame is used as calibrator.
-#' @param x.axis.labels.rename a vector replacing the x axis labels in the bar plot
-#' @param block column name of the block if there is a blocking factor (for correct column arrangement see example data.). 
-#' Block effect is usually considered as random and its interaction with any main effect is not considered.
-#' @param p.adj Method for adjusting p values
-#' @param plot  if \code{FALSE}, prevents the plot.
-#' @param plotType  Plot based on "RE" (relative expression) or "log2FC" (log2 fold change).
-#' @return A list with 5 elements:
-#' \describe{
-#'   \item{Final_data}{Input data frame plus the weighted Delat Ct values (wDCt)}
-#'   \item{lm}{lm of factorial analysis-tyle}
-#'   \item{ANOVA_table}{ANOVA table}
-#'   \item{FC Table}{Table of FC values, significance, confidence interval and standard error with the lower and upper limits for the selected factor levels.}
-#'   \item{Bar plot of FC values}{Bar plot of the fold change values for the main factor levels.}
-#' }
-#' 
-#' 
-#' 
-#' @examples
-#' 
-#' REPEATED_DDCt(data_repeated_measure_1,
-#'             numberOfrefGenes = 1,
-#'             factor = "time", block = NULL)
 #'
-#' REPEATED_DDCt(data_repeated_measure_2,
-#'              numberOfrefGenes = 1,
-#'              factor = "time", block = NULL)
-#'                                                        
-#'                                                        
+#' @param x
+#' A data frame in which the first column is the individual identifier (\code{id}),
+#' followed by one or more factor columns (including \code{time}).
+#' Expression-related columns (time, target gene, reference gene(s)) must appear
+#' at the end of the data frame in the required order.
+#'
+#' @param numberOfrefGenes
+#' Integer specifying the number of reference genes (must be \eqn{\ge 1}).
+#'
+#' @param factor
+#' Character string specifying the factor for which fold changes are analysed
+#' (commonly \code{"time"}).
+#'
+#' @param calibratorLevel
+#' A level of \code{factor} to be used as the calibrator (reference level).
+#'
+#' @param block
+#' Optional blocking factor column name. If supplied, block effects are treated
+#' as random effects.
+#'
+#' @param x.axis.labels.rename
+#' Optional character vector used to replace x-axis labels in the bar plot.
+#'
+#' @param p.adj
+#' Method for p-value adjustment (passed to \code{emmeans}).
+#'
+#' @param plot
+#' Logical; if \code{FALSE}, plots are not produced.
+#'
+#' @param plotType
+#' Either \code{"RE"} (relative expression) or \code{"log2FC"} (log2 fold change).
+#'
+#' @return
+#' A list with the following components:
+#' \describe{
+#'   \item{Final_data}{Input data frame augmented with weighted \eqn{\Delta C_T} values.}
+#'   \item{lm}{Fitted linear mixed-effects model object.}
+#'   \item{ANOVA_table}{ANOVA table for fixed effects.}
+#'   \item{Relative_Expression_table}{Table containing RE values, log2FC, p-values,
+#'   significance codes, confidence intervals, and standard errors.}
+#'   \item{RE_Plot}{Bar plot of relative expression values (if requested).}
+#'   \item{log2FC_Plot}{Bar plot of log2 fold change values (if requested).}
+#' }
+#'
+#' @examples
+#' REPEATED_DDCt(
+#'   data_repeated_measure_1,
+#'   numberOfrefGenes = 1,
+#'   factor = "time",
+#'   calibratorLevel = "1",
+#'   block = NULL
+#' )
+#'
+#' REPEATED_DDCt(
+#'   data_repeated_measure_2,
+#'   numberOfrefGenes = 1,
+#'   factor = "time",
+#'   calibratorLevel = "1",
+#'   block = NULL
+#' )
 
 
 
 REPEATED_DDCt <- function(x, 
                           numberOfrefGenes,
                           factor, 
+                          calibratorLevel,
                           block,
                           x.axis.labels.rename = "none",
                           p.adj = "none",
                           plot = TRUE,
                           plotType = "RE"){
   
+  ## ---- basic checks ----
+  if (!is.data.frame(x)) stop("`x` must be a data.frame")
+  if (missing(factor)) stop("argument 'factor' is missing")
+  if (missing(calibratorLevel)) stop("argument 'calibratorLevel' is missing")
+  if (!is.numeric(numberOfrefGenes) || numberOfrefGenes < 1)
+    stop("`numberOfrefGenes` must be >= 1")
+  if (missing(block)) stop("argument 'block' is missing")
   
-  if (missing(numberOfrefGenes)) {
-    stop("argument 'numberOfrefGenes' is missing, with no default")
+  # rearrange_repeatedMeasureData
+  x <- .rearrange_repeatedMeasureData(x, column_name = factor, level = calibratorLevel)  
+  
+  
+  ## ---- validate number of target genes ----
+  ## ---- validate that only ONE target gene exists ----
+  expr_cols_expected <- if (is.null(block)) {
+    3 + 2 * numberOfrefGenes   # time + target + refs
+  } else {
+    4 + 2 * numberOfrefGenes   # block + time + target + refs
   }
-  if (missing(factor)) {
-    stop("argument 'factor' is missing, with no default")
+  
+  non_expr_cols <- ncol(x) - expr_cols_expected
+  
+  if (non_expr_cols < 1) {
+    stop(
+      "Input data structure error:\n",
+      "At least one non-expression column (id) must exist before expression columns.",
+      call. = FALSE
+    )
   }
-  if (missing(block)) {
-    stop("argument 'block' is missing, with no default. Requires NULL or a blocking factor column.")
+  
+  ## if expression columns are MORE than expected → extra target genes
+  actual_expr_cols <- ncol(x) - non_expr_cols
+  
+  if (actual_expr_cols != expr_cols_expected) {
+    stop(
+      sprintf(
+        paste0(
+          "Exactly ONE target gene is allowed.\n\n",
+          "Expected expression columns:\n",
+          "  %d  (= time + 1 target + %d reference gene(s)%s)\n\n",
+          "But detected:\n",
+          "  %d expression-related columns\n\n",
+          "This usually means:\n",
+          "  more than one target gene is present, or\n",
+          "  numberOfrefGenes is incorrect, or\n",
+          "  expression columns are not at the end of the data frame."
+        ),
+        expr_cols_expected,
+        numberOfrefGenes,
+        if (is.null(block)) "" else " + block",
+        actual_expr_cols
+      ),
+      call. = FALSE
+    )
   }
   
   
+  
+  
+  
+  
+  
+  id <- colnames(x)[1]
+  
+  ## ---- column parsing ----
   if (is.null(block)) {
     
+    n_expr <- 3 + 2 * numberOfrefGenes
+    factors <- if ((ncol(x) - n_expr) <= 1) NULL else colnames(x)[2:(ncol(x) - n_expr)]
     
-    if(numberOfrefGenes == 1) {
-      id <- colnames(x)[1]
-      if((ncol(x)-5) <= 1){
-        factors = NULL
-      } else {
-        factors <- colnames(x)[2:(ncol(x)-5)]
-      }
-      colnames(x)[ncol(x)-4] <- "time"
-      colnames(x)[ncol(x)-3] <- "Etarget"
-      colnames(x)[ncol(x)-2] <- "Cttarget"
-      colnames(x)[ncol(x)-1] <- "Eref"
-      colnames(x)[ncol(x)] <- "Ctref"
-      
-      x <- data.frame(x, wDCt = (log2(x$Etarget)*x$Cttarget)-(log2(x$Eref)*x$Ctref))
-      
-    } else if(numberOfrefGenes == 2) {
-      id <- colnames(x)[1]
-      factors <- colnames(x)[2:(ncol(x)-7)]
-      colnames(x)[ncol(x)-6] <- "time"
-      colnames(x)[ncol(x)-5] <- "Etarget"
-      colnames(x)[ncol(x)-4] <- "Cttarget"
-      colnames(x)[ncol(x)-3] <- "Eref"
-      colnames(x)[ncol(x)-2] <- "Ctref"
-      colnames(x)[ncol(x)-1] <- "Eref2"
-      colnames(x)[ncol(x)] <- "Ctref2"
-      
-      x <- data.frame(x, wDCt = (log2(x$Etarget)*x$Cttarget)-
-                        ((log2(x$Eref)*x$Ctref) + (log2(x$Eref2)*x$Ctref2))/2)
-    }
+    colnames(x)[(ncol(x) - n_expr + 1)] <- "time"
+    colnames(x)[(ncol(x) - n_expr + 2)] <- "Etarget"
+    colnames(x)[(ncol(x) - n_expr + 3)] <- "Cttarget"
+    
+    ref_start <- ncol(x) - (2 * numberOfrefGenes) + 1
+    ref_cols <- ref_start:ncol(x)
     
   } else {
-    if(numberOfrefGenes == 1) {
-      id <- colnames(x)[1]
-      factors <- colnames(x)[2:(ncol(x)-6)]
-      colnames(x)[ncol(x)-5] <- "block"
-      colnames(x)[ncol(x)-4] <- "time"
-      colnames(x)[ncol(x)-3] <- "Etarget"
-      colnames(x)[ncol(x)-2] <- "Cttarget"
-      colnames(x)[ncol(x)-1] <- "Eref"
-      colnames(x)[ncol(x)] <- "Ctref"
-      
-      x <- data.frame(x, wDCt = (log2(x$Etarget)*x$Cttarget)-(log2(x$Eref)*x$Ctref))
-      
-    } else if(numberOfrefGenes == 2) {
-      id <- colnames(x)[1]
-      factors <- colnames(x)[2:(ncol(x)-8)]
-      colnames(x)[ncol(x)-7] <- "block"
-      colnames(x)[ncol(x)-6] <- "time"
-      colnames(x)[ncol(x)-5] <- "Etarget"
-      colnames(x)[ncol(x)-4] <- "Cttarget"
-      colnames(x)[ncol(x)-3] <- "Eref"
-      colnames(x)[ncol(x)-2] <- "Ctref"
-      colnames(x)[ncol(x)-1] <- "Eref2"
-      colnames(x)[ncol(x)] <- "Ctref2"
-      
-      x <- data.frame(x, wDCt = (log2(x$Etarget)*x$Cttarget)-
-                        ((log2(x$Eref)*x$Ctref) + (log2(x$Eref2)*x$Ctref2))/2)
-    }
+    
+    n_expr <- 4 + 2 * numberOfrefGenes
+    factors <- if ((ncol(x) - n_expr) <= 1) NULL else colnames(x)[2:(ncol(x) - n_expr)]
+    
+    colnames(x)[(ncol(x) - n_expr + 1)] <- "block"
+    colnames(x)[(ncol(x) - n_expr + 2)] <- "time"
+    colnames(x)[(ncol(x) - n_expr + 3)] <- "Etarget"
+    colnames(x)[(ncol(x) - n_expr + 4)] <- "Cttarget"
+    
+    ref_start <- ncol(x) - (2 * numberOfrefGenes) + 1
+    ref_cols <- ref_start:ncol(x)
   }
   
+  ## ---- compute wDCt (GENERALIZED) ----
+  target_part <- log2(x$Etarget) * x$Cttarget
   
+  ref_matrix <- matrix(
+    mapply(
+      function(E, Ct) log2(E) * Ct,
+      x[, ref_cols[seq(1, length(ref_cols), 2)]],
+      x[, ref_cols[seq(2, length(ref_cols), 2)]]
+    ),
+    ncol = numberOfrefGenes
+  )
   
+  ref_part <- rowMeans(ref_matrix)
+  x <- data.frame(x, wDCt = target_part - ref_part)
   
-  # converting columns 1 to time as factor
-  
+  ## ---- convert factors ----
   for (i in 2:which(names(x) == "time")) {
     x[[i]] <- factor(x[[i]], levels = unique(x[[i]]))
   }
   
-  
-  # Check if there is block
+  ## ---- model formula ----
   if (is.null(block)) {
-    if((ncol(x)-5) <= 2){
+    if (is.null(factors)) {
       formula <- wDCt ~ time + (1 | id)
     } else {
-      formula <- paste("wDCt ~", paste("time"," *"), paste(factors, collapse = " * "), "+ (1 | id)")
+      formula <- as.formula(
+        paste("wDCt ~ time *", paste(factors, collapse = " * "), "+ (1 | id)")
+      )
     }
   } else {
-    if((ncol(x)-6) <= 2){
-      formula <- wDCt ~ time + (1|id) + (1|block/id)
+    if (is.null(factors)) {
+      formula <- wDCt ~ time + (1 | id) + (1 | block/id)
     } else {
-      formula <- paste("wDCt ~ ", paste("time"," *"), paste(factors, collapse = " * "), "+ (1 | id) + (1|block/id)")
+      formula <- as.formula(
+        paste("wDCt ~ time *", paste(factors, collapse = " * "),
+              "+ (1 | id) + (1 | block/id)")
+      )
     }
   }
+  
   lm <- lmerTest::lmer(formula, data = x)
-  ANOVA <- stats::anova(lm) 
+  ANOVA <- stats::anova(lm)
   
-  
-  
-  
-  
+  #post hoc
   v <- match(colnames(x), factor)
   n <- which(!is.na(v))
   factor <- colnames(x)[n]
   lvls <- unique(x[,n])
   calibrartor <- lvls[1]
   
-  warning(paste("The level", calibrartor, " of the selected factor was used as calibrator."))
+  on.exit(cat(paste("The level", calibrartor, " of the selected factor was used as calibrator.\n")))
   pp1 <- emmeans(lm, factor, data = x, adjust = p.adj, mode = "satterthwaite")
   pp2 <- as.data.frame(graphics::pairs(pp1), adjust = p.adj)
   if (length(lvls) >= 3){
@@ -215,7 +275,7 @@ REPEATED_DDCt <- function(x,
   
   words <- strsplit(as.character(contrast[1]), " ")[[1]]
   referencelevel <- words[1]
- 
+  
   
   reference <- data.frame(contrast = as.character(referencelevel),
                           RE = 1,
@@ -229,7 +289,7 @@ REPEATED_DDCt <- function(x,
   tableC  <- rbind(reference, post_hoc_test)
   
   #round tableC to 4 decimal places
-  tableC[, sapply(tableC, is.numeric)] <- lapply(tableC[, sapply(tableC, is.numeric)], function(x) round(x, 4))
+  #tableC[, sapply(tableC, is.numeric)] <- lapply(tableC[, sapply(tableC, is.numeric)], function(x) round(x, 4))
   
   FINALDATA <- x
   
@@ -254,8 +314,8 @@ REPEATED_DDCt <- function(x,
   
   
   tableC <- data.frame(tableC, 
-                       Lower.se.RE = round(2^(log2(tableC$RE) - tableC$se), 4), 
-                       Upper.se.RE = round(2^(log2(tableC$RE) + tableC$se), 4))  
+                       Lower.se.RE = 2^(log2(tableC$RE) - tableC$se), 
+                       Upper.se.RE = 2^(log2(tableC$RE) + tableC$se))  
   ##################################################
   a <- data.frame(tableC, d = 0)
   
@@ -285,27 +345,28 @@ REPEATED_DDCt <- function(x,
   
   tableC <- data.frame(tableC, Lower.se.log2FC = a$Lower.se, Upper.se.log2FC = a$Upper.se)
   ##################################################    
+  tableC <- tableC %>%
+    mutate_if(is.numeric, ~ round(., 4))
   
-
   outlist2 <- structure(list(Final_data = x,
                              lm = lm,
                              ANOVA_table = ANOVA,
-                             FC_statistics_of_the_main_factor  = tableC,
-                             RE_Plot_of_the_main_factor_levels = pfc1,
-                             log2FC_Plot_of_the_main_factor_levels = pfc2), class = "XX")
+                             Relative_Expression_table  = tableC,
+                             RE_Plot = pfc1,
+                             log2FC_Plot = pfc2), class = "XX")
   
   print.XX <- function(outlist2){
     print(outlist2$ANOVA_table)
-    cat("\n", sep = '',"Fold Change table", "\n")
-    print(outlist2$FC_statistics_of_the_main_factor)
+    cat("\n", sep = '',"Expression table", "\n")
+    print(outlist2$Relative_Expression_table)
     
     if (plot == TRUE){
       if(plotType == "RE"){
-        cat("\n", sep = '', "Expression plot of main factor levels", "\n")
-        print(outlist2$RE_Plot_of_the_main_factor_levels)
+        cat("\n", sep = '', "Expression plot", "\n")
+        print(outlist2$RE_Plot)
       }else{
-        cat("\n", sep = '', "Expression plot of main factor levels", "\n")
-        print(outlist2$log2FC_Plot_of_the_main_factor_levels)
+        cat("\n", sep = '', "Expression plot", "\n")
+        print(outlist2$log2FC_Plot)
       }
     }
     

@@ -1,41 +1,71 @@
-#' @title \eqn{\Delta \Delta C_T} analysis analysis using a model
-#' 
-#' @description Relative expression (\eqn{\Delta \Delta C_T} method) analysis using a model object produced by the
-#' \code{ANOVA_DDCt} or \code{REPEATED_DDCt}.
-#' 
-#' @details The \code{Means_DDCt} function performs fold change (\eqn{\Delta \Delta C_T} method) analysis using a model produced by the
-#' \code{ANOVA_DDCt} or \code{REPEATED_DDCt}. The values can be returned for any effects in the model including simple effects,
-#' interactions and slicing if an ANOVA model is used, but ANCOVA models returned by rtpcr package only include simple effects.
-#' 
-#' @author Ghader Mirzaghaderi
-#' @export Means_DDCt
+#' @title Relative expression (\eqn{\Delta \Delta C_T}) analysis using a fitted model
+#'
+#' @description
+#' Performs relative expression (fold change) analysis based on the
+#' \eqn{\Delta \Delta C_T} method using a fitted model object produced by
+#' \code{ANOVA_DDCt()} or \code{REPEATED_DDCt()}.
+#'
+#' @details
+#' The \code{Means_DDCt} function calculates fold change (FC) values using
+#' estimated marginal means derived from a fitted model.
+#' For ANOVA models, FC values can be obtained for main effects,
+#' interactions, and sliced (simple) effects.
+#' For ANCOVA models returned by the \pkg{rtpcr} package, only simple
+#' effects are supported.
+#'
+#' Internally, this function relies on the \pkg{emmeans} package to
+#' compute marginal means and contrasts, which are then back-transformed
+#' to fold change values using the \eqn{\Delta \Delta C_T} framework.
+#'
+#' @author
+#' Ghader Mirzaghaderi
+#'
+#' @export
+#'
 #' @import emmeans
-#' @param model an `lmer` fitted model object created by ANOVA_DDCt or REPEATED_DDCt functions
-#' @param specs A character vector specifying the names of the predictors over which FC values are desired
-#' @param p.adj Method for adjusting p values
-#' @return Table of FC values, significance and confidence interval.
-#' 
-#' 
+#'
+#' @param model
+#' A fitted model object (typically an \code{lmer} or \code{lm} object)
+#' created by \code{ANOVA_DDCt()} or \code{REPEATED_DDCt()}.
+#'
+#' @param specs
+#' A character string or character vector specifying the predictors or
+#' combinations of predictors over which fold change values are desired.
+#' This argument follows the specification syntax used by
+#' \code{emmeans::emmeans()} (e.g., \code{"Factor"},
+#' \code{"Factor1 | Factor2"}).
+#'
+#' @param p.adj
+#' Character string specifying the method for adjusting p-values.
+#' See \code{\link[stats]{p.adjust}} for available options.
+#'
+#' @return
+#' A data frame containing estimated fold change values, confidence
+#' intervals, p-values, and significance levels derived from the fitted
+#' model.
+#'
 #' @examples
-#' 
-#' # Returning fold change values from a fitted model.
-#' # Firstly, result of `ANOVA_DDCt` or `REPEATED_DDCt` is 
-#' # acquired which includes a model object:
-#' res <- ANOVA_DDCt(data_3factor, numberOfrefGenes = 1, mainFactor.column = 1, block = NULL)
-#' 
-#' # Returning fold change values of Type levels from a fitted model:
+#'
+#' # Obtain a fitted model from ANOVA_DDCt
+#' res <- ANOVA_DDCt(
+#'   data_3factor,
+#'   numberOfrefGenes = 1,
+#'   mainFactor.column = 1,
+#'   block = NULL
+#' )
+#'
+#' # Fold change values for Type main effect
 #' Means_DDCt(res$lm_ANOVA, specs = "Type")
-#' 
-#' # Returning fold change values of Conc levels from a fitted model:
+#'
+#' # Fold change values for Concentration main effect
 #' Means_DDCt(res$lm_ANOVA, specs = "Conc")
-#' 
-#' # Returning fold change values of Conc levels sliced by Type:
+#'
+#' # Fold change values for Concentration sliced by Type
 #' Means_DDCt(res$lm_ANOVA, specs = "Conc | Type")
-#' 
-#' # Returning fold change values of Conc levels sliced by Type*SA:
-#' Means_DDCt(res$lm_ANOVA, specs = "Conc | (Type*SA)")
-#' 
-#' 
+#'
+#' # Fold change values for Concentration sliced by Type and SA
+#' Means_DDCt(res$lm_ANOVA, specs = "Conc | Type * SA")
+
 
 
 

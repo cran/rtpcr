@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotOneFactor.r
 \name{plotOneFactor}
 \alias{plotOneFactor}
-\title{Bar plot of gene expression from an expression table of a single-factor experiment data}
+\title{Bar plot of gene expression for single-factor experiments}
 \usage{
 plotOneFactor(
   data,
@@ -11,41 +11,85 @@ plotOneFactor(
   Lower.se_col,
   Upper.se_col,
   letters_col = NULL,
-  show.groupingLetters = TRUE
+  letters_d = 0.2,
+  col_width = 0.8,
+  err_width = 0.15,
+  fill_colors = "grey40",
+  alpha = 1,
+  base_size = 12,
+  legend_position = "none",
+  ...
 )
 }
 \arguments{
-\item{data}{A data.frame such as the expression result of \code{ANOVA_DDCt(x)} or \code{ANOVA_DCt(x)}, etc. functions.}
+\item{data}{Data frame}
 
-\item{x_col}{The column number of the data.frame used for x axis.}
+\item{x_col}{Numeric. Column index for x-axis}
 
-\item{y_col}{The column number of the data.frame used for y axis.}
+\item{y_col}{Numeric. Column index for bar height}
 
-\item{Lower.se_col}{The column number of the data.frame used for the lower error bar.}
+\item{Lower.se_col}{Numeric. Column index for lower SE}
 
-\item{Upper.se_col}{The column number of the data.frame used for the upper error bar.}
+\item{Upper.se_col}{Numeric. Column index for upper SE}
 
-\item{letters_col}{The column number of the data.frame used as the result of statistical comparing and grouping.}
+\item{letters_col}{Optional column index for grouping letters}
 
-\item{show.groupingLetters}{a logical variable. If TRUE, mean grouping letters (the results of statistical comparison) are added to the bars.}
+\item{letters_d}{Numeric. Vertical offset for letters (default 0.2)}
+
+\item{col_width}{Numeric. Width of bars (default 0.8)}
+
+\item{err_width}{Numeric. Width of error bars (default 0.15)}
+
+\item{fill_colors}{Optional vector of fill colors}
+
+\item{alpha}{Numeric. Transparency of bars (default 1)}
+
+\item{base_size}{Numeric. Base font size for theme (default 12)}
+
+\item{legend_position}{Character. Legend position (default "right")}
+
+\item{...}{Additional valid ggplot2 layer arguments}
 }
 \value{
-Bar plot of the average fold change for target genes along with the significance and the standard error or 95\% confidence interval as error bars.
+ggplot2 plot object
 }
 \description{
-Bar plot of the relative expression of a gene along with the standard error (se), 95\% confidence interval (ci) and significance.
+Creates a bar plot of relative gene expression (fold change) values
+from a single-factor experiment, including standard error or
+confidence interval error bars and statistical significance.
 }
 \details{
-The \code{plotOneFactor} function generates the bar plot of the  fold change for target genes along with the significance and the 95\% confidence interval as error bars.
+The \code{plotOneFactor} function generates a bar plot of fold change
+values for target genes using the output expression tables produced by
+functions such as \code{ANOVA_DDCt()} or \code{ANOVA_DCt()}.
+Error bars can represent either standard error (SE) or 95\% confidence
+intervals, and optional grouping letters from post hoc statistical
+comparisons can be displayed above the bars.
 }
 \examples{
 
-# Before plotting, the result needs to be extracted as below:
-res <- ANOVA_DCt(data_1factor, numberOfrefGenes = 1, block = NULL)$Result
+a <- ANOVA_DCt(
+data_1factor,
+numberOfrefGenes = 1,
+block = NULL
+)
+data <- a$Results
 
-# Bar plot
-plotOneFactor(res, 1, 2, 7, 8, 11,
-    show.groupingLetters = TRUE)
+plotOneFactor(
+  data,
+  x_col = 1,
+  y_col = 2,
+  Lower.se_col = 7,
+  Upper.se_col = 8,
+  letters_col = 11,
+  letters_d = 0.1,
+  col_width = 0.7,
+  err_width = 0.15,
+  fill_colors = "skyblue",
+  alpha = 1,
+  base_size = 16
+)
+
 
 
 }

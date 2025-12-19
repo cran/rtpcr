@@ -2,37 +2,40 @@
 % Please edit documentation in R/meanTech.r
 \name{meanTech}
 \alias{meanTech}
-\title{Calculating mean of technical replicates}
+\title{Calculate mean of technical replicates}
 \usage{
 meanTech(x, groups)
 }
 \arguments{
-\item{x}{A raw data frame including technical replicates.}
+\item{x}{A raw data frame containing technical replicates.}
 
-\item{groups}{grouping columns based on which the mean technical replicates are calculated.}
+\item{groups}{An integer vector or character vector specifying the column(s) to group
+by before calculating the mean of technical replicates.}
 }
 \value{
-A data frame with the mean of technical replicates.
+A data frame with the mean of technical replicates for each group.
 }
 \description{
-Calculating arithmetic mean of technical replicates for subsequent ANOVA analysis
+Computes the arithmetic mean of technical replicates for each sample or group.
+This is often performed before ANOVA or other statistical analyses to simplify
+comparisons between experimental groups.
 }
 \details{
-The meanTech calculates mean of technical replicates. Arithmetic mean of technical replicates can be calculated in order to 
-simplify the statistical comparison between sample groups.
+The \code{meanTech} function calculates the mean of technical replicates
+based on one or more grouping columns. This reduces the dataset to a single
+representative value per group, facilitating downstream analysis such as
+fold change calculation or ANOVA.
 }
 \examples{
 
-# See example input data frame:
+# Example input data frame with technical replicates
 data_withTechRep
 
-# Calculating mean of technical replicates
+# Calculate mean of technical replicates using first four columns as groups
 meanTech(data_withTechRep, groups = 1:4)
 
-# Calculating mean of technical replicates
+# Another example using different dataset and grouping columns
 meanTech(Lee_etal2020qPCR, groups = 1:3)
-
-
 }
 \author{
 Ghader Mirzaghaderi

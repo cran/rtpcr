@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotTwoFactor.r
 \name{plotTwoFactor}
 \alias{plotTwoFactor}
-\title{Bar plot of gene expression from an expression table of a two-factorial experiment data}
+\title{Bar plot of gene expression for two-factor experiments}
 \usage{
 plotTwoFactor(
   data,
@@ -12,41 +12,80 @@ plotTwoFactor(
   Lower.se_col,
   Upper.se_col,
   letters_col = NULL,
-  show.groupingLetters = TRUE
+  letters_d = 0.2,
+  dodge_width = 0.8,
+  col_width = 0.8,
+  err_width = 0.15,
+  fill_colors = NULL,
+  alpha = 1,
+  base_size = 12,
+  legend_position = "right",
+  ...
 )
 }
 \arguments{
-\item{data}{A data.frame such as the expression result of \code{ANOVA_DDCt(x)} or \code{ANOVA_DCt(x)}, etc. functions.}
+\item{data}{A data frame containing expression results, typically obtained from
+\code{ANOVA_DDCt()} or \code{ANOVA_DCt()}.}
 
-\item{x_col}{column number of the x-axis factor.}
+\item{x_col}{Integer specifying the column number used for the x-axis factor.}
 
-\item{y_col}{column number of the y-axis factor.}
+\item{y_col}{Integer specifying the column number used for the bar height
+(relative expression or fold change).}
 
-\item{group_col}{column number of the grouping factor.}
+\item{group_col}{Integer specifying the column number used for grouping bars
+(fill aesthetic).}
 
-\item{Lower.se_col}{The column number of the data.frame used for the lower error bar.}
+\item{Lower.se_col}{Integer specifying the column number used for the lower limit
+of the error bar.}
 
-\item{Upper.se_col}{The column number of the data.frame used for the upper error bar.}
+\item{Upper.se_col}{Integer specifying the column number used for the upper limit
+of the error bar.}
 
-\item{letters_col}{The column number of the data.frame used as the result of statistical comparing and grouping.}
+\item{letters_col}{Integer specifying the column number containing grouping letters
+from statistical comparisons.}
 
-\item{show.groupingLetters}{a logical variable. If TRUE, mean grouping letters (the results of statistical comparison) are added to the bars.}
+\item{letters_d}{Numeric specifying the distance between sig letters and error bar.}
+
+\item{dodge_width}{Numeric. Width of the dodge position adjustment for grouped bars.}
+
+\item{col_width}{Numeric. Width of bars (default 0.8)}
+
+\item{err_width}{Numeric. Width of error bars (default 0.15)}
+
+\item{fill_colors}{Optional vector of fill colors}
+
+\item{alpha}{Numeric. Transparency of bars (default 1)}
+
+\item{base_size}{Numeric. Base font size (default 12)}
+
+\item{legend_position}{Character or numeric vector. Position of legend (default "right")}
+
+\item{...}{Additional ggplot2 layer arguments (e.g., fill, alpha, color)}
 }
 \value{
-Bar plot of the average fold change for target genes along with the standard error or 95\% confidence interval as error bars.
+A ggplot object
 }
 \description{
-Bar plot of the relative expression (\eqn{\Delta C_T} method) of a gene along with the standard error (se), 95\% confidence interval (ci) and significance
+Creates a bar plot of relative gene expression (fold change) values
+from a two-factor experiment, including error bars and statistical
+significance annotations.
 }
 \details{
-The \code{plotTwoFactor} function generates the bar plot of the average fold change for target genes along with the significance, standard error (se) and the 95\% confidence interval (ci) as error bars.
+The \code{plotTwoFactor} function generates a bar plot of average
+fold change (relative expression) values for target genes using
+expression tables produced by functions such as
+\code{ANOVA_DDCt()} or \code{ANOVA_DCt()}.
+One factor is mapped to the x-axis and the second factor is used
+to group the bars (fill aesthetic). Error bars represent standard
+error (SE) or 95\% confidence intervals (CI). Optional grouping
+letters from post hoc statistical comparisons can be displayed.
 }
 \examples{
 
 a <- ANOVA_DCt(data_2factorBlock, block = "Block", numberOfrefGenes = 1)
 data <- a$Results
 
-plotTwoFactor(
+p1 <- plotTwoFactor(
   data = data,
   x_col = 2,
   y_col = 3,
@@ -54,36 +93,34 @@ plotTwoFactor(
   Lower.se_col = 8,
   Upper.se_col = 9,
   letters_col = 12,
-  show.groupingLetters = TRUE)
-              
-              
-              
-# Combining FC results of two different genes:
-a <- REPEATED_DDCt(data_repeated_measure_1,
-                   numberOfrefGenes = 1,
-                   factor = "time", block = NULL, plot = FALSE)
-
-b <- REPEATED_DDCt(data_repeated_measure_2,
-                   factor = "time",
-                   numberOfrefGenes = 1, block = NULL, plot = FALSE)
-
-a1 <- a$FC_statistics_of_the_main_factor
-b1 <- b$FC_statistics_of_the_main_factor
-c <- rbind(a1, b1)
-c$gene <- factor(c(1,1,1,2,2,2))
-c
-
-plotTwoFactor(
-  data = c,
-  x_col = 1,
-  y_col = 2,
-  group_col = 13,
-  Lower.se_col = 9,
-  Upper.se_col = 10,
-  letters_col = 5,
-  show.groupingLetters = TRUE)
+  letters_d = 0.2,
+  fill_colors = c("aquamarine4", "gold2"),
+  alpha = 1,
+  col_width = 0.7,
+  dodge_width = 0.7,
+  base_size = 16, 
+  legend_position = c(0.2, 0.8)
+)
+p1
 
 
+p2 <- plotTwoFactor(
+  data = data,
+  x_col = 2,
+  y_col = 4,
+  group_col = 1,
+  Lower.se_col = 10,
+  Upper.se_col = 11,
+  letters_col = 12,
+  letters_d = 0.2,
+  fill_colors = c("aquamarine4", "gold2"),
+  alpha = 1,
+  col_width = 0.7,
+  dodge_width = 0.7,
+  base_size = 16, 
+  legend_position = c(0.2, 0.8)
+)
+p2
 }
 \author{
 Ghader Mirzaghaderi

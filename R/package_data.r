@@ -17,7 +17,7 @@
 
 #' Sample data (one factor three levels)
 #'
-#' A sample dataset for demonstration purposes. Each line belongs to a separate individual (non-repeated measure experiment).
+#' A sample dataset. Each line belongs to a separate individual (non-repeated measure experiment).
 #'
 #' @format A data frame with 9 observations and 6 variables:
 #' \describe{
@@ -35,7 +35,7 @@
 
 #' Sample data (two factor)
 #'
-#' A sample dataset for demonstration purposes. Each line belongs to a separate individual (non-repeated measure experiment).
+#' A sample dataset. Each line belongs to a separate individual (non-repeated measure experiment).
 #'
 #' @format A data frame with 18 observations and 7 variables:
 #' \describe{
@@ -52,7 +52,7 @@
 #' @keywords internal
 "data_2factor"
 
-#' Sample data (two factor with blocking factor)
+#' Sample data in (two factor with blocking factor)
 #'
 #' A sample qPCR data set with blocking factor. Each line belongs to a separate individual (non-repeated measure experiment).
 #'
@@ -74,7 +74,7 @@
 
 #' Sample data (three factor)
 #'
-#' A sample dataset for demonstration purposes. Each line belongs to a separate individual (non-repeated measure experiment).
+#' A sample dataset. Each line belongs to a separate individual (non-repeated measure experiment).
 #'
 #' @format A data frame with 36 observations and 8 variables:
 #' \describe{
@@ -93,37 +93,66 @@
 "data_3factor"
 
 
-#' Sample qPCR data from an experiment conducted under two different conditions
+#' Sample qPCR data (two different conditions)
 #'
-#' Sample qPCR data from an experiment conducted under two different conditions.
+#' Sample qPCR data (two different conditions)
 #'
-#' @format A data frame with 24 observations and 4 variables:
+#' @format A data frame with 6 observations and 10 variables:
 #' \describe{
 #'   \item{Condition}{Experimental conditions}
-#'   \item{Gene}{Genes}
-#'   \item{E}{Amplification efficiency}
-#'   \item{Ct}{Ct values}
+#'   \item{Rep}{Biological replicates}
+#'   \item{C2H2_26_E}{amplification efficiency of C2H2_26 gene}
+#'   \item{C2H2_26_Ct}{Ct values of C2H2_26 gene. Each is the mean of technical replicates}
+#'   \item{C2H2_01_E}{Amplification efficiency of C2H2_01 gene}
+#'   \item{C2H2_01_Ct}{Ct values of C2H2_01 gene. Each is the mean of technical replicates}
+#'   \item{C2H2_12_E}{Amplification efficiency of C2H2_12 gene}
+#'   \item{C2H2_12_Ct}{Ct values of C2H2_12 gene}
+#'   \item{ref_E}{Amplification efficiency of ref gene}
+#'   \item{ref_Ct}{Ct values of ref gene}
 #' }
 #'
 #' @source University of Kurdistan
 #' @keywords internal
-"data_ttest"
+"data_1factor_one_ref"
+
+
+#' Sample qPCR data (two different conditions)
+#'
+#' Sample qPCR data (two different conditions)
+#'
+#' @format A data frame with 6 observations and 6 variables:
+#' \describe{
+#'   \item{Con}{Experimental conditions}
+#'   \item{r}{Biological replicates}
+#'   \item{target_E}{Amplification efficiency of target gene}
+#'   \item{target_Ct}{Ct values of target gene}
+#'   \item{Actin_E}{Amplification efficiency of reference gene}
+#'   \item{Actin_Ct}{Ct values of reference gene}
+#' }
+#'
+#' @source University of Kurdistan
+#' @keywords internal
+"data_1factor_one_ref_Eff"
 
 #' Sample qPCR data (one target and two reference genes under two different conditions)
 #'
 #' Sample qPCR data (one target and two reference genes under two different conditions)
 #'
-#' @format A data frame with 18 observations and 4 variables:
+#' @format A data frame with 6 observations and 8 variables:
 #' \describe{
 #'   \item{Condition}{Experimental conditions}
-#'   \item{Gene}{Genes}
-#'   \item{E}{Amplification efficiency}
-#'   \item{Ct}{Ct values}
+#'   \item{Rep}{Biological replicates}
+#'   \item{E_DER5}{amplification efficiency of DER5 gene}
+#'   \item{Ct_DER5}{Ct values of DER5 gene. Each is the mean of technical replicates}
+#'   \item{E_Actin}{Amplification efficiency of Actin gene}
+#'   \item{Ct_Actin}{Ct values of Actin gene. Each is the mean of technical replicates}
+#'   \item{E_HPRT}{Amplification efficiency of HPRT gene}
+#'   \item{Ct_HPRT}{Ct values of HPRT gene}
 #' }
 #'
 #' @source Not applicable
 #' @keywords internal
-"Taylor_etal2019"
+"data_1factor_Two_ref"
 
 #' Sample data (with technical replicates)
 #'
@@ -187,7 +216,6 @@
 #' 
 #' @source NA
 #' @keywords internal
-
 "data_repeated_measure_2"
 
 
@@ -208,5 +236,53 @@
 #' 
 #' @source NA
 #' @keywords internal
-
 "data_repeated_measure_1"
+
+
+#' Sample data in (two factor with blocking factor)
+#'
+#' A sample qPCR data set with blocking factor. Each line belongs to a separate individual (non-repeated measure experiment).
+#'
+#' @format A data frame with 18 observations and 8 variables:
+#' \describe{
+#'   \item{factor1}{First experimental factor}
+#'   \item{factor2}{Second experimental factor}
+#'   \item{Rep}{Biological replicates}
+#'   \item{E_PO}{Mean amplification efficiency of PO gene}
+#'   \item{Ct_PO}{Ct values of PO gene. Each is the mean of technical replicates}
+#'   \item{E_GAPDH}{Mean amplification efficiency of GAPDH gene}
+#'   \item{Ct_GAPDH}{Ct values of GAPDH gene. Each is the mean of technical replicates}
+#'   \item{ref2E}{Mean amplification efficiency of ref2 gene}
+#'   \item{ref2Ct}{Ct values of ref2 gene. Each is the mean of technical replicates}
+#'   \item{ref3E}{Mean amplification efficiency of ref3 gene}
+#'   \item{ref3Ct}{Ct values of GAPDH gene. Each is the mean of technical replicates}
+#' }
+#'
+#' @source Not applicable
+#' @keywords internal
+"data_2factor3ref"
+
+
+#' Sample data in (two factor with blocking factor and 3 reference genes)
+#'
+#' A sample qPCR data set with blocking factor and 3 reference genes. Each line belongs to a separate individual (non-repeated measure experiment).
+#'
+#' @format A data frame with 18 observations and 8 variables:
+#' \describe{
+#'   \item{factor1}{First experimental factor}
+#'   \item{factor2}{Second experimental factor}
+#'   \item{block}{blocking factor}
+#'   \item{Rep}{Biological replicates}
+#'   \item{E_PO}{Mean amplification efficiency of PO gene}
+#'   \item{Ct_PO}{Ct values of PO gene. Each is the mean of technical replicates}
+#'   \item{E_GAPDH}{Mean amplification efficiency of GAPDH gene}
+#'   \item{Ct_GAPDH}{Ct values of GAPDH gene. Each is the mean of technical replicates}
+#'   \item{ref2E}{Mean amplification efficiency of ref2 gene}
+#'   \item{ref2Ct}{Ct values of ref2 gene. Each is the mean of technical replicates}
+#'   \item{ref3E}{Mean amplification efficiency of ref3 gene}
+#'   \item{ref3Ct}{Ct values of GAPDH gene. Each is the mean of technical replicates}
+#' }
+#'
+#' @source Not applicable
+#' @keywords internal
+"data_2factorBlock3ref"

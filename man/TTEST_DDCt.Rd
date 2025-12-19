@@ -2,11 +2,12 @@
 % Please edit documentation in R/TTEST_DDCt.r
 \name{TTEST_DDCt}
 \alias{TTEST_DDCt}
-\title{Expression (\eqn{\Delta \Delta C_T} method) analysis of target genes using t-test}
+\title{Expression analysis of target genes using the \eqn{\Delta\Delta C_T} method and t-test}
 \usage{
 TTEST_DDCt(
   x,
   numberOfrefGenes,
+  Factor.level.order = NULL,
   paired = FALSE,
   var.equal = TRUE,
   p.adj = "BH",
@@ -15,78 +16,104 @@ TTEST_DDCt(
 )
 }
 \arguments{
-\item{x}{a data frame of 4 columns including Conditions, E (efficiency), Gene and Ct values (see examples below). Biological replicates needs to be equal for all Genes. Each Ct value is the mean of technical replicates. Complete amplification efficiencies of 2 is assumed here for all wells but the calculated efficienies can be used instead. See \href{../doc/vignette.html}{\code{vignette}} for details about "data structure and column arrangement".}
+\item{x}{A data frame containing experimental conditions, biological replicates, and
+amplification efficiency and Ct values for target and reference genes.
+The number of biological replicates must be equal across genes.
+See the package vignette for details on the required data structure.}
 
-\item{numberOfrefGenes}{number of reference genes. Up to two reference genes can be handled.}
+\item{numberOfrefGenes}{Integer specifying the number of reference genes used for normalization
+(must be \eqn{\ge 1}).}
 
-\item{paired}{a logical indicating whether you want a paired t-test.}
+\item{Factor.level.order}{Optional character vector specifying the order of factor levels.
+If \code{NULL}, the first level of the factor column is used as the calibrator.}
 
-\item{var.equal}{a logical variable indicating whether to treat the two variances as being equal. If TRUE then the pooled variance is used to estimate the variance otherwise the Welch (or Satterthwaite) approximation to the degrees of freedom is used.}
+\item{paired}{Logical; if \code{TRUE}, a paired t-test is performed.}
 
-\item{p.adj}{Method ("holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none") for adjusting p values.}
+\item{var.equal}{Logical; if \code{TRUE}, equal variances are assumed and a pooled variance
+estimate is used. Otherwise, Welch's t-test is applied.}
 
-\item{order}{a vector determining genes order on the output graph.}
+\item{p.adj}{Method for p-value adjustment. One of
+\code{"holm"}, \code{"hochberg"}, \code{"hommel"}, \code{"bonferroni"},
+\code{"BH"}, \code{"BY"}, \code{"fdr"}, or \code{"none"}.}
 
-\item{plotType}{Plot based on "RE" (relative expression) or "log2FC" (log2 fold change).}
+\item{order}{Optional character vector specifying the order of genes in the output plot.}
+
+\item{plotType}{Plot scale to use: \code{"RE"} for relative expression or
+\code{"log2FC"} for log2 fold change.}
 }
 \value{
-A list of two elements:
+A list with the following components:
 \describe{
-  \item{Result}{Output table including the Fold Change values, lower and upper confidence interval, pvalue and standard error with the lower and upper limits.}
+  \item{Result}{Table containing RE values, log2FC, p-values, significance codes,
+  confidence intervals, standard errors, and lower/upper SE limits.}
+  \item{RE_Plot}{Bar plot of relative expression values.}
+  \item{log2FC_Plot}{Bar plot of log2 fold change values.}
 }
-For more information about the test procedure and its arguments,
-refer \code{\link[stats]{t.test}}, and \code{\link[stats]{lm}}.
-If the residuals of the model do not follow normal distribution and variances between the two groups are not homoGene, \code{\link[stats]{wilcox.test}} procedure may be concidered
 }
 \description{
-t.test based analysis of the fold change expression for any number of target genes.
+The \code{TTEST_DDCt} function performs fold change expression analysis based on
+the \eqn{\Delta\Delta C_T} method using Student's t-test. It supports analysis
+of one or more target genes evaluated under two experimental conditions
+(e.g. control vs treatment).
 }
 \details{
-The \code{TTEST_DDCt} function applies a t.test based analysis to calculate 
-fold change (\eqn{\Delta \Delta C_T} method) expression and returns related statistics for any number of 
-target genes that have been evaluated under control and treatment conditions. This function also returns the 
-expression bar plot based on fold change or log2 fold change. Sampling may be paired or unpaired. 
-One or two reference genes can be used. Unpaired and paired samples are commonly analyzed 
-using unpaired and paired t-test, respectively.  \strong{NOTE:} Paired samples in quantitative PCR refer to two sample 
-data that are collected from one set of individuals 
-at two different conditions, for example before and after a treatment or at two different time points. While 
-for unpaired samples, two sets of individuals are used: one under untreated and the other set under treated 
-condition.  Paired samples allow to compare gene expression changes within the same individual, reducing 
+Fold change values are computed using one or more reference genes for normalization.
+Both paired and unpaired experimental designs are supported.
+
+Paired samples in quantitative PCR refer to measurements collected from the same
+individuals under two different conditions (e.g. before vs after treatment),
+whereas unpaired samples originate from different individuals in each condition.
+Paired designs allow within-individual comparisons and typically reduce
 inter-individual variability.
+
+The function returns numerical summaries as well as bar plots based on either
+relative expression (RE) or log2 fold change (log2FC).
 }
 \examples{
+# Example data structure
+data_1factor_one_ref
 
-# See the sample data structure
-data_ttest
+# Unpaired t-test
+TTEST_DDCt(
+  data_1factor_one_ref,
+  paired = FALSE,
+  var.equal = TRUE,
+  numberOfrefGenes = 1
+)
 
-# Getting t.test results
-TTEST_DDCt(data_ttest,
-   paired = FALSE,
-   var.equal = TRUE,
-   numberOfrefGenes = 1)
+# With amplification efficiencies
+data_1factor_one_ref_Eff
 
+TTEST_DDCt(
+  data_1factor_one_ref_Eff,
+  paired = FALSE,
+  var.equal = TRUE,
+  numberOfrefGenes = 1
+)
 
-
-TTEST_DDCt(Taylor_etal2019, 
-          numberOfrefGenes = 2, 
-          var.equal = TRUE,
-          p.adj = "BH")
- 
-
-
+# Two reference genes
+TTEST_DDCt(
+  data_1factor_Two_ref,
+  numberOfrefGenes = 2,
+  var.equal = TRUE,
+  p.adj = "BH"
+)
 }
 \references{
-Livak, Kenneth J, and Thomas D Schmittgen. 2001. Analysis of
-Relative Gene Expression Data Using Real-Time Quantitative PCR and the
-Double Delta CT Method. Methods 25 (4). doi:10.1006/meth.2001.1262.
+Livak, K. J. and Schmittgen, T. D. (2001).
+Analysis of Relative Gene Expression Data Using Real-Time Quantitative PCR
+and the Double Delta CT Method.
+\emph{Methods}, 25(4), 402–408.
+doi:10.1006/meth.2001.1262
 
-Ganger, MT, Dietz GD, and Ewing SJ. 2017. A common base method for analysis
-of qPCR data and the application of simple blocking in qPCR experiments.
-BMC bioinformatics 18, 1-11.
+Ganger, M. T., Dietz, G. D., and Ewing, S. J. (2017).
+A common base method for analysis of qPCR data and the application of
+simple blocking in qPCR experiments.
+\emph{BMC Bioinformatics}, 18, 1–11.
 
-Yuan, Joshua S, Ann Reed, Feng Chen, and Neal Stewart. 2006.
-Statistical Analysis of Real-Time PCR Data. BMC Bioinformatics 7 (85).
-doi:10.1186/1471-2105-7-85.
+Yuan, J. S., Reed, A., Chen, F., and Stewart, N. (2006).
+Statistical Analysis of Real-Time PCR Data.
+\emph{BMC Bioinformatics}, 7, 85.
 }
 \author{
 Ghader Mirzaghaderi

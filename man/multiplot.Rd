@@ -2,45 +2,58 @@
 % Please edit documentation in R/multiplot.r
 \name{multiplot}
 \alias{multiplot}
-\title{Multiple plot function}
+\title{Combine multiple ggplot objects into a single layout}
 \usage{
 multiplot(..., cols = 1)
 }
 \arguments{
-\item{...}{ggplot objects can be passed in ... or to plotlist (as a list of ggplot objects)}
+\item{...}{One or more \code{ggplot2} objects.}
 
-\item{cols}{Number of columns in the panel}
+\item{cols}{Integer specifying the number of columns in the layout.}
 }
 \value{
-A  multiple-plots plate
+A grid object displaying multiple plots arranged in the specified layout.
 }
 \description{
-\code{multiplot} function combines multiple ggplot objects into a single plate.
+The \code{multiplot} function arranges multiple \code{ggplot2} objects
+into a single plotting layout with a specified number of columns.
 }
 \details{
-Combining multiple ggplot objects into a single plate.
+Multiple \code{ggplot2} objects can be provided either as separate
+arguments via \code{...}.
+The function uses the \code{grid} package to control the layout.
 }
 \examples{
 
-a <- TTEST_DDCt(data_ttest, 
-        numberOfrefGenes = 1)
+# Example using output from TTEST_DDCt
+a <- TTEST_DDCt(
+  data_1factor_one_ref,
+  numberOfrefGenes = 1,
+  plotType = "log2FC"
+)
 p1 <- a$plot
 
-out2 <- ANOVA_DCt(data_1factor, numberOfrefGenes = 1, block = NULL)$Result
-p2 <- plotOneFactor(out2,
-        x_col= 1,
-        y_col= 2,
-        Lower.se_col = 7,
-        Upper.se_col = 8,
-        letters_col = 11,
-        show.groupingLetters = TRUE)
-                    
-multiplot(p1, p2, cols=2)
+# Example using output from ANOVA_DCt
+out2 <- ANOVA_DCt(
+  data_1factor,
+  numberOfrefGenes = 1,
+  block = NULL
+)$Result
 
-multiplot(p1, p2, cols=1)
+p2 <- plotOneFactor(
+  out2,
+  x_col = 1,
+  y_col = 2,
+  Lower.se_col = 7,
+  Upper.se_col = 8,
+  letters_col = 11
+)
 
+# Combine plots into a single layout
+multiplot(p1, p2, cols = 2)
 
+multiplot(p1, p2, cols = 1)
 }
 \author{
-gist.github.com/pedroj/ffe89c67282f82c1813d
+Pedro J. (adapted from \url{https://gist.github.com/pedroj/ffe89c67282f82c1813d})
 }
