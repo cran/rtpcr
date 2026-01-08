@@ -2,16 +2,16 @@
 % Please edit documentation in R/Means_DDCt.r
 \name{Means_DDCt}
 \alias{Means_DDCt}
-\title{Relative expression (\eqn{\Delta \Delta C_T}) analysis using a fitted model}
+\title{Delta Ct or Delta Delta Ct pairwise comparisons using a fitted model}
 \usage{
 Means_DDCt(model, specs, p.adj = "none")
 }
 \arguments{
 \item{model}{A fitted model object (typically an \code{lmer} or \code{lm} object)
-created by \code{ANOVA_DDCt()} or \code{REPEATED_DDCt()}.}
+created by \code{ANOVA_DCt()}, \code{ANOVA_DDCt()} or \code{REPEATED_DDCt()}.}
 
 \item{specs}{A character string or character vector specifying the predictors or
-combinations of predictors over which fold change values are desired.
+combinations of predictors over which relative expression values are desired.
 This argument follows the specification syntax used by
 \code{emmeans::emmeans()} (e.g., \code{"Factor"},
 \code{"Factor1 | Factor2"}).}
@@ -20,19 +20,19 @@ This argument follows the specification syntax used by
 See \code{\link[stats]{p.adjust}} for available options.}
 }
 \value{
-A data frame containing estimated fold change values, confidence
+A data frame containing estimated relative expression values, confidence
 intervals, p-values, and significance levels derived from the fitted
 model.
 }
 \description{
 Performs relative expression (fold change) analysis based on the
-\eqn{\Delta \Delta C_T} method using a fitted model object produced by
-\code{ANOVA_DDCt()} or \code{REPEATED_DDCt()}.
+\eqn{\Delta C_T} or \eqn{\Delta \Delta C_T} methods using a fitted model object produced by
+\code{ANOVA_DCt()}, \code{ANOVA_DDCt()} or \code{REPEATED_DDCt()}.
 }
 \details{
-The \code{Means_DDCt} function calculates fold change (FC) values using
+The \code{Means_DDCt} function performs pairwise comparisons of relative expression values fo all combinations using
 estimated marginal means derived from a fitted model.
-For ANOVA models, FC values can be obtained for main effects,
+For ANOVA models, relative expression values can be obtained for main effects,
 interactions, and sliced (simple) effects.
 For ANCOVA models returned by the \pkg{rtpcr} package, only simple
 effects are supported.
@@ -46,22 +46,35 @@ to fold change values using the \eqn{\Delta \Delta C_T} framework.
 # Obtain a fitted model from ANOVA_DDCt
 res <- ANOVA_DDCt(
   data_3factor,
+  numOfFactors = 3,
   numberOfrefGenes = 1,
   mainFactor.column = 1,
-  block = NULL
-)
+  block = NULL)
 
-# Fold change values for Type main effect
-Means_DDCt(res$lm_ANOVA, specs = "Type")
+# Relative expression values for Type main effect
+Means_DDCt(res$perGene$E_PO$lm_ANOVA, specs = "Type")
 
-# Fold change values for Concentration main effect
-Means_DDCt(res$lm_ANOVA, specs = "Conc")
+# Relative expression values for Concentration main effect
+Means_DDCt(res$perGene$E_PO$lm_ANOVA, specs = "Conc")
 
-# Fold change values for Concentration sliced by Type
-Means_DDCt(res$lm_ANOVA, specs = "Conc | Type")
+# Relative expression values for Concentration sliced by Type
+Means_DDCt(res$perGene$E_PO$lm_ANOVA, specs = "Conc | Type")
 
-# Fold change values for Concentration sliced by Type and SA
-Means_DDCt(res$lm_ANOVA, specs = "Conc | Type * SA")
+# Relative expression values for Concentration sliced by Type and SA
+Means_DDCt(res$perGene$E_PO$lm_ANOVA, specs = "Conc | Type * SA")
+
+
+
+
+data <- read.csv(system.file("extdata", "data_3factor.csv", package = "rtpcr"))
+res <- ANOVA_DCt(
+  data,
+  numOfFactors = 3,
+  numberOfrefGenes = 1,
+  block = NULL)
+
+# lm <- res$perGene$PO$lm_factorial
+# Means_DDCt(lm, specs = "Type * Conc * SA", p.adj = "none")
 }
 \author{
 Ghader Mirzaghaderi

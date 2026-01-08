@@ -26,28 +26,36 @@ The function uses the \code{grid} package to control the layout.
 \examples{
 
 # Example using output from TTEST_DDCt
+data1 <- read.csv(system.file("extdata", "data_1factor_one_ref.csv", package = "rtpcr"))
 a <- TTEST_DDCt(
-  data_1factor_one_ref,
+  data1,
   numberOfrefGenes = 1,
-  plotType = "log2FC"
-)
+  plotType = "log2FC")
 p1 <- a$plot
 
 # Example using output from ANOVA_DCt
+data2 <- read.csv(system.file("extdata", "data_1factor.csv", package = "rtpcr"))
 out2 <- ANOVA_DCt(
-  data_1factor,
+  data2,
+  numOfFactors = 1,
   numberOfrefGenes = 1,
-  block = NULL
-)$Result
+  block = NULL)
+  
+df <- out2$combinedResults
 
-p2 <- plotOneFactor(
-  out2,
-  x_col = 1,
-  y_col = 2,
-  Lower.se_col = 7,
-  Upper.se_col = 8,
-  letters_col = 11
-)
+p2 <- plotFactor(
+  df,
+  x_col = "SA",
+  y_col = "RE",
+  Lower.se_col = "Lower.se.RE",
+  Upper.se_col = "Upper.se.RE",
+  letters_col = "sig",
+  letters_d = 0.1,
+  col_width = 0.7,
+  err_width = 0.15,
+  fill_colors = "skyblue",
+  alpha = 1,
+  base_size = 16)
 
 # Combine plots into a single layout
 multiplot(p1, p2, cols = 2)

@@ -11,6 +11,8 @@
 #' For each gene, the function reports the slope of the standard curve,
 #' amplification efficiency (E), and R\eqn{^2} as a measure of goodness of fit.
 #' The function also provides graphical visualization of the standard curves.
+#' 
+#' @import emmeans
 #'
 #' @author Ghader Mirzaghaderi
 #'
@@ -37,12 +39,12 @@
 #' }
 #'
 #' @examples
-#'
+#' 
 #' # Load example efficiency data
-#' data_efficiency
+#' data <- read.csv(system.file("extdata", "data_efficiency.csv", package = "rtpcr"))
 #'
 #' # Calculate amplification efficiency and generate standard curves
-#' efficiency(data_efficiency)
+#' efficiency(data)
 
 
 

@@ -205,13 +205,13 @@
 #'
 #' @format A data frame with 18 observations and 7 variables:
 #' \describe{
-#'   \item{id}{experimental factor}
 #'   \item{treatment}{treatment}
 #'   \item{time}{time course levels}
-#'   \item{E_target}{Amplification efficiency of target gene}
-#'   \item{Ct_target}{Ct of target gene}
-#'   \item{E_ref}{Amplification efficiency of reference gene}
-#'   \item{Ct_ref}{Ct of reference gene}
+#'   \item{id}{experimental factor}
+#'   \item{Target}{Amplification efficiency of target gene}
+#'   \item{Target_Ct}{Ct of target gene}
+#'   \item{Ref}{Amplification efficiency of reference gene}
+#'   \item{Ref_Ct}{Ct of reference gene}
 #' }
 #' 
 #' @source NA
@@ -226,12 +226,12 @@
 #'
 #' @format A data frame with 9 observations and 6 variables:
 #' \describe{
-#'   \item{id}{experimental factor}
 #'   \item{time}{time course levels}
-#'   \item{E_target}{Amplification efficiency of target gene}
-#'   \item{Ct_target}{Ct of target gene}
-#'   \item{E_ref}{Amplification efficiency of reference gene}
-#'   \item{Ct_ref}{Ct of reference gene}
+#'   \item{id}{experimental factor}
+#'   \item{Target}{Amplification efficiency of target gene}
+#'   \item{Ct_Target}{Ct of target gene}
+#'   \item{Ref}{Amplification efficiency of reference gene}
+#'   \item{Ct_Ref}{Ct of reference gene}
 #' }
 #' 
 #' @source NA
@@ -248,14 +248,14 @@
 #'   \item{factor1}{First experimental factor}
 #'   \item{factor2}{Second experimental factor}
 #'   \item{Rep}{Biological replicates}
-#'   \item{E_PO}{Mean amplification efficiency of PO gene}
+#'   \item{PO}{Mean amplification efficiency of PO gene}
 #'   \item{Ct_PO}{Ct values of PO gene. Each is the mean of technical replicates}
-#'   \item{E_GAPDH}{Mean amplification efficiency of GAPDH gene}
+#'   \item{GAPDH}{Mean amplification efficiency of GAPDH gene}
 #'   \item{Ct_GAPDH}{Ct values of GAPDH gene. Each is the mean of technical replicates}
-#'   \item{ref2E}{Mean amplification efficiency of ref2 gene}
-#'   \item{ref2Ct}{Ct values of ref2 gene. Each is the mean of technical replicates}
-#'   \item{ref3E}{Mean amplification efficiency of ref3 gene}
-#'   \item{ref3Ct}{Ct values of GAPDH gene. Each is the mean of technical replicates}
+#'   \item{ref2}{Mean amplification efficiency of ref2 gene}
+#'   \item{Ct_ref2}{Ct values of ref2 gene. Each is the mean of technical replicates}
+#'   \item{ref3}{Mean amplification efficiency of ref3 gene}
+#'   \item{Ct_ref3}{Ct values of GAPDH gene. Each is the mean of technical replicates}
 #' }
 #'
 #' @source Not applicable

@@ -1,13 +1,13 @@
-#' @title Expression analysis of target genes using the \eqn{\Delta\Delta C_T} method and t-test
+#' @title Delta Delta Ct method t-test analysis
 #'
 #' @description
 #' The \code{TTEST_DDCt} function performs fold change expression analysis based on
-#' the \eqn{\Delta\Delta C_T} method using Student's t-test. It supports analysis
+#' the \eqn{\Delta \Delta C_T} method using Student's t-test. It supports analysis
 #' of one or more target genes evaluated under two experimental conditions
 #' (e.g. control vs treatment).
 #'
 #' @details
-#' Fold change values are computed using one or more reference genes for normalization.
+#' Relative expression values are computed using one or more reference genes for normalization.
 #' Both paired and unpaired experimental designs are supported.
 #'
 #' Paired samples in quantitative PCR refer to measurements collected from the same
@@ -31,7 +31,9 @@
 #' @param x
 #' A data frame containing experimental conditions, biological replicates, and
 #' amplification efficiency and Ct values for target and reference genes.
-#' The number of biological replicates must be equal across genes.
+#' The number of biological replicates must be equal across genes. If this 
+#' is not true, or there are \code{NA} values use \code{ANODA_DDCt} function 
+#' for independent samples or \code{REPEATED_DDCt} for paired samples.
 #' See the package vignette for details on the required data structure.
 #'
 #' @param paired
@@ -42,8 +44,7 @@
 #' estimate is used. Otherwise, Welch's t-test is applied.
 #'
 #' @param numberOfrefGenes
-#' Integer specifying the number of reference genes used for normalization
-#' (must be \eqn{\ge 1}).
+#' Integer specifying the number of reference genes used for normalization.
 #'
 #' @param Factor.level.order
 #' Optional character vector specifying the order of factor levels.
@@ -52,7 +53,7 @@
 #' @param p.adj
 #' Method for p-value adjustment. One of
 #' \code{"holm"}, \code{"hochberg"}, \code{"hommel"}, \code{"bonferroni"},
-#' \code{"BH"}, \code{"BY"}, \code{"fdr"}, or \code{"none"}.
+#' \code{"BH"}, \code{"BY"}, \code{"fdr"}, or \code{"none"}. See \code{\link[stats]{p.adjust}}.
 #'
 #' @param order
 #' Optional character vector specifying the order of genes in the output plot.
@@ -88,204 +89,158 @@
 #'
 #' @examples
 #' # Example data structure
-#' data_1factor_one_ref
+#' data1 <- read.csv(system.file("extdata", "data_1factor_one_ref.csv", package = "rtpcr"))
 #'
 #' # Unpaired t-test
 #' TTEST_DDCt(
-#'   data_1factor_one_ref,
+#'   data1,
 #'   paired = FALSE,
 #'   var.equal = TRUE,
-#'   numberOfrefGenes = 1
-#' )
+#'   numberOfrefGenes = 1)
 #'
 #' # With amplification efficiencies
-#' data_1factor_one_ref_Eff
+#' data2 <- read.csv(system.file("extdata", "data_1factor_one_ref_Eff.csv", package = "rtpcr"))
 #'
 #' TTEST_DDCt(
-#'   data_1factor_one_ref_Eff,
+#'   data2,
 #'   paired = FALSE,
 #'   var.equal = TRUE,
-#'   numberOfrefGenes = 1
-#' )
+#'   numberOfrefGenes = 1)
 #'
 #' # Two reference genes
+#' data3 <- read.csv(system.file("extdata", "data_1factor_Two_ref.csv", package = "rtpcr"))
 #' TTEST_DDCt(
-#'   data_1factor_Two_ref,
+#'   data3,
 #'   numberOfrefGenes = 2,
 #'   var.equal = TRUE,
-#'   p.adj = "BH"
-#' )
+#'   p.adj = "BH")
+
 
 
 
 TTEST_DDCt <- function(x,
                        numberOfrefGenes,
                        Factor.level.order = NULL,
-                       paired = FALSE, 
-                       var.equal = TRUE, 
-                       p.adj = "BH",
-                       order = "none", 
+                       paired = FALSE,
+                       var.equal = TRUE,
+                       p.adj = "none",
+                       order = "none",
                        plotType = "RE") {
   
-
-  ## Basic checks
-  if (!is.data.frame(x)) {
-    stop("`x` must be a data.frame")
-  }
-  if (!is.numeric(numberOfrefGenes) || length(numberOfrefGenes) != 1 || numberOfrefGenes < 1) {
-    stop("`numberOfrefGenes` must be a single numeric value >= 1")
-  }
+  stopifnot(is.data.frame(x))
+  stopifnot(numberOfrefGenes >= 1)
   
-
   
-  ## Factor level handling
+  ## Factor handling
   if (is.null(Factor.level.order)) {
-    x[,1] <- factor(x[,1], levels = unique(x[,1]))
-    Factor.level.order <- unique(x[,1])
-    calibrartor <- x[,1][1]
-    on.exit(cat(structure(
-      paste("*** The", calibrartor, "level was used as calibrator.\n")
-    )))
-  } else if (any(is.na(match(unique(x[,1]), Factor.level.order)))) {
-    stop("The `Factor.level.order` doesn't match factor levels.")
+    x[, 1] <- factor(x[, 1], levels = unique(x[, 1]))
+    calibrator <- x[, 1][1]
   } else {
-    x <- x[order(match(x[,1], Factor.level.order)), ]
-    x[,1] <- factor(x[,1], levels = Factor.level.order)
-    calibrartor <- x[,1][1]
-    on.exit(cat(structure(
-      paste("*** The", calibrartor, "level was used as calibrator.\n")
-    )))
+    x[, 1] <- factor(x[, 1], levels = Factor.level.order)
+    calibrator <- Factor.level.order[1]
   }
   
-
-  ## Number of targets
-  y <- (ncol(x) - ((numberOfrefGenes * 2) + 2)) / 2
+  on.exit(cat(sprintf(
+    "*** The %s level was used as calibrator.\n",
+    calibrator
+  )))
+  
+  
+  ## Column structure
+  nc <- ncol(x)
+  
+  nTargets <- (nc - 2 - numberOfrefGenes * 2) / 2
+  if (nTargets < 1) stop("No target genes detected")
   
   cat(sprintf(
-    "*** %d target(s) using %d reference gene(s) was analysed!\n",
-    y, numberOfrefGenes
+    "*** %s target(s) using %s reference gene(s) was analysed!\n",
+    nTargets, numberOfrefGenes
   ))
   
-
-  ## Wide to long
-  x <- .wide_to_long(x)
-  colnames(x)[1:4] <- c("Condition", "Gene", "E", "Ct")
+  target_start <- 3
+  target_end   <- target_start + nTargets * 2 - 1
+  ref_start    <- target_end + 1
   
-  default.order <- unique(x$Gene)[-length(unique(x$Gene))]
+  gene_names <- sub("_E$", "", colnames(x)[seq(target_start, target_end, by = 2)])
   
-  r <- nrow(x) / (2 * length(unique(x$Gene)))
-  if (!all(r %% 1 == 0)) {
-    stop("Error: Replicates are not equal for all Genes, or there are more than two conditions!")
-  }
+  ## Replicates per condition
+  r <- table(x[, 1])[1]
   
-
-  ## Weighted Ct
-  x$wCt <- log2(x$E) * x$Ct
   
-
-  
-  ## GENERALIZED reference gene handling (ANY number ≥ 1)
-  genes <- unique(x$Gene)
-  nGenes <- length(genes)
-  
-  if (numberOfrefGenes >= nGenes) {
-    stop("Number of reference genes must be smaller than total number of genes")
-  }
-  
-  # Reference genes = last numberOfrefGenes
-  ref_genes <- tail(genes, numberOfrefGenes)
-  
-  ref_data <- x[x$Gene %in% ref_genes, ]
-  
-  # Replicates per condition
-  r_ref <- nrow(ref_data) / (length(ref_genes) * length(unique(x$Condition)))
-  if (r_ref %% 1 != 0) {
-    stop("Unequal replicates among reference genes")
-  }
-  
-  # Average wCt across reference genes per condition & replicate
-  ref_mean <- do.call(
-    rbind,
-    lapply(split(ref_data, ref_data$Condition), function(d) {
-      wCt_mat <- matrix(d$wCt, nrow = r_ref, byrow = FALSE)
-      data.frame(
-        Condition = unique(d$Condition),
-        Gene = ref_genes[1],   # pseudo reference gene
-        E = NA,
-        Ct = NA,
-        wCt = rowMeans(wCt_mat)
-      )
-    })
-  )
-  
-  # Remove original reference genes
-  x <- x[!x$Gene %in% ref_genes, ]
-  
-  # Append averaged reference gene
-  x <- rbind(x, ref_mean)
-  
-
-  ## DDCt and t-tests
-  GENE <- x$Gene
-  levels_to_compare <- unique(GENE)[-length(unique(GENE))]
-  
-  res <- matrix(nrow = length(levels_to_compare), ncol = 7)
+  ## Result container
+  res <- matrix(NA, nrow = nTargets, ncol = 7)
   colnames(res) <- c("Gene", "dif", "RE", "LCL", "UCL", "pvalue", "se")
   
-  subset <- matrix(NA, nrow = 2 * r_ref, ncol = length(levels_to_compare))
-  ttest_result <- vector("list", length(levels_to_compare))
   
-  for (i in seq_along(levels_to_compare)) {
+  ## Loop over targets
+  for (i in seq_len(nTargets)) {
     
-    subset[, i] <-
-      x[GENE == levels_to_compare[i], "wCt"] -
-      x[GENE == utils::tail(unique(GENE), 1), "wCt"]
+    E_col  <- target_start + (i - 1) * 2
+    Ct_col <- E_col + 1
     
-    ttest_result[[i]] <-
-      stats::t.test(
-        subset[(r_ref + 1):(2 * r_ref), i],
-        subset[1:r_ref, i],
-        paired = paired,
-        var.equal = var.equal
-      )
+    ## Build per-target wide table
+    tmp <- x[, c(1, 2, E_col, Ct_col, ref_start:nc)]
+    
+    ## Compute wDCt using helper
+    tmp <- .compute_wDCt(
+      x = tmp,
+      numOfFactors = 1, 
+      numberOfrefGenes = numberOfrefGenes, 
+      block = NULL
+    )
+    
+    wDCt <- tmp$wDCt
+    
+    cal_vals <- wDCt[tmp[, 1] == calibrator]
+    trt_vals <- wDCt[tmp[, 1] != calibrator]
+    
+    tt <- stats::t.test(
+      trt_vals,
+      cal_vals,
+      paired = paired,
+      var.equal = var.equal
+    )
+    
+    dif <- mean(trt_vals) - mean(cal_vals)
     
     res[i, ] <- c(
-      levels_to_compare[i],
-      mean(subset[(r_ref + 1):(2 * r_ref), i]) - mean(subset[1:r_ref, i]),
-      2^-(mean(subset[(r_ref + 1):(2 * r_ref), i]) - mean(subset[1:r_ref, i])),
-      round(2^(-ttest_result[[i]]$conf.int[2]), 4),
-      round(2^(-ttest_result[[i]]$conf.int[1]), 4),
-      ttest_result[[i]]$p.value,
-      stats::sd(subset[(r_ref + 1):(2 * r_ref), i]) / sqrt(r_ref)
-      )
+      gene_names[i],
+      dif,
+      2^(-dif),
+      2^(-tt$conf.int[2]),
+      2^(-tt$conf.int[1]),
+      tt$p.value,
+      stats::sd(trt_vals) / sqrt(r)
+    )
   }
-
-
+  
   
   ## Result table
   res <- as.data.frame(res)
-  res$RE <- as.numeric(res$RE)
-  res$se <- as.numeric(res$se)
+  num_cols <- c("RE", "LCL", "UCL", "pvalue", "se")
+  res[num_cols] <- lapply(res[num_cols], as.numeric)
+  
   res$dif <- NULL
   
-  res <- data.frame(
+  res <- transform(
     res,
-    log2FC = log2(res$RE),
-    Lower.se.RE = 2^(log2(res$RE) - res$se),
-    Upper.se.RE = 2^(log2(res$RE) + res$se),
-    p.adj = stats::p.adjust(res$pvalue, method = p.adj)
+    log2FC = log2(RE),
+    Lower.se.RE = 2^(log2(RE) - se),
+    Upper.se.RE = 2^(log2(RE) + se),
+    pvalue = stats::p.adjust(pvalue, method = p.adj)
   )
-  
-  res$pvalue <- res$p.adj
-  res$p.adj <- NULL
   
   res$sig <- cut(
     res$pvalue,
     breaks = c(-Inf, 0.001, 0.01, 0.05, Inf),
     labels = c("***", "**", "*", " ")
   )
+  default.order <- unique(res$Gene)[-length(unique(res$Gene))]
   
-
+  
+  
+  
+  
   #-------------------- 
   a <- data.frame(res, d = 0, Lower.se.log2FC = 0, Upper.se.log2FC = 0)
   res$Lower.se

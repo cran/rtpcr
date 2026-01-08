@@ -2,94 +2,68 @@
 % Please edit documentation in R/ANOVA_DCt.r
 \name{ANOVA_DCt}
 \alias{ANOVA_DCt}
-\title{Relative expression analysis using the \eqn{\Delta C_T} method with ANOVA}
+\title{Delta Ct ANOVA analysis}
 \usage{
-ANOVA_DCt(x, numberOfrefGenes, block, alpha = 0.05, adjust = "none")
+ANOVA_DCt(
+  x,
+  numOfFactors,
+  numberOfrefGenes,
+  block,
+  alpha = 0.05,
+  p.adj = "none",
+  analyseAllTarget = TRUE
+)
 }
 \arguments{
-\item{x}{A data frame structured as described in the package vignette, containing
-experimental condition columns, amplification efficiency (E) and Ct values
-for target and reference genes. Each Ct value should represent the mean of
-technical replicates.
+\item{x}{A data frame containing experimental design columns, target gene
+E/Ct column pairs, and reference gene E/Ct column pairs. Reference gene
+columns must be located at the end of the data frame.}
 
-\strong{NOTE:} Each row corresponds to a separate biological individual,
-reflecting a non-repeated-measures experimental design.}
+\item{numOfFactors}{Integer. Number of experimental factor columns
+(excluding \code{rep} and optional \code{block}).}
 
-\item{numberOfrefGenes}{Integer specifying the number of reference genes used for normalization
-(must be \eqn{\ge 1}).}
+\item{numberOfrefGenes}{Integer. Number of reference genes. Each reference gene
+must be represented by two columns (E and Ct).}
 
-\item{block}{Character string or \code{NULL}. If provided, this specifies the column name
-in \code{x} corresponding to a blocking factor (e.g. qPCR plate).
-Blocking is used to reduce technical variation arising from experimental
-conditions such as plate-to-plate differences.}
+\item{block}{Character or \code{NULL}. Name of the blocking factor column.
+When a qPCR experiment is done in multiple qPCR plates, 
+variation resulting from the plates may interfere with the actual amount of 
+gene expression. One solution is to conduct each plate as a randomized block 
+so that at least one replicate of each treatment and control is present 
+on a plate. Block effect is usually considered as random and its interaction 
+with any main effect is not considered.}
 
-\item{alpha}{Significance level used for compact letter display (CLD);
-default is \code{0.05}.}
+\item{alpha}{statistical level for comparisons}
 
-\item{adjust}{P-value adjustment method passed to \code{emmeans} and \code{cld}.}
+\item{p.adj}{Method for p-value adjustment. See \code{\link[stats]{p.adjust}}.}
+
+\item{analyseAllTarget}{Logical or character.
+If \code{TRUE} (default), all detected target genes are analysed.
+Alternatively, a character vector specifying the names (names of their Efficiency columns) of target genes
+to be analysed.}
 }
 \value{
-A list containing the following components:
+An object containing expression table, lm models, ANOVA tables, residuals, raw data and ANOVA table for each gene. 
 \describe{
-  \item{Final_data}{Input data frame augmented with weighted Delta Ct (wDCt) values.}
-  \item{lm}{Fitted linear model object, including ANOVA results.}
-  \item{ANOVA}{ANOVA table based on a completely randomized design (CRD).}
-  \item{Result}{Result table containing treatment and factor levels, relative
-  expression (RE), log2 fold change (log2FC), confidence limits (LCL, UCL),
-  compact letter display for pairwise comparisons, and standard errors with
-  corresponding lower and upper limits.}
+\item{\eqn{\Delta C_T} combined expression table}{\code{object$combinedResults}}
+\item{ANOVA table for treatments}{\code{object$perGene$gene_name$ANOVA_T}}
+\item{ANOVA table factorial}{\code{object$perGene$gene_name$ANOVA_factorial}}
+\item{lm ANOVA for tratments}{\code{object$perGene$gene_name$lm_T}}
+\item{lm ANOVA factorial}{\code{object$perGene$gene_name$lm_factorial}}
+\item{Residuals}{\code{resid(object$perGene$gene_name$lm_T)}}
 }
 }
 \description{
-The \code{ANOVA_DCt} function performs analysis of variance (ANOVA) on
-relative expression values calculated using the \eqn{\Delta C_T} method.
-Expression levels are normalized using one or more reference genes and
-analyzed across all combinations of experimental factor levels.
-}
-\details{
-Relative expression (RE) values are calculated using the \eqn{\Delta C_T}
-method, where Ct values of target genes are normalized to reference gene(s).
-The resulting weighted Delta Ct (wDCt) values are then analyzed using ANOVA.
-
-The function supports uni- and multi-factorial experimental designs.
-Blocking factors (e.g. qPCR plates) can optionally be included to account
-for technical variation. Each row of the input data represents an independent
-biological individual, corresponding to a non-repeated-measures experiment.
+Performs \eqn{\Delta C_T} analysis for target genes by
+applying \eqn{\Delta C_T} method to each target gene. Target genes must be provided as paired
+efficiency (E) and Ct columns followed by the the reference gene(s) columns. 
+See "Input data structure and column arrangement" in vignettes for details about data structure.
 }
 \examples{
-# If the data include technical replicates, calculate means first:
-# df <- meanTech(data_3factor, groups = 1:3)
-
-# One-factor or multi-factor ANOVA without blocking
-ANOVA_DCt(
-  data_3factor,
+data <- read.csv(system.file("extdata", "data_3factor.csv", package = "rtpcr"))
+res <- ANOVA_DCt(
+  data,
+  numOfFactors = 3,
   numberOfrefGenes = 1,
-  block = NULL
-)
-
-# ANOVA with blocking factor
-ANOVA_DCt(
-  data_2factorBlock,
-  numberOfrefGenes = 1,
-  block = "Block"
-)
-}
-\references{
-Livak, K. J. and Schmittgen, T. D. (2001).
-Analysis of Relative Gene Expression Data Using Real-Time Quantitative PCR
-and the Double Delta CT Method.
-\emph{Methods}, 25(4), 402–408.
-doi:10.1006/meth.2001.1262
-
-Ganger, M. T., Dietz, G. D., and Ewing, S. J. (2017).
-A common base method for analysis of qPCR data and the application of simple
-blocking in qPCR experiments.
-\emph{BMC Bioinformatics}, 18, 1–11.
-
-Yuan, J. S., Reed, A., Chen, F., and Stewart, N. (2006).
-Statistical Analysis of Real-Time PCR Data.
-\emph{BMC Bioinformatics}, 7, 85.
-}
-\author{
-Ghader Mirzaghaderi
+  block = NULL)
 }

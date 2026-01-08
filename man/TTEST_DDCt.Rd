@@ -2,7 +2,7 @@
 % Please edit documentation in R/TTEST_DDCt.r
 \name{TTEST_DDCt}
 \alias{TTEST_DDCt}
-\title{Expression analysis of target genes using the \eqn{\Delta\Delta C_T} method and t-test}
+\title{Delta Delta Ct method t-test analysis}
 \usage{
 TTEST_DDCt(
   x,
@@ -10,7 +10,7 @@ TTEST_DDCt(
   Factor.level.order = NULL,
   paired = FALSE,
   var.equal = TRUE,
-  p.adj = "BH",
+  p.adj = "none",
   order = "none",
   plotType = "RE"
 )
@@ -18,11 +18,12 @@ TTEST_DDCt(
 \arguments{
 \item{x}{A data frame containing experimental conditions, biological replicates, and
 amplification efficiency and Ct values for target and reference genes.
-The number of biological replicates must be equal across genes.
+The number of biological replicates must be equal across genes. If this 
+is not true, or there are \code{NA} values use \code{ANODA_DDCt} function 
+for independent samples or \code{REPEATED_DDCt} for paired samples.
 See the package vignette for details on the required data structure.}
 
-\item{numberOfrefGenes}{Integer specifying the number of reference genes used for normalization
-(must be \eqn{\ge 1}).}
+\item{numberOfrefGenes}{Integer specifying the number of reference genes used for normalization.}
 
 \item{Factor.level.order}{Optional character vector specifying the order of factor levels.
 If \code{NULL}, the first level of the factor column is used as the calibrator.}
@@ -34,7 +35,7 @@ estimate is used. Otherwise, Welch's t-test is applied.}
 
 \item{p.adj}{Method for p-value adjustment. One of
 \code{"holm"}, \code{"hochberg"}, \code{"hommel"}, \code{"bonferroni"},
-\code{"BH"}, \code{"BY"}, \code{"fdr"}, or \code{"none"}.}
+\code{"BH"}, \code{"BY"}, \code{"fdr"}, or \code{"none"}. See \code{\link[stats]{p.adjust}}.}
 
 \item{order}{Optional character vector specifying the order of genes in the output plot.}
 
@@ -52,12 +53,12 @@ A list with the following components:
 }
 \description{
 The \code{TTEST_DDCt} function performs fold change expression analysis based on
-the \eqn{\Delta\Delta C_T} method using Student's t-test. It supports analysis
+the \eqn{\Delta \Delta C_T} method using Student's t-test. It supports analysis
 of one or more target genes evaluated under two experimental conditions
 (e.g. control vs treatment).
 }
 \details{
-Fold change values are computed using one or more reference genes for normalization.
+Relative expression values are computed using one or more reference genes for normalization.
 Both paired and unpaired experimental designs are supported.
 
 Paired samples in quantitative PCR refer to measurements collected from the same
@@ -71,33 +72,31 @@ relative expression (RE) or log2 fold change (log2FC).
 }
 \examples{
 # Example data structure
-data_1factor_one_ref
+data1 <- read.csv(system.file("extdata", "data_1factor_one_ref.csv", package = "rtpcr"))
 
 # Unpaired t-test
 TTEST_DDCt(
-  data_1factor_one_ref,
+  data1,
   paired = FALSE,
   var.equal = TRUE,
-  numberOfrefGenes = 1
-)
+  numberOfrefGenes = 1)
 
 # With amplification efficiencies
-data_1factor_one_ref_Eff
+data2 <- read.csv(system.file("extdata", "data_1factor_one_ref_Eff.csv", package = "rtpcr"))
 
 TTEST_DDCt(
-  data_1factor_one_ref_Eff,
+  data2,
   paired = FALSE,
   var.equal = TRUE,
-  numberOfrefGenes = 1
-)
+  numberOfrefGenes = 1)
 
 # Two reference genes
+data3 <- read.csv(system.file("extdata", "data_1factor_Two_ref.csv", package = "rtpcr"))
 TTEST_DDCt(
-  data_1factor_Two_ref,
+  data3,
   numberOfrefGenes = 2,
   var.equal = TRUE,
-  p.adj = "BH"
-)
+  p.adj = "BH")
 }
 \references{
 Livak, K. J. and Schmittgen, T. D. (2001).
