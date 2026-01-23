@@ -11,11 +11,11 @@ library(rtpcr)
 # library(rtpcr)
 
 ## ----eval = F-----------------------------------------------------------------
-# devtools::install_github("mirzaghaderi/rtpcr", build_vignettes = FALSE)
+# devtools::install_github("mirzaghaderi/rtpcr", build_vignettes = TRUE)
 
 ## ----eval= F------------------------------------------------------------------
 # # Applying the efficiency function
-# data <- read.csv(system.file("extdata", "data_efficiency.csv", package = "rtpcr"))
+# data <- read.csv(system.file("extdata", "data_efficiency1.csv", package = "rtpcr"))
 # data
 # dilutions	Gene1	Gene2	Gene3
 # 1.00	25.58	24.25	22.61
@@ -77,8 +77,7 @@ library(rtpcr)
 #   data,
 #   numOfFactors = 1,
 #   numberOfrefGenes = 1,
-#   repeatedFactor = "time",
-#   calibratorLevel = "1",
+#   mainFactor.column = 1,
 #   block = NULL)
 # 
 # 
@@ -110,7 +109,7 @@ library(rtpcr)
 
 ## ----eval= F------------------------------------------------------------------
 # # Relative expression table for the specified column in the input data:
-# df <- res$combinedFoldChange
+# df <- res$relativeExpression
 # df
 # Relative Expression
 # gene   contrast	      RE  log2FC pvalue sig    LCL     UCL     se Lower.se.RE Upper.se.RE Lower.se.log2FC Upper.se.log2FC
@@ -130,10 +129,10 @@ library(rtpcr)
 #   numberOfrefGenes = 1,
 #   block = NULL)
 # 
-# df <- res$combinedResults
-#  df
-#  # Generate three-factor bar plot
-#  p <- plotFactor(
+# df <- res$relativeExpression
+# df
+# # Generate three-factor bar plot
+# plotFactor(
 #   df,
 #   x_col = "SA",
 #   y_col = "log2FC",
@@ -150,10 +149,6 @@ library(rtpcr)
 #   base_size = 14,
 #   alpha = 1,
 #   legend_position = c(0.1, 0.2))
-# 
-# library(ggplot2)
-# p + theme(
-#   panel.border = element_rect(color = "black", linewidth = 0.5))
 
 ## ----eval= F, fig.height = 7, fig.width = 12.5, fig.align = 'center', warning = F----
 # data <- read.csv(system.file("extdata", "data_2factorBlock.csv", package = "rtpcr"))
@@ -162,9 +157,9 @@ library(rtpcr)
 #       block = "block",
 #       numberOfrefGenes = 1)
 # 
-# df <- res$combinedResults
+# df <- res$relativeExpression
 # 
-# p1 <- plotFactor(
+# plotFactor(
 #   data = df,
 #   x_col = "factor2",
 #   y_col = "RE",
@@ -179,20 +174,12 @@ library(rtpcr)
 #   col_width = 0.7,
 #   dodge_width = 0.7,
 #   base_size = 16,
-#   legend_position = c(0.2, 0.8))
-# 
-# library(ggplot2)
-# p1 +
-#   theme(axis.text.x = element_text(size = 14, color = "black", angle = 45),
-#         axis.text.y = element_text(size = 14,color = "black", angle = 0, hjust = 0.5)) +
-#   theme(legend.text = element_text(colour = "black", size = 14),
-#         legend.background = element_rect(fill = "transparent")) +
-#   scale_y_continuous(expand = expansion(mult = c(0, 0.1)))
+#   legend_position = c(0.8, 0.8))
 
 ## ----eval= F, warning = F-----------------------------------------------------
 # # Heffer et al., 2020, PlosOne
 # library(dplyr)
-# df <- read.csv(system.file("extdata", "Heffer2020PlosOne.csv", package = "rtpcr"))
+# df <- read.csv(system.file("extdata", "data_Heffer2020PlosOne.csv", package = "rtpcr"))
 # 
 # res <- ANOVA_DDCt(
 #   df,
@@ -201,16 +188,12 @@ library(rtpcr)
 #   numberOfrefGenes = 1,
 #   block = NULL)
 # 
-# data <- res$combinedFoldChange
-# data$gene <- factor(data$gene, levels = unique(data$gene))
+# data <- res$relativeExpression
 # 
 # # Selecting only the first words in 'contrast' column to be used as the x-axis labels.
 # data$contrast <- sub(" .*", "", data$contrast)
 # 
-# # Converting the 'contrast' column as factor and fix the current level order
-# data$contrast <- factor(data$contrast, levels = unique(data$contrast))
-# 
-# p <- plotFactor(
+# plotFactor(
 #   data = data,
 #   x_col = "contrast",
 #   y_col = "RE",
@@ -227,16 +210,6 @@ library(rtpcr)
 #   dodge_width = 0.5,
 #   base_size = 16,
 #   legend_position = "none")
-# 
-# library(ggplot2)
-# p + theme(
-#   panel.border = element_rect(color = "black", linewidth = 0.5)) +
-#   theme(axis.text.x = element_text(size = 14, color = "black", angle = 45, hjust = 1)) +
-#   xlab(NULL) +
-#   scale_y_continuous(expand = expansion(mult = c(0, 0.1))) +
-#   theme(
-#     strip.background = element_blank(),  # removes the faceting gray background
-#     strip.text = element_text(face = "bold")) # optional: keeps the text visible
 
 ## ----eval= F------------------------------------------------------------------
 # res <- ANOVA_DDCt(
@@ -246,9 +219,9 @@ library(rtpcr)
 #   mainFactor.column = 1,
 #   block = NULL)
 # 
-# 
+# model <- res$perGene$E_PO$lm
 # # Relative expression values for Concentration main effect
-# Means_DDCt(res$perGene$E_PO$lm_ANOVA, specs = "Conc")
+# Means_DDCt(model, specs = "Conc")
 # 
 #  contrast        RE        SE df       LCL       UCL p.value sig
 #  L vs H   0.1703610 0.2208988 24 0.1242014 0.2336757 <0.0001 ***
@@ -259,7 +232,7 @@ library(rtpcr)
 # Confidence level used: 0.95
 # 
 # # Relative expression values for Concentration sliced by Type
-# Means_DDCt(res$perGene$E_PO$lm_ANOVA, specs = "Conc | Type")
+# Means_DDCt(model, specs = "Conc | Type")
 # 
 # Type = R:
 #  contrast       RE        SE df       LCL      UCL p.value sig
@@ -277,7 +250,7 @@ library(rtpcr)
 # Confidence level used: 0.95
 # 
 # # Relative expression values for Concentration sliced by Type and SA
-# Means_DDCt(res$perGene$E_PO$lm_ANOVA, specs = "Conc | Type * SA")
+# Means_DDCt(model, specs = "Conc | Type * SA")
 
 ## ----eval= F------------------------------------------------------------------
 # data <- read.csv(system.file("extdata", "data_repeated_measure_1.csv", package = "rtpcr"))
@@ -285,8 +258,7 @@ library(rtpcr)
 #   data,
 #   numOfFactors = 1,
 #   numberOfrefGenes = 1,
-#   repeatedFactor = "time",
-#   calibratorLevel = "1",
+#   mainFactor.column = 1,
 #   block = NULL
 # )
 # residuals <- resid(res3$perGene$Target$lm)
@@ -297,10 +269,12 @@ library(rtpcr)
 # qqline(residuals, col = "red")
 
 ## ----eval= F------------------------------------------------------------------
-# # See example input data frame:
-# data <- read.csv(system.file("extdata", "data_withTechRep.csv", package = "rtpcr"))
-# data
+# # Example input data frame with technical replicates
+# data1 <- read.csv(system.file("extdata", "data_withTechRep.csv", package = "rtpcr"))
 # 
-# # Calculating mean of technical replicates
-# meanTech(data, groups = 1:4)
+# # Calculate mean of technical replicates using first four columns as groups
+# meanTech(data1,
+#          groups = 1:2,
+#          numOfFactors = 1,
+#          block = NULL)
 
