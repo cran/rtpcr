@@ -10,7 +10,7 @@ WILCOX_DDCt(
   Factor.level.order = NULL,
   paired = FALSE,
   p.adj = "none",
-  order = "none"
+  set_missing_target_Ct_to_40 = FALSE
 )
 }
 \arguments{
@@ -32,7 +32,8 @@ If \code{NULL}, the first level of the factor column is used as the calibrator.}
 \code{"holm"}, \code{"hochberg"}, \code{"hommel"}, \code{"bonferroni"},
 \code{"BH"}, \code{"BY"}, \code{"fdr"}, or \code{"none"}. See \code{\link[stats]{p.adjust}}.}
 
-\item{order}{Optional character vector specifying the order of genes in the output plot.}
+\item{set_missing_target_Ct_to_40}{If \code{TRUE}, missing target gene Ct 
+values become 40; if \code{FALSE} (default), they become NA.}
 }
 \value{
 A table containing RE values, log2FC, p-values, significance, 

@@ -73,12 +73,12 @@ library(rtpcr)
 #    3	 3	   	2	    18.09	2	33.40
 # 
 # # Repeated measure analysis
-# res <- REPEATED_DDCt(
+# res <- ANOVA_DDCt(
 #   data,
 #   numOfFactors = 1,
 #   numberOfrefGenes = 1,
 #   mainFactor.column = 1,
-#   block = NULL)
+#   block = NULL, model = wDCt ~ time + (1 | id))
 # 
 # 
 # # Anova analysis
@@ -202,14 +202,7 @@ library(rtpcr)
 #   Lower.se_col = "Lower.se.RE",
 #   Upper.se_col = "Upper.se.RE",
 #   letters_col = "sig",
-#   letters_d = 0.2,
-#   alpha = 1,
-#   fill_colors = palette.colors(4, recycle = TRUE),
-#   color = "black",
-#   col_width = 0.5,
-#   dodge_width = 0.5,
-#   base_size = 16,
-#   legend_position = "none")
+#   legend_position = "none") # more controlling arguments are available.
 
 ## ----eval= F------------------------------------------------------------------
 # res <- ANOVA_DDCt(

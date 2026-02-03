@@ -2,7 +2,7 @@
 % Please edit documentation in R/ANOVA_DDCt.R
 \name{ANOVA_DDCt}
 \alias{ANOVA_DDCt}
-\title{Delta Delta Ct ANOVA analysis}
+\title{Delta Delta Ct ANOVA analysis with optional model specification}
 \usage{
 ANOVA_DDCt(
   x,
@@ -12,7 +12,9 @@ ANOVA_DDCt(
   block,
   mainFactor.level.order = NULL,
   p.adj = "none",
-  analyseAllTarget = TRUE
+  analyseAllTarget = TRUE,
+  model = NULL,
+  set_missing_target_Ct_to_40 = FALSE
 )
 }
 \arguments{
@@ -46,6 +48,23 @@ If provided, the first element of the vector is used as the calibrator level.}
 If \code{TRUE} (default), all target genes are analysed.
 Alternatively, a character vector specifying the names (names of their Efficiency columns) of target genes
 to be analysed.}
+
+\item{model}{Optional model formula. If provided, this overrides the automatic formula (CRD or RCBD 
+based on \code{block} and \code{numOfFactors}). The formula uses 
+\code{wDCt} as the response variable. 
+For mixed models, random effects can be defined using \code{lmer} syntax 
+(e.g., \code{"wDCt ~ Treatment + (1|Block)"}). When using \code{model}, 
+the \code{block} and \code{numOfFactors} arguments are ignored for model 
+specification, but still used for data structure identification.
+  
+for fixed effects only, the \code{"lm"} (ordinary least squares) is used. 
+\code{"lmer"} is used for mixed effects models 
+(requires the \code{lmerTest} package). If a custom formula is provided with 
+random effects, the function will use \code{lmerTest::lmer()}; otherwise 
+it will use \code{stats::lm()}. Note that \code{emmeans} supports both 
+model types and will use appropriate degrees of freedom methods (Satterthwaite by default).}
+
+\item{set_missing_target_Ct_to_40}{If \code{TRUE}, missing target gene Ct values become 40; if \code{FALSE} (default), they become NA.}
 }
 \value{
 An object containing expression table, lm model, residuals, raw data and ANOVA table for each gene:
@@ -68,15 +87,15 @@ experiment by default. However, if \code{ANCOVA_DDCt} function is used,
 analysis of covariance is performed for the levels of the \code{mainFactor.column} and the other factors are 
 treated as covariates. if the interaction between the main factor and the covariate is significant, ANCOVA is not appropriate.
 
-All the functions for relative expression analysis (including `TTEST_DDCt()`, 
-`WILCOX_DDCt()`, `ANOVA_DDCt()`, `ANCOVA_DDCt()`, `REPEATED_DDCt()`, and `ANOVA_DCt()`) return the 
+All the functions for relative expression analysis (including \code{TTEST_DDCt()}, 
+\code{WILCOX_DDCt()}, \code{ANOVA_DDCt()}, and \code{ANOVA_DCt()}) return the 
 relative expression table which include fold change and corresponding 
-statistics. The output of `ANOVA_DDCt()`, `ANCOVA_DDCt()`, `ANCOVA_DDCt()`, `REPEATED_DDCt()`, 
-and `ANOVA_DCt()` also include lm models, residuals, raw data and ANOVA table 
+statistics. The output of \code{ANOVA_DDCt()}, 
+and \code{ANOVA_DCt()} also include lm models, residuals, raw data and ANOVA table 
 for each gene. 
 
-The expression table returned by `TTEST_DDCt()`, 
-`WILCOX_DDCt()`, `ANOVA_DDCt()`, `ANCOVA_DDCt()`, and `REPEATED_DDCt()` functions 
+The expression table returned by \code{TTEST_DDCt()}, 
+\code{WILCOX_DDCt()}, and \code{ANOVA_DDCt()} functions 
 include these columns: gene (name of target genes), 
 contrast (calibrator level and contrasts for which the relative expression is computed), 
 ddCt (mean of weighted delta delta Ct values), RE (relative expression or 
@@ -92,7 +111,7 @@ Upper.se.log2FC (The upper limit error bar for log2 RE)
 data1 <- read.csv(system.file("extdata", "data_2factorBlock3ref.csv", package = "rtpcr"))
 ANOVA_DDCt(x = data1,
            numOfFactors = 2,
-           numberOfrefGenes = 2,
+           numberOfrefGenes = 3,
            block = "block",
            mainFactor.column = 2,
            p.adj = "none")
@@ -104,6 +123,23 @@ ANOVA_DDCt(x = data2,
            block = NULL,
            mainFactor.column = 1,
            p.adj = "none")
+  
+# Repeated measure analysis         
+a <- ANOVA_DDCt(data_repeated_measure_1,
+           numOfFactors = 1,
+           numberOfrefGenes = 1,
+           block = NULL,
+           mainFactor.column = 1,
+           p.adj = "none", model = wDCt ~ time + (1 | id))
+
+a$perGene$Target$ANOVA_table
+
+
+# Repeated measure analysis: split-plot in time
+a <- ANOVA_DDCt(data_repeated_measure_2,
+           numOfFactors = 2, numberOfrefGenes = 1,
+           mainFactor.column = 2, block = NULL,
+           model = wDCt ~ treatment * time + (1 | id))
            
 }
 \references{
