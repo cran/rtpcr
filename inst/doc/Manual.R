@@ -57,10 +57,28 @@ library(rtpcr)
 #  C2H2.01 - GAPDH    -0.1136 0.121 57  -0.938  0.6186
 
 ## ----eval= F------------------------------------------------------------------
-# # An example of a properly arranged dataset from a repeated-measures experiment.
-# data <- read.csv(system.file("extdata", "data_repeated_measure_1.csv", package = "rtpcr"))
-# data
+# data1 <- read.csv(system.file("extdata", "data_Yuan2006PMCBioinf.csv", package = "rtpcr"))
+# data1
+#       Con r target target_Ct Actin Actin_Ct
+#   control 1   1.88  21.13000  1.67 20.70333
+#   control 2   1.88  21.55667  1.67 20.35000
+#   control 3   1.88  21.33000  1.67 20.75333
+# treatment 1   1.88  22.09000  1.67 20.24333
+# treatment 2   1.88  22.69667  1.67 20.54000
+# treatment 3   1.88  23.05333  1.67 20.50000
 # 
+# # Anova analysis
+# ANOVA_DDCt(
+#   data1,
+#   mainFactor.column = 1,
+#   numOfFactors = 1,
+#   numberOfrefGenes = 1,
+#   block = NULL)
+# 
+# 
+# # An example of a properly arranged dataset from a repeated-measures experiment.
+# data2 <- read.csv(system.file("extdata", "data_repeated_measure_1.csv", package = "rtpcr"))
+# data2
 # time	id  E_Target	Ct_target   E_Ref      Ct_Ref
 #    1	 1	   	2	    18.92	2	32.77
 #    1	 2	   	2	    15.82	2	32.45
@@ -74,51 +92,67 @@ library(rtpcr)
 # 
 # # Repeated measure analysis
 # res <- ANOVA_DDCt(
-#   data,
+#   data2,
 #   numOfFactors = 1,
 #   numberOfrefGenes = 1,
 #   mainFactor.column = 1,
 #   block = NULL, model = wDCt ~ time + (1 | id))
 # 
 # 
-# # Anova analysis
-# ANOVA_DDCt(
-#   data,
-#   mainFactor.column = 1,
-#   numOfFactors = 1,
-#   numberOfrefGenes = 1,
-#   block = NULL)
-# 
-# 
 # # Paired t.test (equivalent to repeated measure analysis, but not always the same results, due to different calculation methods!)
 # TTEST_DDCt(
-#   data[1:6,],
+#   data2[1:6,],
 #   numberOfrefGenes = 1,
 #   paired = T)
 # 
 # 
 # # Anova analysis
-# data <- read.csv(system.file("extdata", "data_2factorBlock3ref.csv", package = "rtpcr"))
+# data3 <- read.csv(system.file("extdata", "data_2factorBlock3ref.csv", package = "rtpcr"))
+# 
 # res <- ANOVA_DDCt(
-#   x = data,
-#   mainFactor.column = 1,
+#   x = data3,
+#   mainFactor.column = 2,
 #   numOfFactors = 2,
-#   numberOfrefGenes = 1,
+#   numberOfrefGenes = 3,
 #   block = "block",
 #   analyseAllTarget = TRUE)
 
 ## ----eval= F------------------------------------------------------------------
 # # Relative expression table for the specified column in the input data:
-# df <- res$relativeExpression
-# df
-# Relative Expression
-# gene   contrast	      RE  log2FC pvalue sig    LCL     UCL     se Lower.se.RE Upper.se.RE Lower.se.log2FC Upper.se.log2FC
-# PO            R	  1.0000  0.0000 1.0000     0.0000  0.0000 0.5506      0.6828      1.4647          0.0000          0.0000
-# PO       S vs R  11.6130  3.5377 0.0001 *** 4.4233 30.4888 0.2286      9.9115     13.6066          3.0193          4.1450
-# GAPDH         R	  1.0000  0.0000 1.0000     0.0000  0.0000 0.4815      0.7162      1.3962          0.0000          0.0000
-# GAPDH    S vs R	  6.6852  2.7410 0.0001 *** 3.0687 14.5641 0.3820      5.1301      8.7118          2.1034          3.5719
-# ref2          R	  1.0000  0.0000 1.0000     0.0000  0.0000 0.6928      0.6186      1.6164          0.0000          0.0000
-# ref2     S vs R	  0.9372 -0.0936 0.9005     0.3145  2.7929 0.2414      0.7927      1.1079         -0.1107         -0.0792
+# data3 <- read.csv(system.file("extdata", "data_2factorBlock3ref.csv", package = "rtpcr"))
+# 
+# res <- ANOVA_DDCt(
+#   x = data3,
+#   mainFactor.column = 2,
+#   numOfFactors = 2,
+#   numberOfrefGenes = 3,
+#   block = "block",
+#   analyseAllTarget = TRUE)
+# 
+# # Relative Expression
+# #   gene contrast     ddCt      RE   log2FC     LCL     UCL      se Lower.se.RE Upper.se.RE Lower.se.log2FC Upper.se.log2FC  pvalue sig
+# # 1   PO       L1  0.00000 1.00000  0.00000 0.00000 0.00000 0.13940     0.90790     1.10144         0.00000         0.00000 1.00000
+# # 2   PO L2 vs L1 -0.94610 1.92666  0.94610 1.25860 2.94934 0.14499     1.74245     2.13036         0.85564         1.04613 0.00116  **
+# # 3   PO L3 vs L1 -2.19198 4.56931  2.19198 3.08069 6.77724 0.29402     3.72685     5.60221         1.78783         2.68748 0.00000 ***
+# # 4  NLM       L1  0.00000 1.00000  0.00000 0.00000 0.00000 0.91809     0.52921     1.88962         0.00000         0.00000 1.00000
+# # 5  NLM L2 vs L1  0.86568 0.54879 -0.86568 0.39830 0.75614 0.36616     0.42577     0.70734        -1.11579        -0.67163 0.00018 ***
+# # 6  NLM L3 vs L1 -1.44341 2.71964  1.44341 1.94670 3.79946 0.17132     2.41511     3.06256         1.28179         1.62542 0.00000 ***
+# #
+# # The L1 level was used as calibrator.
+# # Note: Using default model for statistical analysis: wDCt ~ block + Concentration * Type
+# 
+# 
+# ANOVA_table <- res$perGene$PO$ANOVA_table
+# ANOVA_table
+# 
+# lm <- res$perGene$PO$lm
+# lm
+# 
+# lm_formula <- res$perGene$gene_name$lm_formula
+# lm_formula
+# 
+# residuals <- resid(res$perGene$gene_name$lm)
+# residuals
 
 ## ----eval= F, warning = F, fig.height = 7, fig.width = 12.5, fig.align = 'center', warning = F----
 # data <- read.csv(system.file("extdata", "data_3factor.csv", package = "rtpcr"))
@@ -216,44 +250,46 @@ library(rtpcr)
 # # Relative expression values for Concentration main effect
 # Means_DDCt(model, specs = "Conc")
 # 
-#  contrast        RE        SE df       LCL       UCL p.value sig
-#  L vs H   0.1703610 0.2208988 24 0.1242014 0.2336757 <0.0001 ***
-#  M vs H   0.2227247 0.2208988 24 0.1623772 0.3055004 <0.0001 ***
-#  M vs L   1.3073692 0.2208988 24 0.9531359 1.7932535  0.0928 .
-# 
-# Results are averaged over the levels of: Type, SA
-# Confidence level used: 0.95
+# # contrast        RE        SE df       LCL       UCL p.value sig
+# # L vs H   0.1703610 0.2208988 24 0.1242014 0.2336757 <0.0001 ***
+# # M vs H   0.2227247 0.2208988 24 0.1623772 0.3055004 <0.0001 ***
+# # M vs L   1.3073692 0.2208988 24 0.9531359 1.7932535  0.0928 .
+# #
+# #Results are averaged over the levels of: Type, SA
+# #Confidence level used: 0.95
 # 
 # # Relative expression values for Concentration sliced by Type
 # Means_DDCt(model, specs = "Conc | Type")
 # 
-# Type = R:
-#  contrast       RE        SE df       LCL      UCL p.value sig
-#  L vs H   0.103187 0.3123981 24 0.0659984 0.161331 <0.0001 ***
-#  M vs H   0.339151 0.3123981 24 0.2169210 0.530255 <0.0001 ***
-#  M vs L   3.286761 0.3123981 24 2.1022126 5.138776 <0.0001 ***
-# 
-# Type = S:
-#  contrast       RE        SE df       LCL      UCL p.value sig
-#  L vs H   0.281265 0.3123981 24 0.1798969 0.439751 <0.0001 ***
-#  M vs H   0.146266 0.3123981 24 0.0935518 0.228684 <0.0001 ***
-#  M vs L   0.520030 0.3123981 24 0.3326112 0.813055  0.0059 **
-# 
-# Results are averaged over the levels of: SA
-# Confidence level used: 0.95
+# #Type = R:
+# # contrast       RE        SE df       LCL      UCL p.value sig
+# # L vs H   0.103187 0.3123981 24 0.0659984 0.161331 <0.0001 ***
+# # M vs H   0.339151 0.3123981 24 0.2169210 0.530255 <0.0001 ***
+# # M vs L   3.286761 0.3123981 24 2.1022126 5.138776 <0.0001 ***
+# #
+# #Type = S:
+# # contrast       RE        SE df       LCL      UCL p.value sig
+# # L vs H   0.281265 0.3123981 24 0.1798969 0.439751 <0.0001 ***
+# # M vs H   0.146266 0.3123981 24 0.0935518 0.228684 <0.0001 ***
+# # M vs L   0.520030 0.3123981 24 0.3326112 0.813055  0.0059 **
+# #
+# #Results are averaged over the levels of: SA
+# #Confidence level used: 0.95
 # 
 # # Relative expression values for Concentration sliced by Type and SA
 # Means_DDCt(model, specs = "Conc | Type * SA")
 
 ## ----eval= F------------------------------------------------------------------
 # data <- read.csv(system.file("extdata", "data_repeated_measure_1.csv", package = "rtpcr"))
-# res3 <- REPEATED_DDCt(
+# res3 <- ANOVA_DDCt(
 #   data,
 #   numOfFactors = 1,
 #   numberOfrefGenes = 1,
 #   mainFactor.column = 1,
-#   block = NULL
+#   block = NULL,
+#   model = wDCt ~ time + (1 | id)
 # )
+# 
 # residuals <- resid(res3$perGene$Target$lm)
 # shapiro.test(residuals)
 # par(mfrow = c(1,2))

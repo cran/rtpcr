@@ -1,3 +1,14 @@
+# rtpcr 2.1.4
+
+## New features
+
+- In `ANOVA_DDCt()` function the `se.type` argument was added to control how standard errors (SE) are calculated for relative expression (RE = fold change) estimates. If set to `"paired.sample"` the se is computed from paired differences between factor levels, matching samples by `id`. This is automatically used when an `id` random effect is detected in a user-provided mixed model. `"two.sample"` computes SE using an unpaired samples against the reference level, and `"single.sample"` computes SE within each factor level. When a random `id` effect is detected in the model, paired standard errors are used automatically (with a warning if another `se.type` is requested).
+
+- The default behavior in `ANOVA_DDCt()` function for standard error calculation has been updated. Standard errors are now calculated from model-based residuals (`modelBased_se = TRUE`) by default. Setting `modelBased_se = FALSE` restores the previous behavior i.e. direct computing from observed wDCt values. For single factor data, both methods are the same.  It is recommended let it use `modelBased_se = TRUE` (default).
+
+- A function called `plotSingleGene()` was added that creates a bar plot of relative gene expression (fold change) values from single gene analysis showing all pairwise significances.
+
+
 # rtpcr 2.1.3
 
 ## New features
