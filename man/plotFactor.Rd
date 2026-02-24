@@ -22,6 +22,8 @@ plotFactor(
   alpha = 1,
   base_size = 12,
   legend_position = "right",
+  removeCalibratorCols = FALSE,
+  removeCalibratorText = FALSE,
   ...
 )
 }
@@ -60,6 +62,10 @@ plotFactor(
 
 \item{legend_position}{Character or numeric vector. Legend position (default \code{right})}
 
+\item{removeCalibratorCols}{= NULL or remove Calibrator Cols}
+
+\item{removeCalibratorText}{= NULL or remove Calibrator text}
+
 \item{...}{Additional ggplot2 layer arguments}
 }
 \value{
@@ -77,7 +83,7 @@ res <- ANOVA_DDCt(x = data,
   numOfFactors = 2,
   numberOfrefGenes = 3,
   block = "block",
-  mainFactor.column = 2,
+  specs = "Concentration",
   p.adj = "none")
 
 df <- res$relativeExpression

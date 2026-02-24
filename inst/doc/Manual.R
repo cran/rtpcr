@@ -69,8 +69,8 @@ library(rtpcr)
 # 
 # # Anova analysis
 # ANOVA_DDCt(
-#   data1,
-#   mainFactor.column = 1,
+#   data,
+#   specs = "condition",
 #   numOfFactors = 1,
 #   numberOfrefGenes = 1,
 #   block = NULL)
@@ -92,10 +92,10 @@ library(rtpcr)
 # 
 # # Repeated measure analysis
 # res <- ANOVA_DDCt(
-#   data2,
+#   data,
 #   numOfFactors = 1,
 #   numberOfrefGenes = 1,
-#   mainFactor.column = 1,
+#   specs = "time",
 #   block = NULL, model = wDCt ~ time + (1 | id))
 # 
 # 
@@ -111,7 +111,7 @@ library(rtpcr)
 # 
 # res <- ANOVA_DDCt(
 #   x = data3,
-#   mainFactor.column = 2,
+#   specs = "Type | Concentration",
 #   numOfFactors = 2,
 #   numberOfrefGenes = 3,
 #   block = "block",
@@ -123,7 +123,7 @@ library(rtpcr)
 # 
 # res <- ANOVA_DDCt(
 #   x = data3,
-#   mainFactor.column = 2,
+#   specs = "Concentration",
 #   numOfFactors = 2,
 #   numberOfrefGenes = 3,
 #   block = "block",
@@ -218,7 +218,7 @@ library(rtpcr)
 # res <- ANOVA_DDCt(
 #   df,
 #   numOfFactors = 1,
-#   mainFactor.column = 1,
+#   specs = "Treatment",
 #   numberOfrefGenes = 1,
 #   block = NULL)
 # 
@@ -243,7 +243,7 @@ library(rtpcr)
 #   data_3factor,
 #   numOfFactors = 3,
 #   numberOfrefGenes = 1,
-#   mainFactor.column = 1,
+#   specs = "Conc",
 #   block = NULL)
 # 
 # model <- res$perGene$E_PO$lm
@@ -285,10 +285,9 @@ library(rtpcr)
 #   data,
 #   numOfFactors = 1,
 #   numberOfrefGenes = 1,
-#   mainFactor.column = 1,
+#   specs = "time",
 #   block = NULL,
-#   model = wDCt ~ time + (1 | id)
-# )
+#   model = wDCt ~ time + (1 | id))
 # 
 # residuals <- resid(res3$perGene$Target$lm)
 # shapiro.test(residuals)
