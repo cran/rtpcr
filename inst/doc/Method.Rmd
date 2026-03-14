@@ -1,7 +1,6 @@
 ---
 title: "Calculation method"
-author: "Ghader Mirzaghaderi"
-output: rmarkdown::html_vignette
+output: github_document
 link-citations: true
 vignette: >
   %\VignetteIndexEntry{Calculation method}
