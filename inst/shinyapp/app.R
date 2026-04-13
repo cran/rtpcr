@@ -1,5 +1,5 @@
-if (!require("rtpcr")) {install.packages("rtpcr")
-library(rtpcr)}
+#install.packages("rtpcr")
+library(rtpcr)
 library(shiny)
 library(multcompView)
 library(dplyr)
@@ -352,8 +352,9 @@ ui <- fluidPage(
                            tabsetPanel(id = "sub_pf",
                                        tabPanel("Input Data", tableOutput("preview_pf")),
                                        tabPanel("Plot", br(), downloadButton("download_pf_plot", "PNG"), downloadButton("download_pf_pdf", "PDF"), hr(), plotOutput("plot_pf_main"))
-                           )
+                                       )
                   ),
+                  
                   tabPanel("meanTech", value = "meanTech",
                            br(),
                            tabsetPanel(id = "sub_mt",
@@ -429,7 +430,7 @@ server <- function(input, output, session) {
   observeEvent(input$run_mt,   { updateTabsetPanel(session, "sub_mt", selected = "Results") })
   observeEvent(input$run_dc,   { updateTabsetPanel(session, "sub_dc", selected = "Relative Expression") })
   observeEvent(input$run_ddct, { updateTabsetPanel(session, "sub_ddct", selected = "Relative Expression") })
-  observeEvent(input$run_eff,  { updateTabsetPanel(session, "sub_eff", selected = "Table") })
+  observeEvent(input$run_eff,  { updateTabsetPanel(session, "sub_eff", selected = "Values & Statistics") })
   observeEvent(input$run_tt,   { updateTabsetPanel(session, "sub_tt", selected = "Results") })
   observeEvent(input$run_wx,   { updateTabsetPanel(session, "sub_wx", selected = "Results") })
   observeEvent(input$run_pf,   { updateTabsetPanel(session, "sub_pf", selected = "Plot") })

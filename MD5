@@ -1,6 +1,6 @@
-c0f46cef95cebeb193ce0ad0ad5ee895 *DESCRIPTION
+f1751c7fc775fc033f57aff4c70949ba *DESCRIPTION
 6b877ac8e8bb8bd968c6f7de657508b7 *NAMESPACE
-0dc5ef6663ac0e30acf9f53cd70c19ad *NEWS.md
+a663c75f8671c5e9fb9b86f226f8704e *NEWS.md
 ad18312beac23a8178338f8038089681 *R/ANOVA_DCt.R
 5a89195186b8fa5aed1d6a534d360aea *R/ANOVA_DDCt.R
 a3465cd95a9df1fec7e6b6de0460bf28 *R/Means_DDCt.R
@@ -37,8 +37,8 @@ bc0c1e5882f68a9309ffad79050002f4 *data/data_repeated_measure_3bLock.rda
 b9475b827d1699a7340d8b8481f2269b *data/data_withTechRep.rda
 5d0fd9c0dc0c20ff672a660a07a7c3a4 *inst/CITATION
 fdfebcdc92aae80e2c41ca752f63b825 *inst/doc/Method.R
-ef13c0d38f8071ad54829058ddbcff18 *inst/doc/Method.Rmd
-fa5e591c707a4be58c30a09fa55c149d *inst/doc/Method.html
+1eb46db9b42b52f53e652b1770f7af8d *inst/doc/Method.Rmd
+013417b0091def5db7d27b2eab48b511 *inst/doc/Method.html
 c61166d8a01ca8bbe43912b7315c5695 *inst/doc/manual.R
 393829516de6d527a988ee753166d045 *inst/doc/manual.Rmd
 41c1d5ab79c357febf508b18b22a4bb9 *inst/doc/manual.html
@@ -61,7 +61,7 @@ bfca7c770779016f7b82a6d4bbe9264e *inst/extdata/data_efficiency_Yuan2006PMCBioinf
 30ab657a830aa40e8a68f61581b7d15f *inst/extdata/data_repeated_measure_3bLock.csv
 c0cc0b330c1c19d439a2f23d91fd8704 *inst/extdata/data_ttest18genes.csv
 2cc5da39f1535ab063dd87e75ea44c4e *inst/extdata/data_withTechRep.csv
-85b5c9293cb9062cdc8c876d34a3ddfd *inst/shinyapp/app.R
+4d6e427911e8c2e5453185a776860b02 *inst/shinyapp/app.R
 94cfda43f801c6c6f8a6e7d83510b7b9 *inst/shinyapp/eff/data_efficiency1.csv
 bfca7c770779016f7b82a6d4bbe9264e *inst/shinyapp/eff/data_efficiency_Yuan2006PMCBioinf.csv
 cc1193cd47ed5c68316b5b9004d30652 *inst/shinyapp/exp/data_2factorBlock3ref.csv
@@ -69,7 +69,7 @@ a8a5c705a336a3ed62524b15c19653be *inst/shinyapp/exp/data_3factor.csv
 c0cc0b330c1c19d439a2f23d91fd8704 *inst/shinyapp/exp/data_ttest18genes.csv
 2cc5da39f1535ab063dd87e75ea44c4e *inst/shinyapp/mean/data_withTechRep.csv
 b54305cf09150f6d106b287f9debf583 *inst/shinyapp/plot/out_ANOVA_DDCt.csv
-c7eb7892ed71469e52c29a5dada23e41 *inst/shinyapp/rsconnect/shinyapps.io/mirzaghaderi/rtpcr.dcf
+8b6852b46bebed6986896c78c7048bfe *inst/shinyapp/rsconnect/shinyapps.io/mirzaghaderi/rtpcr.dcf
 1f0048dc2fb6229c0c20db3865f4b47b *inst/shinyapp/rsconnect/shinyapps.io/mirzaghaderi/shinyapp.dcf
 b87bdffb968dbcc5055430493048d99e *inst/shinyapp/www/dataStructure1.png
 e7843f67d5cb551c7395d4f9f573390c *inst/shinyapp/www/sampleData1.png
@@ -116,5 +116,5 @@ a1ca0447195ce8c8930f2f998703e708 *man/globalVariables.Rd
 164ead7927f1db282b1e4cba24cf81e7 *man/meanTech.Rd
 9ea732cfe03e2ef02f0e98f19b97c564 *man/multiplot.Rd
 a832911f381b2bfa1322e743725624e9 *man/plotFactor.Rd
-ef13c0d38f8071ad54829058ddbcff18 *vignettes/Method.Rmd
+1eb46db9b42b52f53e652b1770f7af8d *vignettes/Method.Rmd
 393829516de6d527a988ee753166d045 *vignettes/manual.Rmd
