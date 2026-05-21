@@ -1,6 +1,6 @@
-f1751c7fc775fc033f57aff4c70949ba *DESCRIPTION
+9b1b680acf5ca81b3ad20226e8cf42a5 *DESCRIPTION
 6b877ac8e8bb8bd968c6f7de657508b7 *NAMESPACE
-a663c75f8671c5e9fb9b86f226f8704e *NEWS.md
+de9d0156ccbabc875a58881f8270862f *NEWS.md
 ad18312beac23a8178338f8038089681 *R/ANOVA_DCt.R
 5a89195186b8fa5aed1d6a534d360aea *R/ANOVA_DDCt.R
 a3465cd95a9df1fec7e6b6de0460bf28 *R/Means_DDCt.R
@@ -10,7 +10,7 @@ dca0a61fd297665ae71c5f160cc8fb54 *R/TTEST_DDCt.R
 0ec88388b89fe030f9148f7f50bd9de4 *R/efficiency.R
 5e88ec8ce3065d98938f0a60acd7290b *R/globalVariables.R
 f8aa5a4da7384a7774cc002886259f9e *R/long_to_wide.R
-2124f3d5b6e52180ce1e7dabf66abb3b *R/meanTech.R
+a27efe057e37385900afe9f81b622aaa *R/meanTech.R
 c314a87e4a37c74dcd13503280456add *R/multiplot.R
 207e9f3abe1b22d320fcadafb2596ba0 *R/package_data.R
 ea117a0093f065fa2c40a8ce7a8e6507 *R/plotFactor.R
@@ -116,5 +116,6 @@ a1ca0447195ce8c8930f2f998703e708 *man/globalVariables.Rd
 164ead7927f1db282b1e4cba24cf81e7 *man/meanTech.Rd
 9ea732cfe03e2ef02f0e98f19b97c564 *man/multiplot.Rd
 a832911f381b2bfa1322e743725624e9 *man/plotFactor.Rd
+7a2fcc55f1d412c5a70db89a1c4576f3 *vignettes/--find-assets.html
 1eb46db9b42b52f53e652b1770f7af8d *vignettes/Method.Rmd
 393829516de6d527a988ee753166d045 *vignettes/manual.Rmd
