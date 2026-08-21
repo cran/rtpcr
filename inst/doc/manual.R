@@ -3,14 +3,6 @@ options(tinytex.verbose = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 library(rtpcr)
 
-## ----eval= F------------------------------------------------------------------
-# # install.packages("rtpcr")
-# # install.packages("shiny")
-# library(shiny)
-# library(rtpcr)
-# # Run the following code in Rstudio
-# runApp(system.file("shinyapp/app.R", package = "rtpcr"))
-
 ## ----eval = F-----------------------------------------------------------------
 # # Installing from CRAN
 # install.packages("rtpcr")
@@ -311,4 +303,12 @@ library(rtpcr)
 #          groups = 2,
 #          numOfFactors = 1,
 #          block = NULL)
+
+## ----eval= F------------------------------------------------------------------
+# # install.packages("rtpcr")
+# # install.packages("shiny")
+# library(shiny)
+# library(rtpcr)
+# # Run the following code in Rstudio
+# runApp(system.file("shinyapp/app.R", package = "rtpcr"))
 
