@@ -652,8 +652,7 @@ samples.</td>
 </tr>
 <tr>
 <td><code>plotFactor()</code></td>
-<td>Bar plot of gene expression for one-, two- or three-factor
-experiments</td>
+<td>Bar plot of gene expression for one- to four-factor data frames</td>
 </tr>
 <tr>
 <td><code>Means_DDCt()</code></td>
@@ -673,7 +672,7 @@ needs averaging over biological replicates.</td>
 <td>Combine multiple ggplot objects into a single layout</td>
 </tr>
 <tr>
-<td><code>compute_wDCt()</code></td>
+<td><code>Compute_wDCt()</code></td>
 <td>Cleaning data and weighted delta Ct (wDCt) calculation using the
 geometric mean of reference gene(s).</td>
 </tr>
@@ -1120,7 +1119,7 @@ model, residuals, raw data and ANOVA table for each gene.</figcaption>
 
 <h2 id="plot-output">Plot output</h2>
 <p>A single function of <code>plotFactor()</code> is used to produce bar
-plots for one- to three-factor expression tables.</p>
+plots for one- to four-factor expression tables.</p>
 <h2 id="plot-output-example-1">Plot output: example 1</h2>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="fu">system.file</span>(<span class="st">&quot;extdata&quot;</span>, <span class="st">&quot;data_3factor.csv&quot;</span>, <span class="at">package =</span> <span class="st">&quot;rtpcr&quot;</span>))</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#Perform analysis first</span></span>

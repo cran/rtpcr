@@ -80,6 +80,115 @@
 
 
 
+.Compute_wDCt <- function(x, 
+                          numOfFactors,
+                          numberOfrefGenes, 
+                          block,
+                          set_missing_target_Ct_to_40 = FALSE) {
+  
+  if (is.null(block)) {
+    x[seq_len(numOfFactors)] <- lapply(
+      x[seq_len(numOfFactors)],
+      factor
+    )
+  } else {
+    x[seq_len(numOfFactors + 1)] <- lapply(
+      x[seq_len(numOfFactors + 1)],
+      factor
+    )
+  }
+  
+  x <- .cleanup(x = x, numOfFactors = numOfFactors, numberOfrefGenes = numberOfrefGenes, block = block,
+                set_missing_target_Ct_to_40 = set_missing_target_Ct_to_40)
+  
+  stopifnot(numberOfrefGenes >= 1)
+  nRef <- numberOfrefGenes
+  nc   <- ncol(x)
+  
+  # Identify columns
+  ref_E_cols  <- seq(nc - 2 * nRef + 1, nc, by = 2)
+  ref_Ct_cols <- seq(nc - 2 * nRef + 2, nc, by = 2)
+  
+  target_E_col  <- ref_E_cols[1] - 2
+  target_Ct_col <- ref_E_cols[1] - 1
+  
+  # Target term - handle NA/Inf
+  target_term <- log2(x[[target_E_col]]) * x[[target_Ct_col]]
+  # Convert Inf/-Inf to NA
+  target_term[!is.finite(target_term)] <- NA_real_
+  
+  # Reference matrices
+  E_mat  <- as.matrix(x[, ref_E_cols])
+  Ct_mat <- as.matrix(x[, ref_Ct_cols])
+  
+  # Row-wise geometric mean of reference efficiencies (NA-aware)
+  geoMeanE <- apply(E_mat, 1, function(z) {
+    k <- sum(!is.na(z))
+    if (k > 0) {
+      # Check for zeros or negative values
+      if (any(z <= 0, na.rm = TRUE)) {
+        return(NA_real_)
+      }
+      prod(z, na.rm = TRUE)^(1 / k)
+    } else {
+      NA_real_
+    }
+  })
+  
+  # Reference term (Excel-consistent)
+  ref_term <- numeric(nrow(x))
+  for (r in seq_len(nrow(x))) {
+    
+    # Check if geoMeanE is valid (positive and finite)
+    if (is.na(geoMeanE[r]) || geoMeanE[r] <= 0 || !is.finite(geoMeanE[r])) {
+      ref_term[r] <- NA_real_
+      next
+    }
+    
+    logE <- log2(geoMeanE[r])
+    
+    # Check if logE is finite
+    if (!is.finite(logE)) {
+      ref_term[r] <- NA_real_
+      next
+    }
+    
+    tmp <- logE * Ct_mat[r, ]
+    
+    # Remove NA values
+    tmp <- tmp[!is.na(tmp)]
+    k   <- length(tmp)
+    
+    if (k > 0) {
+      # Check if any tmp values are infinite
+      if (any(!is.finite(tmp))) {
+        ref_term[r] <- NA_real_
+      } else {
+        # Calculate geometric mean
+        result <- prod(tmp)^(1 / k)
+        # Check if result is finite
+        ref_term[r] <- if (is.finite(result)) result else NA_real_
+      }
+    } else {
+      ref_term[r] <- NA_real_
+    }
+  }
+  
+  # Final wDCt - handle cases where either term is NA
+  x$wDCt <- target_term - ref_term
+  # Convert any remaining Inf/-Inf to NA
+  x$wDCt[!is.finite(x$wDCt)] <- NA_real_
+  
+  x
+}
+
+
+
+
+
+
+
+
 .wide_to_long <- function(df) {
   
   if (ncol(df) < 6) {
@@ -286,7 +395,7 @@
     }
     
     
-    gene_df <- compute_wDCt(gene_df, numOfFactors, numberOfrefGenes, block,
+    gene_df <- .Compute_wDCt(gene_df, numOfFactors, numberOfrefGenes, block,
                             set_missing_target_Ct_to_40 = set_missing_target_Ct_to_40)
     
     gene_df[] <- lapply(gene_df, function(x) {
@@ -571,4 +680,136 @@
     perGene = perGene,
     relativeExpression = relativeExpression
   ))
+}
+
+
+
+
+
+
+
+.plotF <- function(data,
+                        x_col,
+                        y_col,
+                        Lower.se_col,
+                        Upper.se_col,
+                        group_col = NULL,
+                        facet_col = NULL,
+                        facet_ncol = NULL,
+                        facet_nrow = NULL,
+                        letters_col = NULL,
+                        letters_d = 0.2,
+                        col_width = 0.8,
+                        err_width = 0.15,
+                        dodge_width = 0.8,
+                        fill_colors = NULL,
+                        color = NA,
+                        alpha = 1,
+                        base_size = 12,
+                        legend_position = "right",
+                        removeCalibratorCols = FALSE,
+                        removeCalibratorText = FALSE,
+                        ...) {
+  
+  
+  if (removeCalibratorCols) {
+    if ("contrast" %in% colnames(data)) {
+      data <- data[grepl(" ", data$contrast), ]
+    }
+  }
+  
+  if (removeCalibratorText) {
+    if ("contrast" %in% colnames(data)) {
+      data$contrast <- gsub("\\s.*", "", as.character(data$contrast))
+    }
+  }
+  
+  # required columns
+  required_cols <- c(x_col, y_col, Lower.se_col, Upper.se_col)
+  if (!is.null(group_col)) required_cols <- c(required_cols, group_col)
+  if (!is.null(facet_col)) required_cols <- c(required_cols, facet_col)
+  
+  if (!all(required_cols %in% colnames(data))) {
+    stop("One or more specified columns do not exist in `data`.")
+  }
+  
+  if (!is.null(letters_col) && !letters_col %in% colnames(data)) {
+    stop("`letters_col` does not exist in `data`.")
+  }
+  
+  # add error columns
+  data$ymin <- data[[Lower.se_col]]
+  data$ymax <- data[[Upper.se_col]]
+  
+  if (!is.null(letters_col)) {
+    data[[letters_col]] <- as.character(data[[letters_col]])
+  }
+  
+  
+  # To factor:
+  data[] <- lapply(data, function(data) {
+    if (is.character(data)) factor(data, levels = unique(data)) else data
+  })
+  
+  
+  # 1-factor plot
+  if (is.null(group_col) && is.null(facet_col)) {
+    p <- ggplot(data, aes(x = .data[[x_col]], y = .data[[y_col]])) +
+      geom_col(width = col_width, fill = fill_colors[1] %||% "grey40", alpha = alpha, color = color %||% NULL, ...)
+    p <- p + geom_errorbar(aes(ymin = ymin, ymax = ymax), width = err_width)
+    
+    if (!is.null(letters_col)) {
+      p <- p + geom_text(aes(
+        label = .data[[letters_col]],
+        y = ifelse(.data[[y_col]] < 0, ymin - letters_d, ymax + letters_d)
+      ))
+    }
+    
+  } else {
+    # 2- or 3-factor plot
+    p <- ggplot(data, aes(
+      x = .data[[x_col]],
+      y = .data[[y_col]],
+      fill = .data[[group_col]]
+    )) +
+      .geom_pub_cols(
+        col_width = col_width,
+        err_width = err_width,
+        fill_colors = fill_colors,
+        dodge_width = dodge_width,
+        alpha = alpha,
+        color = color,
+        ...
+      )
+    
+    if (!is.null(facet_col)) {
+      p <- p + facet_wrap(vars(.data[[facet_col]]), ncol = facet_ncol, nrow = facet_nrow)
+    }
+    
+    if (!is.null(letters_col)) {
+      pos <- position_dodge(width = dodge_width)
+      p <- p + geom_text(aes(
+        label = .data[[letters_col]],
+        y = ifelse(.data[[y_col]] < 0, ymin - letters_d, ymax + letters_d)
+      ), position = pos, ...)
+    }
+  }
+  
+  if(y_col == "log2FC" && any(data$log2FC < 0)){
+    p <- p + scale_y_continuous(expand = expansion(mult = c(0.05, 0.05)))
+  } else {
+    p <- p + scale_y_continuous(expand = expansion(mult = c(0, 0.05)))
+  }
+  p + 
+    .theme_pub(base_size = base_size, legend_position = legend_position) +
+    xlab(NULL) +
+    theme(axis.text.x = element_text(size = base_size, color = "black", angle = 45, hjust = 1),
+          axis.text.y = element_text(size = base_size,color = "black", angle = 0),
+          panel.border = element_rect(color = "black", linewidth = 1),
+          axis.line.y = element_line(linewidth = 0),
+          axis.line.x = element_line(linewidth = 0),
+          legend.text = element_text(colour = "black", size = base_size),
+          legend.background = element_rect(fill = "transparent"),
+          strip.background = element_blank(),            # removes the faceting gray background
+          strip.text = element_text(size = base_size))   # keeps the text visible
 }
